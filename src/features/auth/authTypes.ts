@@ -19,6 +19,8 @@ export type RegisterRequest = {
   email: string;
   password: string;
   allowLocationAccess?: boolean;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type GoogleAuthRequest = {
