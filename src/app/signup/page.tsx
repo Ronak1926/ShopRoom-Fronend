@@ -2,12 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { ContinueWithGoogle } from "../../components/ui/ContinueWithGoogle";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { registerCustomer } from "../../features/auth/authSlice";
 
 export default function SignupPage() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { status, error, token } = useAppSelector((s) => s.auth);
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,17 +22,33 @@ export default function SignupPage() {
   const [allowLocation, setAllowLocation] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const isLoading = status === "loading";
+
+  // Redirect to home once authenticated
+  useEffect(() => {
+    if (token) router.push("/");
+  }, [token, router]);
+
   const canSubmit = useMemo(() => {
     return (
       fullName.trim().length > 0 &&
       email.trim().length > 0 &&
-      password.length > 0 &&
-      confirmPassword.length > 0
+      password.length >= 8 &&
+      password === confirmPassword &&
+      !isLoading
     );
-  }, [fullName, email, password, confirmPassword]);
+  }, [fullName, email, password, confirmPassword, isLoading]);
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    await dispatch(
+      registerCustomer({
+        fullName,
+        email,
+        password,
+        allowLocationAccess: allowLocation,
+      }),
+    );
   }
 
   return (
@@ -210,8 +233,14 @@ export default function SignupPage() {
                 disabled={!canSubmit}
                 className="w-[400px] h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] leading-[24px] font-bold disabled:opacity-50"
               >
-                Create Account
+                {isLoading ? "Creating account…" : "Create Account"}
               </button>
+
+              {error && (
+                <div className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
+                  {error}
+                </div>
+              )}
 
               <div className="text-center text-[14px] leading-[20px] font-normal text-[var(--color-auth-ink-muted)]">
                 Already have an account?{" "}

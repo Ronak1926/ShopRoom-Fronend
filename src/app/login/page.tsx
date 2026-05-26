@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { ContinueWithGoogle } from "../../components/ui/ContinueWithGoogle";
@@ -11,6 +12,7 @@ import { hydrateToken, loginCustomer } from "../../features/auth/authSlice";
 
 export default function LoginPage() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { status, error, token } = useAppSelector((s) => s.auth);
 
   const [email, setEmail] = useState("");
@@ -20,6 +22,11 @@ export default function LoginPage() {
   useEffect(() => {
     dispatch(hydrateToken());
   }, [dispatch]);
+
+  // Redirect to home once authenticated
+  useEffect(() => {
+    if (token) router.push("/");
+  }, [token, router]);
 
   const isLoading = status === "loading";
   const canSubmit = useMemo(() => {
@@ -62,7 +69,7 @@ export default function LoginPage() {
 
           <div className="mt-8 flex flex-col items-center">
             <div className="w-[400px]">
-              <ContinueWithGoogle disabled />
+              <ContinueWithGoogle />
             </div>
 
             <div className="my-6 flex items-center gap-4 w-[400px]">
@@ -162,14 +169,8 @@ export default function LoginPage() {
                 disabled={!canSubmit}
                 className="w-full h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] leading-[24px] font-bold disabled:opacity-50 mt-2"
               >
-                {isLoading ? "Signing in..." : "Log in"}
+                {isLoading ? "Signing in…" : "Log in"}
               </button>
-
-              {token ? (
-                <div className="text-xs text-[var(--color-success-text)] text-center">
-                  Logged in.
-                </div>
-              ) : null}
 
               <div className="text-center text-[14px] leading-[20px] font-normal text-[var(--color-auth-ink-muted)]">
                 Don&apos;t have an account?{" "}

@@ -14,6 +14,17 @@ export type LoginRequest = {
   password: string;
 };
 
+export type RegisterRequest = {
+  fullName: string;
+  email: string;
+  password: string;
+  allowLocationAccess?: boolean;
+};
+
+export type GoogleAuthRequest = {
+  idToken: string;
+};
+
 export type LoginResponse = {
   token: string;
   customer?: Customer;
