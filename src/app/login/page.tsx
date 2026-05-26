@@ -2,40 +2,58 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { ContinueWithGoogle } from "../../components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { hydrateToken, loginCustomer } from "../../features/auth/authSlice";
 
+const loginSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { status, error, token } = useAppSelector((s) => s.auth);
+  const { status, token } = useAppSelector((s) => s.auth);
+  const isLoading = status === "loading";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onTouched",
+  });
 
   useEffect(() => {
     dispatch(hydrateToken());
   }, [dispatch]);
 
-  // Redirect to home once authenticated
   useEffect(() => {
     if (token) router.push("/");
   }, [token, router]);
 
-  const isLoading = status === "loading";
-  const canSubmit = useMemo(() => {
-    return email.trim().length > 0 && password.length > 0 && !isLoading;
-  }, [email, password, isLoading]);
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    await dispatch(loginCustomer({ email, password }));
+  async function onSubmit(values: LoginFormValues) {
+    setServerError(null);
+    const action = await dispatch(
+      loginCustomer({ email: values.email, password: values.password }),
+    );
+    if (!loginCustomer.fulfilled.match(action)) {
+      setServerError((action.payload as string) ?? "Invalid email or password");
+    }
   }
 
   return (
@@ -80,11 +98,16 @@ export default function LoginPage() {
               <div className="h-px flex-1 bg-[var(--color-border-default)]" />
             </div>
 
-            <form className="w-[400px] flex flex-col gap-4" onSubmit={onSubmit}>
-              <label className="flex flex-col gap-2">
-                <span className="text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-[var(--color-auth-ink)]">
+            <form
+              className="w-[400px] flex flex-col gap-4"
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+            >
+              {/* Email */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-[var(--color-auth-ink)]">
                   Email Address
-                </span>
+                </label>
                 <div className="relative">
                   <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)]">
                     <svg
@@ -109,27 +132,32 @@ export default function LoginPage() {
                     </svg>
                   </div>
                   <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
+                    type="email"
                     placeholder="cameron@example.com"
                     autoComplete="email"
-                    className="w-full h-[48px] rounded-[8px] bg-[var(--color-auth-input-bg)] pl-12 pr-4 py-[14px] text-sm text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)] outline-none"
+                    className={`w-full h-[48px] rounded-[8px] bg-[var(--color-auth-input-bg)] pl-12 pr-4 text-sm text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)] outline-none focus:ring-2 focus:ring-[var(--color-auth-primary)]/30 transition-shadow ${errors.email ? "ring-2 ring-red-400" : ""}`}
                   />
                 </div>
-              </label>
+                {errors.email && (
+                  <p className="mt-1 text-[11px] text-red-500">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
 
-              <label className="flex flex-col gap-2">
-                <span className="text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-[var(--color-auth-ink)]">
+              {/* Password */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-[var(--color-auth-ink)]">
                   Password
-                </span>
+                </label>
                 <div className="relative">
                   <input
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    {...register("password")}
                     type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
                     autoComplete="current-password"
-                    className="w-full h-[48px] rounded-[8px] bg-[var(--color-auth-input-bg)] pl-4 pr-12 py-[14px] text-sm text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)] outline-none"
+                    className={`w-full h-[48px] rounded-[8px] bg-[var(--color-auth-input-bg)] pl-4 pr-12 text-sm text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)] outline-none focus:ring-2 focus:ring-[var(--color-auth-primary)]/30 transition-shadow ${errors.password ? "ring-2 ring-red-400" : ""}`}
                   />
                   <button
                     type="button"
@@ -156,17 +184,22 @@ export default function LoginPage() {
                     </svg>
                   </button>
                 </div>
-              </label>
+                {errors.password && (
+                  <p className="mt-1 text-[11px] text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
 
-              {error ? (
-                <div className="rounded-[8px] border border-[var(--color-danger)] bg-[var(--color-danger-light)] px-3 py-2 text-sm text-[var(--color-danger-text)]">
-                  {error}
+              {serverError && (
+                <div className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
+                  {serverError}
                 </div>
-              ) : null}
+              )}
 
               <button
                 type="submit"
-                disabled={!canSubmit}
+                disabled={!isValid || isLoading}
                 className="w-full h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] leading-[24px] font-bold disabled:opacity-50 mt-2"
               >
                 {isLoading ? "Signing in…" : "Log in"}
