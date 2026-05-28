@@ -54,6 +54,15 @@ export default function ShopkeeperLoginPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    mode: "onTouched",
+  });
+
   useEffect(() => {
     const shopkeeperToken = localStorage.getItem("shopkeeper_token");
     const customerToken = localStorage.getItem("token");
@@ -68,15 +77,6 @@ export default function ShopkeeperLoginPage() {
   }, []);
 
   if (!ready) return null;
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    mode: "onTouched",
-  });
 
   async function onSubmit(v: FormValues) {
     setIsLoading(true);

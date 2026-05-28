@@ -1,66 +1,84 @@
 @import "tailwindcss";
 
 :root {
-  --color-brand-primary: #5B47D4;
+  --color-brand-primary: #5b47d4;
   --color-brand-primary-hover: #4a3ab8;
-  --color-brand-primary-active: #3A2DB0;
-  --color-brand-primary-light: #EEEDFE;
-  --color-brand-primary-muted: #CECBF6;
-  --color-brand-primary-text: #3C3489;
+  --color-brand-primary-active: #3a2db0;
+  --color-brand-primary-light: #eeedfe;
+  --color-brand-primary-muted: #cecbf6;
+  --color-brand-primary-text: #3c3489;
 
-  --color-auth-ink: #19192F;
+  --color-auth-ink: #19192f;
   --color-auth-ink-muted: #474554;
-  --color-auth-input-bg: #E8E6FF;
-  --color-auth-primary: #4329BB;
-  --color-auth-border: #C9C4D7;
-  --color-auth-panel-bg: #F5F2FF;
+  --color-auth-input-bg: #e8e6ff;
+  --color-auth-primary: #4329bb;
+  --color-auth-border: #c9c4d7;
+  --color-auth-panel-bg: #f5f2ff;
 
-  --color-brand-alert: #E8930A;
-  --color-brand-alert-hover: #C97A06;
-  --color-brand-alert-light: #FEF3DC;
-  --color-brand-alert-muted: #FAC775;
+  --color-brand-alert: #7a5922;
+  --color-brand-alert-hover: #714f1b;
+  --color-brand-alert-light: #fef3dc;
+  --color-brand-alert-muted: #fac775;
   --color-brand-alert-text: #633806;
 
-  --color-bg-page: #F5F5F7;
-  --color-bg-surface: #FFFFFF;
-  --color-bg-surface-hover: #F0F0F5;
-  --color-bg-sidebar: #1A1A2E;
-  --color-bg-sidebar-active: #2A2A4A;
+  --color-bg-page: #f5f5f7;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-hover: #f0f0f5;
+  --color-bg-sidebar: #1a1a2e;
+  --color-bg-sidebar-active: #2a2a4a;
   --color-bg-overlay: rgba(26, 26, 46, 0.5);
-  --color-bg-input: #FFFFFF;
-  --color-bg-input-disabled: #F5F5F7;
+  --color-bg-input: #ffffff;
+  --color-bg-input-disabled: #f5f5f7;
 
-  --color-text-primary: #1A1A2E;
+  --color-text-primary: #1a1a2e;
   --color-text-secondary: #666680;
-  --color-text-hint: #9999BB;
-  --color-text-disabled: #BBBBCC;
-  --color-text-on-brand: #FFFFFF;
-  --color-text-on-sidebar: #FFFFFF;
-  --color-text-sidebar-muted: #9999CC;
-  --color-text-link: #5B47D4;
-  --color-text-link-hover: #3A2DB0;
+  --color-text-hint: #9999bb;
+  --color-text-disabled: #bbbbcc;
+  --color-text-on-brand: #ffffff;
+  --color-text-on-sidebar: #ffffff;
+  --color-text-sidebar-muted: #9999cc;
+  --color-text-link: #5b47d4;
+  --color-text-link-hover: #3a2db0;
 
-  --color-border-default: #DDDDEE;
-  --color-border-strong: #BBBBDD;
-  --color-border-focus: #5B47D4;
-  --color-border-sidebar: #2E2E50;
+  --color-border-default: #ddddee;
+  --color-border-strong: #bbbbdd;
+  --color-border-focus: #5b47d4;
+  --color-border-sidebar: #2e2e50;
 
-  --color-success: #0F6E56;
-  --color-success-light: #E1F5EE;
+  --color-success: #0f6e56;
+  --color-success-light: #e1f5ee;
   --color-success-text: #085041;
 
-  --color-danger: #E24B4A;
-  --color-danger-light: #FCEBEB;
-  --color-danger-text: #791F1F;
+  --color-danger: #e24b4a;
+  --color-danger-light: #fcebeb;
+  --color-danger-text: #791f1f;
+  --color-danger-dot: #dc2626;
+  --color-danger-bg: #fee2e2;
 
-  --color-msg-shopkeeper-bg: #EEEDFE;
-  --color-msg-shopkeeper-border: #5B47D4;
-  --color-msg-customer-bg: #E6F1FB;
-  --color-msg-other-bg: #F5F5F7;
-  --color-msg-alert-bg: #FEF3DC;
-  --color-msg-alert-border: #E8930A;
+  --color-online: #15803d;
+  --color-badge-success-bg: #dcfce7;
+  --color-badge-success-text: #15803d;
 
-  --font-sans: var(--font-manrope), 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --color-avatar-indigo-bg: #e0e7ff;
+  --color-avatar-indigo: #3730a3;
+  --color-avatar-pink-bg: #fce7f3;
+  --color-avatar-pink-dark: #9d174d;
+
+  --color-badge-neutral-bg: #f3f4f6;
+  --color-badge-neutral-text: #6b7280;
+  --color-badge-blue-bg: #dbeafe;
+  --color-badge-blue-text: #1d4ed8;
+
+  --shadow-brand-card: 0 4px 16px rgba(91, 71, 212, 0.08);
+
+  --color-msg-shopkeeper-bg: #eeedfe;
+  --color-msg-shopkeeper-border: #5b47d4;
+  --color-msg-customer-bg: #e6f1fb;
+  --color-msg-other-bg: #f5f5f7;
+  --color-msg-alert-bg: #fef3dc;
+  --color-msg-alert-border: #e8930a;
+
+  --font-sans: var(--font-manrope), "Inter", "Segoe UI", system-ui, sans-serif;
   --font-size-display: 48px;
   --font-size-h1: 32px;
   --font-size-h2: 24px;
@@ -143,4 +161,14 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--color-brand-primary),
+      var(--color-brand-primary-active)
+    );
+  }
 }
