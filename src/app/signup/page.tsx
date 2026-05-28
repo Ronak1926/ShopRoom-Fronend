@@ -164,200 +164,220 @@ export default function SignupPage() {
       <AuthLeftPanel />
 
       <div className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className="w-full max-w-[480px] rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-[var(--color-border-default)]">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
-              <Image
-                src="/ShopRoomIcon.svg"
-                alt="ShopRoom"
-                width={26}
-                height={23}
-                className="align-middle"
-              />
-              <div className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
-                ShopRoom
-              </div>
+        <div className="w-full max-w-[480px]">
+          {/* Role toggle */}
+          <div className="flex rounded-[10px] bg-[var(--color-auth-input-bg)] p-1 mb-6">
+            <div className="flex-1 text-center text-[13px] font-semibold py-2 rounded-[8px] bg-[var(--color-bg-surface)] text-[var(--color-auth-primary)] shadow-sm">
+              Customer
             </div>
-            <h1 className="mt-6 text-[26px] font-extrabold tracking-[-0.65px] text-[var(--color-auth-ink)] text-center">
-              Create your account
-            </h1>
-            <p className="mt-2 text-[14px] text-[var(--color-auth-ink-muted)] text-center">
-              Find rooms near your favourite shops.
-            </p>
+            <a
+              href="/shopkeeper/signup"
+              className="flex-1 text-center text-[13px] font-medium py-2 rounded-[8px] text-[var(--color-auth-ink-muted)] hover:text-[var(--color-auth-ink)] transition"
+            >
+              Shopkeeper
+            </a>
           </div>
 
-          <div className="mt-8 flex flex-col items-center">
-            <div className="w-[400px]">
-              <ContinueWithGoogle />
-            </div>
-
-            <div className="my-6 flex items-center gap-4 w-[400px]">
-              <div className="h-px flex-1 bg-[var(--color-border-default)]" />
-              <span className="text-[10px] tracking-[1px] text-[var(--color-auth-ink-muted)] uppercase opacity-50">
-                OR
-              </span>
-              <div className="h-px flex-1 bg-[var(--color-border-default)]" />
-            </div>
-
-            <form
-              className="w-[400px] flex flex-col gap-4"
-              onSubmit={handleSubmit(onSubmit)}
-              noValidate
-            >
-              {/* Full Name */}
-              <div className="flex flex-col gap-1">
-                <label className={labelClass}>Full Name</label>
-                <input
-                  {...register("fullName")}
-                  placeholder="Cameron Williamson"
-                  autoComplete="name"
-                  className={`${inputClass} ${errors.fullName ? "ring-2 ring-red-400" : ""}`}
+          <div className="rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-[var(--color-border-default)]">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
+                <Image
+                  src="/ShopRoomIcon.svg"
+                  alt="ShopRoom"
+                  width={26}
+                  height={23}
+                  className="align-middle"
                 />
-                {errors.fullName && (
-                  <p className={errorClass}>{errors.fullName.message}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="flex flex-col gap-1">
-                <label className={labelClass}>Email Address</label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M4 7.5C4 6.67157 4.67157 6 5.5 6H18.5C19.3284 6 20 6.67157 20 7.5V16.5C20 17.3284 19.3284 18 18.5 18H5.5C4.67157 18 4 17.3284 4 16.5V7.5Z"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                      <path
-                        d="M6.5 8.5L12 12.5L17.5 8.5"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    {...register("email")}
-                    type="email"
-                    placeholder="cameron@example.com"
-                    autoComplete="email"
-                    className={`${inputClass} pl-12 ${errors.email ? "ring-2 ring-red-400" : ""}`}
-                  />
+                <div className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
+                  ShopRoom
                 </div>
-                {errors.email && (
-                  <p className={errorClass}>{errors.email.message}</p>
-                )}
+              </div>
+              <h1 className="mt-6 text-[26px] font-extrabold tracking-[-0.65px] text-[var(--color-auth-ink)] text-center">
+                Create your account
+              </h1>
+              <p className="mt-2 text-[14px] text-[var(--color-auth-ink-muted)] text-center">
+                Find rooms near your favourite shops.
+              </p>
+            </div>
+
+            <div className="mt-8 flex flex-col items-center">
+              <div className="w-[400px]">
+                <ContinueWithGoogle />
               </div>
 
-              {/* Password + Confirm */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="my-6 flex items-center gap-4 w-[400px]">
+                <div className="h-px flex-1 bg-[var(--color-border-default)]" />
+                <span className="text-[10px] tracking-[1px] text-[var(--color-auth-ink-muted)] uppercase opacity-50">
+                  OR
+                </span>
+                <div className="h-px flex-1 bg-[var(--color-border-default)]" />
+              </div>
+
+              <form
+                className="w-[400px] flex flex-col gap-4"
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+              >
+                {/* Full Name */}
                 <div className="flex flex-col gap-1">
-                  <label className={labelClass}>Password</label>
+                  <label className={labelClass}>Full Name</label>
+                  <input
+                    {...register("fullName")}
+                    placeholder="Cameron Williamson"
+                    autoComplete="name"
+                    className={`${inputClass} ${errors.fullName ? "ring-2 ring-red-400" : ""}`}
+                  />
+                  {errors.fullName && (
+                    <p className={errorClass}>{errors.fullName.message}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col gap-1">
+                  <label className={labelClass}>Email Address</label>
                   <div className="relative">
+                    <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)]">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M4 7.5C4 6.67157 4.67157 6 5.5 6H18.5C19.3284 6 20 6.67157 20 7.5V16.5C20 17.3284 19.3284 18 18.5 18H5.5C4.67157 18 4 17.3284 4 16.5V7.5Z"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        />
+                        <path
+                          d="M6.5 8.5L12 12.5L17.5 8.5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
                     <input
-                      {...register("password")}
+                      {...register("email")}
+                      type="email"
+                      placeholder="cameron@example.com"
+                      autoComplete="email"
+                      className={`${inputClass} pl-12 ${errors.email ? "ring-2 ring-red-400" : ""}`}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className={errorClass}>{errors.email.message}</p>
+                  )}
+                </div>
+
+                {/* Password + Confirm */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass}>Password</label>
+                    <div className="relative">
+                      <input
+                        {...register("password")}
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className={`${inputClass} pr-12 ${errors.password ? "ring-2 ring-red-400" : ""}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-[var(--color-auth-ink-muted)]"
+                      >
+                        <EyeIcon open={showPassword} />
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className={errorClass}>{errors.password.message}</p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className={labelClass}>Confirm</label>
+                    <input
+                      {...register("confirmPassword")}
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       autoComplete="new-password"
-                      className={`${inputClass} pr-12 ${errors.password ? "ring-2 ring-red-400" : ""}`}
+                      className={`${inputClass} ${errors.confirmPassword ? "ring-2 ring-red-400" : ""}`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-[var(--color-auth-ink-muted)]"
-                    >
-                      <EyeIcon open={showPassword} />
-                    </button>
+                    {errors.confirmPassword && (
+                      <p className={errorClass}>
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.password && (
-                    <p className={errorClass}>{errors.password.message}</p>
-                  )}
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className={labelClass}>Confirm</label>
-                  <input
-                    {...register("confirmPassword")}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    className={`${inputClass} ${errors.confirmPassword ? "ring-2 ring-red-400" : ""}`}
-                  />
-                  {errors.confirmPassword && (
-                    <p className={errorClass}>
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
+                {/* Location toggle */}
+                <div className="w-full rounded-[8px] border border-[var(--color-auth-border)] bg-[var(--color-auth-panel-bg)]/50 p-4 flex items-center justify-between">
+                  <div>
+                    <div className="text-[14px] font-bold text-[var(--color-auth-ink)]">
+                      Allow location access
+                    </div>
+                    <div className="text-[11px] text-[var(--color-auth-ink-muted)]">
+                      Show rooms near your current position.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLocationToggle}
+                    disabled={locationLoading}
+                    className={`relative w-[44px] h-[24px] rounded-full transition-colors disabled:opacity-60 ${allowLocation ? "bg-[var(--color-auth-primary)]" : "bg-[var(--color-auth-border)]/60"}`}
+                    aria-pressed={allowLocation}
+                  >
+                    {locationLoading ? (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      </span>
+                    ) : (
+                      <span
+                        className={`absolute top-[3px] left-[3px] h-[18px] w-[18px] rounded-full bg-white transition-transform ${allowLocation ? "translate-x-[20px]" : "translate-x-0"}`}
+                      />
+                    )}
+                  </button>
                 </div>
-              </div>
 
-              {/* Location toggle */}
-              <div className="w-full rounded-[8px] border border-[var(--color-auth-border)] bg-[var(--color-auth-panel-bg)]/50 p-4 flex items-center justify-between">
-                <div>
-                  <div className="text-[14px] font-bold text-[var(--color-auth-ink)]">
-                    Allow location access
+                {locationError && (
+                  <div className="rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 text-center">
+                    {locationError}
                   </div>
-                  <div className="text-[11px] text-[var(--color-auth-ink-muted)]">
-                    Show rooms near your current position.
+                )}
+
+                {serverError && (
+                  <div className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
+                    {serverError}
                   </div>
-                </div>
+                )}
+
                 <button
-                  type="button"
-                  onClick={handleLocationToggle}
-                  disabled={locationLoading}
-                  className={`relative w-[44px] h-[24px] rounded-full transition-colors disabled:opacity-60 ${allowLocation ? "bg-[var(--color-auth-primary)]" : "bg-[var(--color-auth-border)]/60"}`}
-                  aria-pressed={allowLocation}
+                  type="submit"
+                  disabled={!isValid || isLoading}
+                  className="w-full h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] font-bold disabled:opacity-50 transition-opacity"
                 >
-                  {locationLoading ? (
-                    <span className="absolute inset-0 flex items-center justify-center">
-                      <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                    </span>
-                  ) : (
-                    <span
-                      className={`absolute top-[3px] left-[3px] h-[18px] w-[18px] rounded-full bg-white transition-transform ${allowLocation ? "translate-x-[20px]" : "translate-x-0"}`}
-                    />
-                  )}
+                  {isLoading ? "Creating Account" : "Create Account"}
                 </button>
-              </div>
 
-              {locationError && (
-                <div className="rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 text-center">
-                  {locationError}
+                <div className="text-center text-[14px] text-[var(--color-auth-ink-muted)]">
+                  Already have an account?{" "}
+                  <Link
+                    href="/login"
+                    className="font-bold text-[var(--color-auth-primary)]"
+                  >
+                    Log in
+                  </Link>
                 </div>
-              )}
+              </form>
+            </div>
 
-              {serverError && (
-                <div className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
-                  {serverError}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={!isValid || isLoading}
-                className="w-full h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] font-bold disabled:opacity-50 transition-opacity"
-              >
-                {isLoading ? "Creating Account" : "Create Account"}
-              </button>
-
-              <div className="text-center text-[14px] text-[var(--color-auth-ink-muted)]">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="font-bold text-[var(--color-auth-primary)]"
-                >
-                  Log in
-                </Link>
-              </div>
-            </form>
-          </div>
-
-          <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-[var(--color-auth-ink-muted)] opacity-50">
-            <span>© 2026 SHOPROOM</span>
-            <span>PRIVACY POLICY</span>
-            <span>HELP CENTER</span>
+            <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-[var(--color-auth-ink-muted)] opacity-50">
+              <span>© 2026 SHOPROOM</span>
+              <span>PRIVACY POLICY</span>
+              <span>HELP CENTER</span>
+            </div>
           </div>
         </div>
       </div>

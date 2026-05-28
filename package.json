@@ -11,6 +11,8 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@reduxjs/toolkit": "^2.11.2",
+    "@stripe/react-stripe-js": "^6.4.0",
+    "@stripe/stripe-js": "^9.6.0",
     "axios": "^1.15.1",
     "firebase": "^12.13.0",
     "next": "16.2.4",
