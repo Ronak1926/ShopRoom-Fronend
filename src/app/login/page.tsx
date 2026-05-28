@@ -26,6 +26,7 @@ export default function LoginPage() {
   const { status, token } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
 
+  const [ready, setReady] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -39,12 +40,19 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    dispatch(hydrateToken());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (token) router.push("/");
-  }, [token, router]);
+    const customerToken = localStorage.getItem("token");
+    const shopkeeperToken = localStorage.getItem("shopkeeper_token");
+    if (customerToken) {
+      dispatch(hydrateToken());
+      router.replace("/");
+    } else if (shopkeeperToken) {
+      router.replace("/shopkeeper/dashboard");
+    } else {
+      dispatch(hydrateToken());
+      setReady(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function onSubmit(values: LoginFormValues) {
     setServerError(null);
@@ -55,6 +63,8 @@ export default function LoginPage() {
       setServerError((action.payload as string) ?? "Invalid email or password");
     }
   }
+
+  if (!ready) return null;
 
   return (
     <div className="flex flex-1 bg-[var(--color-bg-page)]">

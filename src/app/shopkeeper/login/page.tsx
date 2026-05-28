@@ -49,19 +49,25 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export default function ShopkeeperLoginPage() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = localStorage.getItem("shopkeeper_token");
-    if (t) setToken(t);
+    const shopkeeperToken = localStorage.getItem("shopkeeper_token");
+    const customerToken = localStorage.getItem("token");
+    if (shopkeeperToken) {
+      router.replace("/shopkeeper/dashboard");
+    } else if (customerToken) {
+      router.replace("/");
+    } else {
+      setReady(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (token) router.push("/shopkeeper/dashboard");
-  }, [token, router]);
+  if (!ready) return null;
 
   const {
     register,
@@ -82,7 +88,6 @@ export default function ShopkeeperLoginPage() {
       });
       const { token: t } = res.data as { token: string };
       localStorage.setItem("shopkeeper_token", t);
-      setToken(t);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setServerError(e?.response?.data?.message ?? "Invalid email or password");

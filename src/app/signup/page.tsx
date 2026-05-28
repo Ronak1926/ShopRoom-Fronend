@@ -62,13 +62,22 @@ export default function SignupPage() {
   const { status, token } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
 
-  useEffect(() => {
-    dispatch(hydrateToken());
-  }, [dispatch]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (token) router.push("/");
-  }, [token, router]);
+    const customerToken = localStorage.getItem("token");
+    const shopkeeperToken = localStorage.getItem("shopkeeper_token");
+    if (customerToken) {
+      dispatch(hydrateToken());
+      router.replace("/");
+    } else if (shopkeeperToken) {
+      router.replace("/shopkeeper/dashboard");
+    } else {
+      dispatch(hydrateToken());
+      setReady(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -158,6 +167,8 @@ export default function SignupPage() {
   const labelClass =
     "text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-[var(--color-auth-ink)]";
   const errorClass = "mt-1 text-[11px] text-red-500";
+
+  if (!ready) return null;
 
   return (
     <div className="flex flex-1 bg-[var(--color-bg-page)]">

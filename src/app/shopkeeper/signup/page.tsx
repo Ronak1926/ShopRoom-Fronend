@@ -439,6 +439,7 @@ function Step4Payment({
 export default function ShopkeeperSignupPage() {
   const router = useRouter();
 
+  const [ready, setReady] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -462,10 +463,22 @@ export default function ShopkeeperSignupPage() {
   const otpInputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const [otpCooldown, setOtpCooldown] = useState(0);
 
-  // ── On mount: restore draftId from localStorage
+  // ── On mount: if already logged in redirect away; otherwise restore draft
   useEffect(() => {
+    const shopkeeperToken = localStorage.getItem("shopkeeper_token");
+    const customerToken = localStorage.getItem("token");
+    if (shopkeeperToken) {
+      router.replace("/shopkeeper/dashboard");
+      return;
+    }
+    if (customerToken) {
+      router.replace("/");
+      return;
+    }
     const saved = localStorage.getItem("shopkeeper_draft_id");
     if (saved) setDraftId(saved);
+    setReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── OTP cooldown ticker
@@ -680,6 +693,8 @@ export default function ShopkeeperSignupPage() {
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────────
+
+  if (!ready) return null;
 
   return (
     <div className="flex flex-1 bg-[var(--color-bg-page)]">
