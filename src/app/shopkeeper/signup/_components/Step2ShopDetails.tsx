@@ -213,20 +213,43 @@ export function Step2ShopDetails({
           </div>
           <div className="flex flex-col gap-1 flex-1">
             <label className={labelCls()}>State</label>
-            <select
-              {...register("state")}
-              className={inputCls(!!e.state)}
-              defaultValue=""
-            >
-              <option value="" disabled>
-                Select state
-              </option>
-              {INDIAN_STATES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+            <div className="relative">
+              <select
+                {...register("state")}
+                defaultValue=""
+                className={`appearance-none h-11.5 w-full rounded-lg bg-(--color-auth-input-bg) px-4 pr-10 text-[14px] outline-none border transition cursor-pointer ${
+                  !!e.state
+                    ? "border-red-400 ring-1 ring-red-300 text-(--color-auth-ink)"
+                    : "border-transparent focus:border-(--color-auth-primary) focus:ring-1 focus:ring-(--color-auth-primary) text-(--color-auth-ink)"
+                }`}
+              >
+                <option
+                  value=""
+                  disabled
+                  className="text-(--color-auth-ink-muted)"
+                >
+                  Select state
                 </option>
-              ))}
-            </select>
+                {INDIAN_STATES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-(--color-auth-ink-muted)"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </div>
             <FieldError msg={e.state?.message} />
           </div>
         </div>

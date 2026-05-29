@@ -28,6 +28,29 @@ export function Step4Payment({
   const [cvv, setCvv] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+    setCardNumber(formatted);
+  }
+
+  function handleExpiryChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 4);
+    if (raw.length <= 2) {
+      setExpiry(raw);
+    } else {
+      setExpiry(raw.slice(0, 2) + "/" + raw.slice(2));
+    }
+  }
+
+  function handleExpiryKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Allow backspace to delete the slash naturally
+    if (e.key === "Backspace" && expiry.endsWith("/")) {
+      e.preventDefault();
+      setExpiry(expiry.slice(0, -1));
+    }
+  }
+
   // ── DEV MODE: skip real Razorpay, send mock values to backend ────────────────
   async function handlePay() {
     if (!selectedPlan) return;
@@ -156,9 +179,10 @@ export function Step4Payment({
           <label className={labelCls()}>Card Number</label>
           <input
             value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
+            onChange={handleCardNumberChange}
             placeholder="4111 1111 1111 1111"
             maxLength={19}
+            inputMode="numeric"
             className={inputCls(false)}
           />
         </div>
@@ -167,9 +191,11 @@ export function Step4Payment({
             <label className={labelCls()}>Expiry</label>
             <input
               value={expiry}
-              onChange={(e) => setExpiry(e.target.value)}
+              onChange={handleExpiryChange}
+              onKeyDown={handleExpiryKeyDown}
               placeholder="MM/YY"
               maxLength={5}
+              inputMode="numeric"
               className={inputCls(false)}
             />
           </div>
