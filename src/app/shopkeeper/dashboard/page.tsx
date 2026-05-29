@@ -15,6 +15,7 @@ export default function ShopkeeperDashboard() {
   const router = useRouter();
   const [activeNav, setActiveNav] = useState("dashboard");
   const [inviteLink, setInviteLink] = useState<string | undefined>(undefined);
+  const [roomId, setRoomId] = useState<string | undefined>(undefined);
   const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
@@ -29,8 +30,9 @@ export default function ShopkeeperDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const data = res.data as { room?: { inviteLink?: string } };
+        const data = res.data as { room?: { roomId?: string; inviteLink?: string } };
         if (data.room?.inviteLink) setInviteLink(data.room.inviteLink);
+        if (data.room?.roomId) setRoomId(data.room.roomId);
       })
       .catch(() => {
         // Fallback: build the link from the invite code stored during signup
@@ -39,36 +41,44 @@ export default function ShopkeeperDashboard() {
       });
   }, [router]);
 
-  return (
-    <div className="flex min-h-screen bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
+  function handleNavChange(id: string) {
+    if (id === "myroom") {
+      router.push(`/shopkeeper/room/${roomId ?? "_"}`);
+    } else {
+      setActiveNav(id);
+    }
+  }
 
-      <div className="flex flex-1 flex-col min-w-0">
+  return (
+    <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
+      <Sidebar activeNav={activeNav} onNavChange={handleNavChange} />
+
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <TopBar
           inviteLink={inviteLink}
           onShareClick={() => setShowShare(true)}
         />
 
-        <main className="flex-1 p-7">
-          <h1 className="text-[28px] font-bold text-(--color-text-primary) mb-2">
-            Good morning, Riya Fashion Store
-          </h1>
-          <div className="flex items-center gap-1.5 mb-6">
-            <div className="w-2 h-2 rounded-full bg-(--color-online)" />
-            <span className="text-[13px] text-(--color-text-secondary)">
-              Your store room is active and syncing in real-time.
-            </span>
-          </div>
+          <main className="flex-1 p-7 overflow-y-auto">
+            <h1 className="text-[28px] font-bold text-(--color-text-primary) mb-2">
+              Good morning, Riya Fashion Store
+            </h1>
+            <div className="flex items-center gap-1.5 mb-6">
+              <div className="w-2 h-2 rounded-full bg-(--color-online)" />
+              <span className="text-[13px] text-(--color-text-secondary)">
+                Your store room is active and syncing in real-time.
+              </span>
+            </div>
 
-          <KPICards />
+            <KPICards />
 
-          <div className="flex gap-5 mt-6">
-            <RecentActivity />
-            <QuickActionsPanel />
-          </div>
+            <div className="flex gap-5 mt-6">
+              <RecentActivity />
+              <QuickActionsPanel />
+            </div>
 
-          <MembersTable />
-        </main>
+            <MembersTable />
+          </main>
       </div>
 
       {showShare && inviteLink && (
