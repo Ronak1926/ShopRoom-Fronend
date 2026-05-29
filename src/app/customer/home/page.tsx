@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
@@ -16,6 +16,40 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
+import { apiClient, setAuthToken } from "@/utils/apiClient";
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+type RoomCard = {
+  roomId: string;
+  shopName: string;
+  category: string;
+  logoUrl: string | null;
+  coverUrl: string | null;
+  membersCount: number;
+  inviteCode: string;
+  city: string;
+  distanceKm: number | null;
+  likes: number;
+  activeNow: boolean;
+};
+
+type TrendingItem = {
+  roomId: string;
+  shopName: string;
+  category: string;
+  logoUrl: string | null;
+  membersCount: number;
+};
+
+type DiscoverResponse = {
+  total: number;
+  rooms: RoomCard[];
+  trending: TrendingItem[];
+  categories: string[];
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
 const navItems = [
   { id: "discover", label: "Discover", Icon: ExploreOutlinedIcon },
@@ -24,95 +58,100 @@ const navItems = [
   { id: "settings", label: "Settings", Icon: SettingsOutlinedIcon },
 ];
 
-const filterChips = [
-  "All",
-  "Clothing",
-  "Electronics",
-  "Food & Grocery",
-  "Beauty",
-  "🔥 Trending",
-];
-
-const rooms = [
-  {
-    name: "Urban Edge Studio",
-    category: "CLOTHING",
-    distance: "0.4 km away",
-    status: "Active now",
-    members: "1.2k",
-    hearts: 245,
-    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400",
-    logoColor: "#5b47d4",
-    logoInitials: "UE",
-    active: true,
-  },
-  {
-    name: "The Tech Annex",
-    category: "ELECTRONICS",
-    distance: "0.8 km away",
-    status: "Last active 2h ago",
-    members: "840",
-    hearts: 128,
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400",
-    logoColor: "#1a1a2e",
-    logoInitials: "TA",
-    active: false,
-  },
-  {
-    name: "Fresh Pantry",
-    category: "FOOD & GROCERY",
-    distance: "1.2 km away",
-    status: "Active now",
-    members: "3.1k",
-    hearts: 1500,
-    image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400",
-    logoColor: "#0f6e56",
-    logoInitials: "FP",
-    active: true,
-  },
-];
-
-const trending = [
-  {
-    name: "Espresso Theory",
-    members: "4.8k members",
-    color: "#5b47d4",
-    initials: "ET",
-  },
-  {
-    name: "Glow Rituals",
-    members: "3.2k members",
-    color: "#9d174d",
-    initials: "GR",
-  },
-  {
-    name: "The Local Hub",
-    members: "2.9k members",
-    color: "#1a1a2e",
-    initials: "LH",
-  },
-  {
-    name: "Pixel & Print",
-    members: "1.5k members",
-    color: "#7a5922",
-    initials: "PP",
-  },
-  {
-    name: "Iron Sanctuary",
-    members: "940 members",
-    color: "#374151",
-    initials: "IS",
-  },
-];
-
-function formatHearts(n: number): string {
+function formatCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
   return String(n);
+}
+
+/** Render a shop logo: real image if logoUrl exists, otherwise branded initials. */
+function ShopLogo({
+  logoUrl,
+  shopName,
+  className,
+}: {
+  logoUrl: string | null;
+  shopName: string;
+  className?: string;
+}) {
+  const initials = shopName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+
+  if (logoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={logoUrl}
+        alt={shopName}
+        className={`object-cover rounded-full ${className ?? ""}`}
+      />
+    );
+  }
+  return (
+    <div
+      className={`flex items-center justify-center text-xs font-bold text-white rounded-full bg-(--color-brand-primary) ${className ?? ""}`}
+    >
+      {initials}
+    </div>
+  );
 }
 
 export default function CustomerHome() {
   const [activeNav, setActiveNav] = useState("discover");
   const [activeChip, setActiveChip] = useState("All");
+
+  const [rooms, setRooms] = useState<RoomCard[]>([]);
+  const [trending, setTrending] = useState<TrendingItem[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState<"nearest" | "popular">("nearest");
+
+  // ── Fetch discover data ──────────────────────────────────────────────────────
+
+  const fetchDiscover = useCallback(
+    async (chip: string, currentSort: "nearest" | "popular") => {
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) return;
+      setAuthToken(token);
+      setLoading(true);
+      try {
+        const isTrending = chip === "Trending";
+        const params: Record<string, string> = {
+          sort: isTrending ? "popular" : currentSort,
+        };
+        if (!isTrending && chip !== "All") params.category = chip;
+
+        const res = await apiClient.get<DiscoverResponse>(
+          "/api/rooms/discover",
+          {
+            params,
+          },
+        );
+        setRooms(res.data.rooms);
+        setTrending(res.data.trending);
+        setTotal(res.data.total);
+        // Categories only set once (they don't change per filter)
+        setCategories((prev) => (prev.length ? prev : res.data.categories));
+      } catch {
+        // silently ignore — could add toast here
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    fetchDiscover(activeChip, sort);
+  }, [activeChip, sort, fetchDiscover]);
+
+  // ── Filter chip list ─────────────────────────────────────────────────────────
+
+  const filterChips = ["All", ...categories, "Trending"];
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
@@ -187,7 +226,7 @@ export default function CustomerHome() {
               }}
             />
             <span className="text-xs font-medium text-(--color-brand-primary) whitespace-nowrap shrink-0">
-              Near Ahmedabad
+              Near You
             </span>
           </div>
 
@@ -227,106 +266,148 @@ export default function CustomerHome() {
           {/* Row header */}
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-(--color-text-secondary)">
-              Showing{" "}
-              <span className="font-bold text-(--color-text-primary)">
-                24 rooms
-              </span>{" "}
-              near you
+              {loading ? (
+                "Loading rooms..."
+              ) : (
+                <>
+                  Showing{" "}
+                  <span className="font-bold text-(--color-text-primary)">
+                    {total} {total === 1 ? "room" : "rooms"}
+                  </span>{" "}
+                  near you
+                </>
+              )}
             </span>
-            <button className="flex items-center gap-1 text-[13px] text-(--color-brand-primary) font-medium cursor-pointer border border-(--color-border-default) rounded-full px-3 h-8 bg-transparent hover:bg-(--color-brand-primary-light) transition-colors">
-              Sort by: Nearest
+            <button
+              onClick={() =>
+                setSort((s) => (s === "nearest" ? "popular" : "nearest"))
+              }
+              className="flex items-center gap-1 text-[13px] text-(--color-brand-primary) font-medium cursor-pointer border border-(--color-border-default) rounded-full px-3 h-8 bg-transparent hover:bg-(--color-brand-primary-light) transition-colors"
+            >
+              Sort by: {sort === "nearest" ? "Nearest" : "Popular"}
               <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} />
             </button>
           </div>
 
+          {/* Loading skeleton */}
+          {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden animate-pulse"
+                >
+                  <div className="h-44 bg-gray-100" />
+                  <div className="px-4 pt-6 pb-4 space-y-2">
+                    <div className="h-4 bg-gray-100 rounded w-3/4" />
+                    <div className="h-3 bg-gray-100 rounded w-1/2" />
+                    <div className="h-3 bg-gray-100 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Cards grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {rooms.map((room) => (
-              <div
-                key={room.name}
-                className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden cursor-pointer hover:shadow-lg transition-shadow group"
-              >
-                {/* Image zone */}
-                <div className="relative h-44">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={room.image}
-                    alt={room.name}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                  />
+          {!loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {rooms.map((room) => (
+                <div
+                  key={room.roomId}
+                  className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden cursor-pointer hover:shadow-lg transition-shadow group"
+                >
+                  {/* Image zone */}
+                  <div className="relative h-44">
+                    {room.coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={room.coverUrl}
+                        alt={room.shopName}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-(--color-brand-primary-light)" />
+                    )}
 
-                  {/* Shop logo overlay */}
-                  <div
-                    className="absolute bottom-0 left-3 translate-y-1/2 w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-md shrink-0"
-                    style={{ backgroundColor: room.logoColor }}
-                  >
-                    {room.logoInitials}
+                    {/* Shop logo overlay */}
+                    <div className="absolute bottom-0 left-3 translate-y-1/2 w-10 h-10 rounded-full border-2 border-white shadow-md shrink-0 overflow-hidden">
+                      <ShopLogo
+                        logoUrl={room.logoUrl}
+                        shopName={room.shopName}
+                        className="w-full h-full"
+                      />
+                    </div>
+
+                    {/* Distance badge — only if server computed it */}
+                    {room.distanceKm !== null && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-(--color-text-primary) px-2 py-1 rounded-full">
+                        <NearMeOutlinedIcon
+                          sx={{
+                            fontSize: 12,
+                            color: "var(--color-brand-primary)",
+                          }}
+                        />
+                        {room.distanceKm} km away
+                      </div>
+                    )}
                   </div>
 
-                  {/* Distance badge */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-(--color-text-primary) px-2 py-1 rounded-full">
-                    <NearMeOutlinedIcon
-                      sx={{ fontSize: 12, color: "var(--color-brand-primary)" }}
-                    />
-                    {room.distance}
+                  {/* Card body */}
+                  <div className="px-4 pt-6 pb-4">
+                    <div className="text-[15px] font-bold text-(--color-text-primary) mt-1">
+                      {room.shopName}
+                    </div>
+                    <div className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-medium mt-0.5">
+                      {room.category}
+                    </div>
+
+                    {/* Status row */}
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{
+                            backgroundColor: room.activeNow
+                              ? "var(--color-online)"
+                              : "#d1d5db",
+                          }}
+                        />
+                        <span className="text-xs text-(--color-text-secondary)">
+                          {room.activeNow ? "Active now" : "Inactive"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <PeopleOutlinedIcon
+                          sx={{
+                            fontSize: 13,
+                            color: "var(--color-text-secondary)",
+                          }}
+                        />
+                        <span className="text-xs text-(--color-text-secondary)">
+                          {formatCount(room.membersCount)} members
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom row */}
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-1">
+                        <FavoriteBorderIcon
+                          sx={{ fontSize: 15, color: "var(--color-danger)" }}
+                        />
+                        <span className="text-[13px] text-(--color-text-secondary)">
+                          {formatCount(room.likes)}
+                        </span>
+                      </div>
+                      <button className="h-9 px-5 bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-white text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors">
+                        Join Room
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {/* Card body */}
-                <div className="px-4 pt-6 pb-4">
-                  <div className="text-[15px] font-bold text-(--color-text-primary) mt-1">
-                    {room.name}
-                  </div>
-                  <div className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-medium mt-0.5">
-                    {room.category}
-                  </div>
-
-                  {/* Status row */}
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{
-                          backgroundColor: room.active
-                            ? "var(--color-online)"
-                            : "#d1d5db",
-                        }}
-                      />
-                      <span className="text-xs text-(--color-text-secondary)">
-                        {room.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <PeopleOutlinedIcon
-                        sx={{
-                          fontSize: 13,
-                          color: "var(--color-text-secondary)",
-                        }}
-                      />
-                      <span className="text-xs text-(--color-text-secondary)">
-                        {room.members} members
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Bottom row */}
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-1">
-                      <FavoriteBorderIcon
-                        sx={{ fontSize: 15, color: "var(--color-danger)" }}
-                      />
-                      <span className="text-[13px] text-(--color-text-secondary)">
-                        {formatHearts(room.hearts)}
-                      </span>
-                    </div>
-                    <button className="h-9 px-5 bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-white text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors">
-                      Join Room
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -396,7 +477,7 @@ export default function CustomerHome() {
               Active Search Area
             </div>
             <div className="text-[13px] font-semibold text-(--color-text-primary)">
-              Bodakdev, Ahmedabad
+              Near You
             </div>
           </div>
         </div>
@@ -413,24 +494,25 @@ export default function CustomerHome() {
           <ul className="list-none m-0 p-0">
             {trending.map((item, index) => (
               <li
-                key={item.name}
+                key={item.roomId}
                 className="flex items-center gap-3 py-2.5 cursor-pointer hover:bg-(--color-bg-page) rounded-lg px-2 -mx-2 transition-colors"
               >
                 <span className="w-4 text-[13px] font-bold text-(--color-text-hint) shrink-0 text-center">
                   {index + 1}
                 </span>
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-                  style={{ backgroundColor: item.color }}
-                >
-                  {item.initials}
+                <div className="w-9 h-9 rounded-xl shrink-0 overflow-hidden">
+                  <ShopLogo
+                    logoUrl={item.logoUrl}
+                    shopName={item.shopName}
+                    className="w-full h-full rounded-xl"
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-semibold text-(--color-text-primary) truncate">
-                    {item.name}
+                    {item.shopName}
                   </div>
                   <div className="text-[11px] text-(--color-text-secondary)">
-                    {item.members}
+                    {formatCount(item.membersCount)} members
                   </div>
                 </div>
                 <ChevronRightOutlinedIcon
