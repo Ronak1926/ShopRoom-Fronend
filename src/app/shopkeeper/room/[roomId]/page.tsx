@@ -56,7 +56,10 @@ export default function RoomPage() {
       />
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <TopBar inviteLink={inviteLink} onShareClick={() => setShowShare(true)} />
+        <TopBar
+          inviteLink={inviteLink}
+          onShareClick={() => setShowShare(true)}
+        />
 
         <MyRoom
           shopName={shopData?.shopName ?? ""}
