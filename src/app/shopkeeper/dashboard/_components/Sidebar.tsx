@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
@@ -8,6 +9,7 @@ import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import EqualizerOutlinedIcon from "@mui/icons-material/EqualizerOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { NAV_ITEMS } from "../_data/constants";
 
 const NAV_ICONS: Record<string, React.ElementType> = {
@@ -26,6 +28,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
+  const router = useRouter();
+
   return (
     <aside className="w-55 min-w-55 bg-(--color-bg-surface) border-r border-(--color-border-default) flex flex-col py-6 h-screen sticky top-0">
       {/* Brand */}
@@ -68,8 +72,14 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
         <button className="flex items-center justify-center gap-1.5 w-full h-10 bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-white rounded-lg text-sm font-semibold cursor-pointer border-0 mb-3 transition-colors">
           <span className="text-lg leading-none">+</span> New Entry
         </button>
-        <button className="flex items-center justify-center gap-1.5 text-[13px] text-(--color-text-secondary) cursor-pointer bg-transparent border-0 w-full hover:text-(--color-text-primary) transition-colors">
+        <button className="flex items-center justify-center gap-1.5 text-[13px] text-(--color-text-secondary) cursor-pointer bg-transparent border-0 w-full hover:text-(--color-text-primary) transition-colors mb-2">
           <HelpOutlineOutlinedIcon sx={{ fontSize: 14 }} /> Help Center
+        </button>
+        <button
+          onClick={() => router.push("/shopkeeper/logout")}
+          className="flex items-center justify-center gap-1.5 text-[13px] text-(--color-danger) cursor-pointer bg-transparent border-0 w-full hover:bg-(--color-danger-light) rounded-lg h-8 transition-colors font-medium"
+        >
+          <LogoutOutlinedIcon sx={{ fontSize: 15 }} /> Sign Out
         </button>
       </div>
     </aside>
