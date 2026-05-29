@@ -69,7 +69,7 @@ export default function SignupPage() {
     const shopkeeperToken = localStorage.getItem("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
-      router.replace("/");
+      router.replace("/customer/home");
     } else if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
     } else {

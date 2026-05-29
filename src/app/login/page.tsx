@@ -44,7 +44,7 @@ export default function LoginPage() {
     const shopkeeperToken = localStorage.getItem("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
-      router.replace("/");
+      router.replace("/customer/home");
     } else if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
     } else {
@@ -60,7 +60,7 @@ export default function LoginPage() {
       loginCustomer({ email: values.email, password: values.password }),
     );
     if (loginCustomer.fulfilled.match(action)) {
-      router.replace("/");
+      router.replace("/customer/home");
     } else {
       setServerError((action.payload as string) ?? "Invalid email or password");
     }

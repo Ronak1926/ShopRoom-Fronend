@@ -30,7 +30,7 @@ export function ContinueWithGoogle() {
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (cancelled) return;
         if (googleAuthCustomer.fulfilled.match(action)) {
-          router.push("/");
+          router.push("/customer/home");
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
           setLoading(false);
@@ -57,7 +57,7 @@ export function ContinueWithGoogle() {
         const idToken = await result.user.getIdToken();
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (googleAuthCustomer.fulfilled.match(action)) {
-          router.push("/");
+          router.push("/customer/home");
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
           setLoading(false);
