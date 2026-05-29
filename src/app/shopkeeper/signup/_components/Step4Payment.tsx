@@ -9,7 +9,7 @@ import { inputCls, labelCls } from "./FormHelpers";
 interface Step4PaymentProps {
   draftId: string;
   userEmail: string;
-  onSuccess: () => void;
+  onSuccess: (token: string, inviteCode: string) => void;
   onError: (msg: string) => void;
   onBack: () => void;
 }
@@ -42,7 +42,7 @@ export function Step4Payment({
       );
       const { orderId } = orderRes.data as { orderId: string };
 
-      await apiClient.post("/api/shopkeeper/payment/verify", {
+      const res = await apiClient.post("/api/shopkeeper/payment/verify", {
         draftId,
         planType: selectedPlan,
         razorpayOrderId: orderId,
@@ -50,7 +50,11 @@ export function Step4Payment({
         razorpaySignature: "dev_signature",
       });
 
-      onSuccess();
+      const { token, inviteCode } = res.data as {
+        token: string;
+        inviteCode: string;
+      };
+      onSuccess(token, inviteCode);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       onError(

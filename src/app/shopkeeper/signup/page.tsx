@@ -240,9 +240,11 @@ export default function ShopkeeperSignupPage() {
               <Step4Payment
                 draftId={draftId}
                 userEmail={step1Email}
-                onSuccess={() => {
+                onSuccess={(token, inviteCode) => {
                   localStorage.removeItem("shopkeeper_draft_id");
-                  router.push("/shopkeeper/success");
+                  localStorage.setItem("shopkeeper_token", token);
+                  localStorage.setItem("shopkeeper_invite_code", inviteCode);
+                  router.push("/shopkeeper/dashboard");
                 }}
                 onError={(msg) => setServerError(msg)}
                 onBack={() => {
