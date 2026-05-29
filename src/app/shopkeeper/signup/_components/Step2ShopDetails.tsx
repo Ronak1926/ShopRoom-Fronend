@@ -29,6 +29,8 @@ export function Step2ShopDetails({
     handleSubmit,
     formState: { errors: e },
     reset,
+    setValue,
+    watch,
   } = useForm<Step2Values>({
     resolver: zodResolver(step2Schema),
     mode: "onTouched",
@@ -38,6 +40,24 @@ export function Step2ShopDetails({
   useEffect(() => {
     if (initialValues) reset(initialValues);
   }, [initialValues, reset]);
+
+  // State dropdown
+  const [stateOpen, setStateOpen] = useState(false);
+  const stateDropdownRef = useRef<HTMLDivElement>(null);
+  const selectedState = watch("state");
+  useEffect(() => {
+    if (!stateOpen) return;
+    function handleClickOutside(ev: MouseEvent) {
+      if (
+        stateDropdownRef.current &&
+        !stateDropdownRef.current.contains(ev.target as Node)
+      ) {
+        setStateOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [stateOpen]);
 
   // Logo
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -213,42 +233,71 @@ export function Step2ShopDetails({
           </div>
           <div className="flex flex-col gap-1 flex-1">
             <label className={labelCls()}>State</label>
-            <div className="relative">
-              <select
-                {...register("state")}
-                defaultValue=""
-                className={`appearance-none h-11.5 w-full rounded-lg bg-(--color-auth-input-bg) px-4 pr-10 text-[14px] outline-none border transition cursor-pointer ${
-                  !!e.state
-                    ? "border-red-400 ring-1 ring-red-300 text-(--color-auth-ink)"
-                    : "border-transparent focus:border-(--color-auth-primary) focus:ring-1 focus:ring-(--color-auth-primary) text-(--color-auth-ink)"
+            {/* Hidden input so react-hook-form validation still works */}
+            <input type="hidden" {...register("state")} />
+            <div className="relative" ref={stateDropdownRef}>
+              {/* Trigger */}
+              <button
+                type="button"
+                onClick={() => setStateOpen((o) => !o)}
+                className={`h-11.5 w-full rounded-lg bg-(--color-auth-input-bg) px-4 pr-9 text-[14px] text-left outline-none border transition cursor-pointer flex items-center ${
+                  e.state
+                    ? "border-red-400 ring-1 ring-red-300"
+                    : stateOpen
+                      ? "border-(--color-auth-primary) ring-1 ring-(--color-auth-primary)"
+                      : "border-transparent"
                 }`}
               >
-                <option
-                  value=""
-                  disabled
-                  className="text-(--color-auth-ink-muted)"
+                <span
+                  className={
+                    selectedState
+                      ? "text-(--color-auth-ink)"
+                      : "text-(--color-auth-ink-muted)/50"
+                  }
                 >
-                  Select state
-                </option>
-                {INDIAN_STATES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+                  {selectedState || "Select state"}
+                </span>
+              </button>
+              {/* Chevron */}
               <svg
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-(--color-auth-ink-muted)"
-                width="16"
-                height="16"
+                className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-(--color-auth-ink-muted) transition-transform duration-150 ${
+                  stateOpen ? "-rotate-180" : ""
+                }`}
+                width="14"
+                height="14"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <path d="M6 9l6 6 6-6" />
               </svg>
+              {/* Dropdown — opens upward */}
+              {stateOpen && (
+                <div className="absolute bottom-full left-0 right-0 mb-1.5 z-50 rounded-lg bg-(--color-bg-surface) border border-(--color-auth-border) shadow-[0_-4px_20px_rgba(25,25,47,0.10)] overflow-hidden">
+                  <ul className="overflow-y-auto max-h-55.5 py-1 [&::-webkit-scrollbar]:w-1.25 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-(--color-auth-border) [&::-webkit-scrollbar-thumb]:rounded-full">
+                    {INDIAN_STATES.map((s) => (
+                      <li
+                        key={s}
+                        onMouseDown={(ev) => {
+                          ev.preventDefault();
+                          setValue("state", s, { shouldValidate: true });
+                          setStateOpen(false);
+                        }}
+                        className={`px-4 py-2.25 text-[13.5px] cursor-pointer select-none transition-colors ${
+                          selectedState === s
+                            ? "bg-(--color-auth-primary) text-white font-medium"
+                            : "text-(--color-auth-ink) hover:bg-(--color-auth-input-bg)"
+                        }`}
+                      >
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <FieldError msg={e.state?.message} />
           </div>

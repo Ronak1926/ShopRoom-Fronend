@@ -59,7 +59,9 @@ export default function LoginPage() {
     const action = await dispatch(
       loginCustomer({ email: values.email, password: values.password }),
     );
-    if (!loginCustomer.fulfilled.match(action)) {
+    if (loginCustomer.fulfilled.match(action)) {
+      router.replace("/");
+    } else {
       setServerError((action.payload as string) ?? "Invalid email or password");
     }
   }

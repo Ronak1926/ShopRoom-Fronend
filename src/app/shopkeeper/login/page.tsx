@@ -88,6 +88,7 @@ export default function ShopkeeperLoginPage() {
       });
       const { token: t } = res.data as { token: string };
       localStorage.setItem("shopkeeper_token", t);
+      router.replace("/shopkeeper/dashboard");
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setServerError(e?.response?.data?.message ?? "Invalid email or password");
