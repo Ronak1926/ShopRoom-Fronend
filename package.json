@@ -26,7 +26,7 @@
     "react-redux": "^9.2.0",
     "zod": "^4.4.3"
   },
-  "devDependencies": {
+  "devDependencies": { 
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
