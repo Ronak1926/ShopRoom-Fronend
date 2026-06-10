@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
@@ -96,11 +96,11 @@ function ShopLogo({
   );
 }
 
-// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
 export default function CustomerHome() {
   const [activeNav, setActiveNav] = useState("discover");
   const [activeChip, setActiveChip] = useState("All");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -195,16 +195,22 @@ export default function CustomerHome() {
 
   const filterChips = ["All", ...categories, "Trending"];
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+      }
+    }
+    if (filterOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterOpen]);
+
   return (
     <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-          Zone 1: Sidebar
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
-
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-          Zone 2: Main Content
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
         <div className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) px-5 flex items-center gap-3 shrink-0">
@@ -245,11 +251,54 @@ export default function CustomerHome() {
             </span>
           </div>
 
-          {/* Filter btn */}
-          <button className="h-10 px-3 rounded-xl bg-(--color-bg-page) border border-(--color-border-default) flex items-center gap-1.5 text-[13px] text-(--color-text-secondary) font-medium cursor-pointer hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) transition-colors">
-            <TuneOutlinedIcon sx={{ fontSize: 16 }} />
-            Filter
-          </button>
+          {/* Filter btn + dropdown */}
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setFilterOpen((o) => !o)}
+              className={`h-10 px-3 rounded-xl bg-(--color-bg-page) border flex items-center gap-1.5 text-[13px] font-medium cursor-pointer transition-colors ${
+                activeChip !== "All"
+                  ? "border-(--color-brand-primary) text-(--color-brand-primary) bg-(--color-brand-primary-light)"
+                  : "border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary)"
+              }`}
+            >
+              <TuneOutlinedIcon sx={{ fontSize: 16 }} />
+              {activeChip !== "All" ? activeChip : "Filter"}
+              <KeyboardArrowDownOutlinedIcon
+                sx={{
+                  fontSize: 16,
+                  transition: "transform 0.2s",
+                  transform: filterOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </button>
+
+            {/* Dropdown panel */}
+            {filterOpen && (
+              <div className="absolute top-[calc(100%+8px)] left-0 z-50 bg-(--color-bg-surface) border border-(--color-border-default) rounded-2xl shadow-lg p-3 min-w-52">
+                <p className="text-[11px] font-semibold text-(--color-text-hint) uppercase tracking-wider mb-2 px-1">
+                  Category
+                </p>
+                <div className="flex flex-col gap-1">
+                  {filterChips.map((chip) => (
+                    <button
+                      key={chip}
+                      onClick={() => {
+                        setActiveChip(chip);
+                        setFilterOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-[13px] font-medium transition-colors cursor-pointer ${
+                        activeChip === chip
+                          ? "bg-(--color-brand-primary) text-white"
+                          : "text-(--color-text-primary) hover:bg-(--color-bg-page)"
+                      }`}
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Right icons */}
           <div className="ml-auto flex items-center gap-2">
@@ -263,23 +312,6 @@ export default function CustomerHome() {
               A
             </div>
           </div>
-        </div>
-
-        {/* Filter Chips */}
-        <div className="px-5 py-3 flex items-center gap-2 border-b border-(--color-border-default) bg-(--color-bg-surface) shrink-0 overflow-x-auto">
-          {filterChips.map((chip) => (
-            <button
-              key={chip}
-              onClick={() => setActiveChip(chip)}
-              className={`h-8 px-4 rounded-full text-[13px] font-medium cursor-pointer whitespace-nowrap shrink-0 border transition-colors ${
-                activeChip === chip
-                  ? "bg-(--color-brand-primary) text-white font-semibold border-transparent"
-                  : "bg-transparent border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary)"
-              }`}
-            >
-              {chip}
-            </button>
-          ))}
         </div>
 
         {/* Room Grid Area */}
