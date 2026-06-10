@@ -94,10 +94,10 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
       </nav>
 
       {/* Bottom actions */}
-      <div className="px-4 pb-10 pt-2">
+      <div className="px-4 pb-5 pt-2 flex flex-col gap-1">
         <button
           type="button"
-          className="flex items-center gap-2 w-full h-11 rounded-xl text-[14px] font-semibold cursor-pointer border-0 text-white px-4 transition-all duration-150 hover:opacity-90 active:scale-[0.98] mb-2"
+          className="flex items-center gap-2 w-full h-11 rounded-xl text-[14px] font-semibold cursor-pointer border-0 text-white px-4 transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
           style={{
             background: "linear-gradient(135deg, #5b47d4 0%, #7c63e8 100%)",
             boxShadow: "0 4px 14px rgba(91,71,212,0.4)",
@@ -108,7 +108,7 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
         </button>
         <button
           type="button"
-          className="flex items-center justify-center gap-1.5 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors"
+          className="flex items-center gap-2 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 px-3 transition-colors"
           style={{ color: "var(--color-text-secondary)" }}
           onMouseEnter={(e) =>
             (e.currentTarget.style.color = "var(--color-text-primary)")
@@ -117,15 +117,17 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
             (e.currentTarget.style.color = "var(--color-text-secondary)")
           }
         >
-          <HelpOutlineOutlinedIcon sx={{ fontSize: 15 }} /> Help Center
+          <HelpOutlineOutlinedIcon sx={{ fontSize: 16 }} />
+          Help Center
         </button>
         <button
           type="button"
           onClick={() => router.push("/shopkeeper/logout")}
-          className="flex items-center justify-center gap-1.5 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors font-medium"
+          className="flex items-center gap-2 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 px-3 transition-colors font-medium"
           style={{ color: "var(--color-danger, #e53935)" }}
         >
-          <LogoutOutlinedIcon sx={{ fontSize: 15 }} /> Sign Out
+          <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
+          Sign Out
         </button>
       </div>
     </aside>

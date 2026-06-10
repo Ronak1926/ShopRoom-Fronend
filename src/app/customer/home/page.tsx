@@ -12,6 +12,7 @@ import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import Sidebar from "@/components/customer/Sidebar";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -53,10 +54,6 @@ type DiscoverResponse = {
   categories: string[];
 };
 
-// â”€â”€ Nav items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
 function formatCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
   return String(n);
@@ -97,6 +94,7 @@ function ShopLogo({
 }
 
 export default function CustomerHome() {
+  const router = useRouter();
   const [activeNav, setActiveNav] = useState("discover");
   const [activeChip, setActiveChip] = useState("All");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -113,19 +111,29 @@ export default function CustomerHome() {
   const [customerLat, setCustomerLat] = useState<number | null>(null);
   const [customerLng, setCustomerLng] = useState<number | null>(null);
 
+  // Guard: redirect to login if no token
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      router.replace("/login");
+    }
+  }, [router]);
+
   // Debounce search
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(searchQuery), 350);
     return () => clearTimeout(id);
   }, [searchQuery]);
 
-  // â”€â”€ Fetch discover data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
   const fetchDiscover = useCallback(
     async (chip: string, currentSort: "nearest" | "popular") => {
       const token =
         typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      if (!token) return;
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
       setAuthToken(token);
       setLoading(true);
       try {
@@ -143,13 +151,21 @@ export default function CustomerHome() {
         setTrending(res.data.trending);
         setTotal(res.data.total);
         setCategories((prev) => (prev.length ? prev : res.data.categories));
-      } catch {
-        // silently ignore
+      } catch (err: unknown) {
+        if (
+          err &&
+          typeof err === "object" &&
+          "response" in err &&
+          (err as { response?: { status?: number } }).response?.status === 401
+        ) {
+          localStorage.removeItem("token");
+          router.replace("/login");
+        }
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [router],
   );
 
   // Fetch customer location for MiniMap
@@ -179,8 +195,6 @@ export default function CustomerHome() {
   useEffect(() => {
     fetchDiscover(activeChip, sort);
   }, [activeChip, sort, fetchDiscover]);
-
-  // â”€â”€ Client-side search filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const filteredRooms = useMemo(() => {
     if (!debouncedQuery.trim()) return rooms;
