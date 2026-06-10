@@ -19,15 +19,18 @@
     "@stripe/stripe-js": "^9.6.0",
     "axios": "^1.15.1",
     "firebase": "^12.13.0",
+    "leaflet": "^1.9.4",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.76.1",
+    "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",
     "zod": "^4.4.3"
   },
-  "devDependencies": { 
+  "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
