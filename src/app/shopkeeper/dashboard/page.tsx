@@ -5,18 +5,40 @@ import { useRouter } from "next/navigation";
 import Sidebar from "./_components/Sidebar";
 import TopBar from "./_components/TopBar";
 import KPICards from "./_components/KPICards";
-import RecentActivity from "./_components/RecentActivity";
+import RecentActivity, { type RecentJoin } from "./_components/RecentActivity";
 import QuickActionsPanel from "./_components/QuickActionsPanel";
-import MembersTable from "./_components/MembersTable";
+import MembersTable, { type MemberRow } from "./_components/MembersTable";
 import ShareModal from "./_components/ShareModal";
 import { apiClient } from "../../../utils/apiClient";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface DashboardData {
+  shop: {
+    shopName: string;
+    category: string;
+    logoUrl: string | null;
+    createdAt: string;
+  };
+  room: {
+    roomId: string;
+    inviteCode: string;
+    inviteLink: string;
+    membersCount: number;
+    createdAt: string;
+  } | null;
+  members: MemberRow[];
+  recentJoins: RecentJoin[];
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ShopkeeperDashboard() {
   const router = useRouter();
   const [activeNav, setActiveNav] = useState("dashboard");
-  const [inviteLink, setInviteLink] = useState<string | undefined>(undefined);
-  const [roomId, setRoomId] = useState<string | undefined>(undefined);
   const [showShare, setShowShare] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("shopkeeper_token");
@@ -26,30 +48,31 @@ export default function ShopkeeperDashboard() {
     }
 
     apiClient
-      .get("/api/shop/me", {
+      .get<DashboardData>("/api/shop/dashboard", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        const data = res.data as {
-          room?: { roomId?: string; inviteLink?: string };
-        };
-        if (data.room?.inviteLink) setInviteLink(data.room.inviteLink);
-        if (data.room?.roomId) setRoomId(data.room.roomId);
+      .then((res) => setData(res.data))
+      .catch((err) => {
+        if (err?.response?.status === 401) {
+          localStorage.removeItem("shopkeeper_token");
+          router.replace("/shopkeeper/login");
+        }
       })
-      .catch(() => {
-        // Fallback: build the link from the invite code stored during signup
-        const code = localStorage.getItem("shopkeeper_invite_code");
-        if (code) setInviteLink(`${window.location.origin}/join/${code}`);
-      });
+      .finally(() => setLoading(false));
   }, [router]);
 
   function handleNavChange(id: string) {
     if (id === "myroom") {
-      router.push(`/shopkeeper/room/${roomId ?? "_"}`);
+      router.push(`/shopkeeper/room/${data?.room?.roomId ?? "_"}`);
     } else {
       setActiveNav(id);
     }
   }
+
+  const shopName = data?.shop.shopName ?? "Your Store";
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
     <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
@@ -57,13 +80,14 @@ export default function ShopkeeperDashboard() {
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <TopBar
-          inviteLink={inviteLink}
+          inviteLink={data?.room?.inviteLink}
           onShareClick={() => setShowShare(true)}
         />
 
         <main className="flex-1 p-7 overflow-y-auto">
+          {/* Heading */}
           <h1 className="text-[28px] font-bold text-(--color-text-primary) mb-2">
-            Good morning, Riya Fashion Store
+            {greeting}, {loading ? "..." : shopName}
           </h1>
           <div className="flex items-center gap-1.5 mb-6">
             <div className="w-2 h-2 rounded-full bg-(--color-online)" />
@@ -72,20 +96,33 @@ export default function ShopkeeperDashboard() {
             </span>
           </div>
 
-          <KPICards />
+          {/* KPI row */}
+          <KPICards
+            membersCount={data?.room?.membersCount ?? 0}
+            loading={loading}
+          />
 
+          {/* Activity + Quick Actions */}
           <div className="flex gap-5 mt-6">
-            <RecentActivity />
+            <RecentActivity
+              recentJoins={data?.recentJoins ?? []}
+              loading={loading}
+            />
             <QuickActionsPanel />
           </div>
 
-          <MembersTable />
+          {/* Members table */}
+          <MembersTable
+            members={data?.members ?? []}
+            totalCount={data?.room?.membersCount ?? 0}
+            loading={loading}
+          />
         </main>
       </div>
 
-      {showShare && inviteLink && (
+      {showShare && data?.room?.inviteLink && (
         <ShareModal
-          inviteLink={inviteLink}
+          inviteLink={data.room.inviteLink}
           onClose={() => setShowShare(false)}
         />
       )}
