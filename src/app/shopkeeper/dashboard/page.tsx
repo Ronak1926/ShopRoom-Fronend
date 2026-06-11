@@ -7,7 +7,7 @@ import TopBar from "./_components/TopBar";
 import KPICards from "./_components/KPICards";
 import RecentActivity, { type RecentJoin } from "./_components/RecentActivity";
 import QuickActionsPanel from "./_components/QuickActionsPanel";
-import MembersTable, { type MemberRow } from "./_components/MembersTable";
+import MembersTable from "./_components/MembersTable";
 import ShareModal from "./_components/ShareModal";
 import { apiClient } from "../../../utils/apiClient";
 
@@ -27,7 +27,6 @@ interface DashboardData {
     membersCount: number;
     createdAt: string;
   } | null;
-  members: MemberRow[];
   recentJoins: RecentJoin[];
 }
 
@@ -112,11 +111,7 @@ export default function ShopkeeperDashboard() {
           </div>
 
           {/* Members table */}
-          <MembersTable
-            members={data?.members ?? []}
-            totalCount={data?.room?.membersCount ?? 0}
-            loading={loading}
-          />
+          <MembersTable dashboardLoading={loading} />
         </main>
       </div>
 

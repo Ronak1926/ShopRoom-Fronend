@@ -7,7 +7,8 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { apiClient } from "../../../../utils/apiClient";
 
 export interface MemberRow {
   id: string;
@@ -18,9 +19,8 @@ export interface MemberRow {
 }
 
 interface MembersTableProps {
-  members: MemberRow[];
-  totalCount: number;
-  loading?: boolean;
+  /** Pass false while the parent dashboard data is still loading. */
+  dashboardLoading?: boolean;
 }
 
 const TH =
@@ -45,14 +45,51 @@ const AVATAR_COLORS = [
   "bg-[var(--color-avatar-indigo-bg)]",
 ];
 
-export default function MembersTable({
-  members,
-  totalCount,
-  loading,
-}: MembersTableProps) {
+export default function MembersTable({ dashboardLoading }: MembersTableProps) {
   const [page, setPage] = useState(0);
-  const pageMembers = members.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  const totalPages = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [paginating, setPaginating] = useState(false);
+
+  const fetchMembers = useCallback(async (p: number, isInitial: boolean) => {
+    if (isInitial) setInitialLoading(true);
+    else setPaginating(true);
+    try {
+      const token = localStorage.getItem("shopkeeper_token");
+      const res = await apiClient.get<{
+        members: MemberRow[];
+        total: number;
+        totalPages: number;
+      }>(`/api/shop/members?page=${p}&limit=${PAGE_SIZE}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache",
+        },
+      });
+      setMembers(res.data.members);
+      setTotal(res.data.total);
+      setTotalPages(Math.max(1, res.data.totalPages));
+    } catch {
+      // keep previous data on error
+    } finally {
+      setInitialLoading(false);
+      setPaginating(false);
+    }
+  }, []);
+
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    if (!dashboardLoading) {
+      const isInitial = isFirstLoad.current;
+      isFirstLoad.current = false;
+      fetchMembers(page, isInitial);
+    }
+  }, [page, dashboardLoading, fetchMembers]);
+
+  const showSkeleton = dashboardLoading || initialLoading;
 
   return (
     <div className="bg-(--color-bg-surface) border border-(--color-border-default) rounded-[14px] p-6 mt-7">
@@ -88,8 +125,14 @@ export default function MembersTable({
             <th className={`${TH} w-[15%]`}>Notifications</th>
           </tr>
         </thead>
-        <tbody>
-          {loading &&
+        <tbody
+          className={
+            paginating
+              ? "opacity-50 transition-opacity duration-150"
+              : "transition-opacity duration-150"
+          }
+        >
+          {showSkeleton &&
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 <td className={TD} colSpan={4}>
@@ -97,7 +140,7 @@ export default function MembersTable({
                 </td>
               </tr>
             ))}
-          {!loading && pageMembers.length === 0 && (
+          {!showSkeleton && members.length === 0 && (
             <tr>
               <td
                 className="py-8 text-center text-sm text-(--color-text-secondary)"
@@ -107,8 +150,8 @@ export default function MembersTable({
               </td>
             </tr>
           )}
-          {!loading &&
-            pageMembers.map((m, idx) => (
+          {!showSkeleton &&
+            members.map((m, idx) => (
               <tr key={m.id}>
                 <td className={TD}>
                   <div className="flex items-center">
@@ -156,18 +199,18 @@ export default function MembersTable({
       {/* Footer */}
       <div className="flex items-center justify-between mt-4">
         <span className="text-xs text-(--color-text-secondary)">
-          Showing {pageMembers.length} of {totalCount} members
+          Showing {members.length} of {total} members
         </span>
         <div className="flex gap-1.5">
           <button
-            disabled={page === 0}
+            disabled={paginating || showSkeleton || page === 0}
             onClick={() => setPage((p) => p - 1)}
             className="w-7 h-7 flex items-center justify-center border border-(--color-border-default) rounded-md bg-(--color-bg-surface) cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronLeftOutlinedIcon sx={{ fontSize: 15 }} />
           </button>
           <button
-            disabled={page >= totalPages - 1}
+            disabled={paginating || showSkeleton || page >= totalPages - 1}
             onClick={() => setPage((p) => p + 1)}
             className="w-7 h-7 flex items-center justify-center border border-(--color-border-default) rounded-md bg-(--color-bg-surface) cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
@@ -178,5 +221,3 @@ export default function MembersTable({
     </div>
   );
 }
-
-
