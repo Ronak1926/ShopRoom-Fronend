@@ -25,6 +25,8 @@
   --color-bg-surface: #ffffff;
   --color-bg-surface-hover: #f0f0f5;
   --color-bg-sidebar: #1a1a2e;
+  --color-landing-hero-bg: #0f1117;
+  --color-landing-nav-scrolled: rgba(15, 17, 23, 0.88);
   --color-bg-sidebar-active: #2a2a4a;
   --color-bg-overlay: rgba(26, 26, 46, 0.5);
   --color-bg-input: #ffffff;
@@ -170,5 +172,14 @@ body {
       var(--color-brand-primary),
       var(--color-brand-primary-active)
     );
+  }
+
+  /* Landing page dot-grid texture — used in HeroSection */
+  .hero-dot-grid {
+    background-image: radial-gradient(
+      rgba(91, 71, 212, 0.22) 1px,
+      transparent 1px
+    );
+    background-size: 32px 32px;
   }
 }
