@@ -43,7 +43,7 @@ export default function ShopkeeperSuccessPage() {
         </p>
 
         <Link
-          href="/shopkeeper/login"
+          href="/login?tab=shopkeeper"
           className="block h-[46px] w-full rounded-[8px] bg-[var(--color-auth-primary)] text-white font-semibold text-[14px] leading-[46px] hover:bg-[var(--color-brand-primary-active)] transition"
         >
           Go to Login →

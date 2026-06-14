@@ -27,7 +27,7 @@ export default function RoomPage() {
   useEffect(() => {
     const token = localStorage.getItem("shopkeeper_token");
     if (!token) {
-      router.replace("/shopkeeper/login");
+      router.replace("/login?tab=shopkeeper");
       return;
     }
 

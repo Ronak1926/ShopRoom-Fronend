@@ -121,7 +121,7 @@ export function Step1Account({ isLoading, onSubmit }: Step1AccountProps) {
       <p className="mt-5 text-center text-[13px] text-[var(--color-auth-ink-muted)]">
         Already have an account?{" "}
         <Link
-          href="/shopkeeper/login"
+          href="/login?tab=shopkeeper"
           className="text-[var(--color-auth-primary)] font-semibold hover:underline"
         >
           Log in

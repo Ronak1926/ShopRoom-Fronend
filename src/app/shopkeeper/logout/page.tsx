@@ -14,7 +14,7 @@ export default function ShopkeeperLogoutPage() {
     // If not logged in, redirect immediately
     const token = localStorage.getItem("shopkeeper_token");
     if (!token) {
-      router.replace("/shopkeeper/login");
+      router.replace("/login?tab=shopkeeper");
       return;
     }
     // Decode email from JWT payload (base64, no verification — display only)
@@ -32,7 +32,7 @@ export default function ShopkeeperLogoutPage() {
     localStorage.removeItem("shopkeeper_token");
     // Small delay so the button animation is visible before redirect
     setTimeout(() => {
-      router.replace("/shopkeeper/login");
+      router.replace("/login?tab=shopkeeper");
     }, 600);
   }
 
