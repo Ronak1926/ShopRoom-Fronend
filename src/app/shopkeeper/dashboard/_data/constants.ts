@@ -1,12 +1,13 @@
 // ── Nav items ─────────────────────────────────────────────────────────────────
 export const NAV_ITEMS = [
-  { id: "dashboard",     label: "Dashboard" },
-  { id: "myroom",        label: "My Room" },
-  { id: "stockalerts",   label: "Stock Alerts" },
-  { id: "members",       label: "Members" },
+  { id: "dashboard", label: "Dashboard" },
+  { id: "myroom", label: "My Room" },
+  { id: "stockalerts", label: "Stock Alerts" },
+  { id: "members", label: "Members" },
   { id: "notifications", label: "Notifications" },
-  { id: "analytics",     label: "Analytics" },
-  { id: "billing",       label: "Billing" },
+  { id: "analytics", label: "Analytics" },
+  { id: "billing", label: "Billing" },
+  { id: "profile", label: "Profile" },
 ] as const;
 
 // ── KPI cards ─────────────────────────────────────────────────────────────────
@@ -17,7 +18,11 @@ export const KPI_CARDS = [
     iconKey: "people",
     iconBgClass: "bg-[var(--color-brand-primary-light)]",
     iconColor: "var(--color-brand-primary)",
-    badge: { text: "↑ 12%", className: "bg-[var(--color-badge-success-bg)] text-[var(--color-badge-success-text)]" },
+    badge: {
+      text: "↑ 12%",
+      className:
+        "bg-[var(--color-badge-success-bg)] text-[var(--color-badge-success-text)]",
+    },
     label: "ROOM MEMBERS",
     value: "312",
     dot: false,
@@ -27,7 +32,11 @@ export const KPI_CARDS = [
     iconKey: "chat",
     iconBgClass: "bg-[var(--color-brand-primary-light)]",
     iconColor: "var(--color-brand-primary)",
-    badge: { text: "↑ 8%", className: "bg-[var(--color-badge-success-bg)] text-[var(--color-badge-success-text)]" },
+    badge: {
+      text: "↑ 8%",
+      className:
+        "bg-[var(--color-badge-success-bg)] text-[var(--color-badge-success-text)]",
+    },
     label: "MESSAGES TODAY",
     value: "47",
     dot: false,
@@ -37,7 +46,11 @@ export const KPI_CARDS = [
     iconKey: "bell",
     iconBgClass: "bg-[var(--color-brand-alert-light)]",
     iconColor: "var(--color-brand-alert)",
-    badge: { text: "Active", className: "bg-[var(--color-brand-alert-light)] text-[var(--color-brand-alert)]" },
+    badge: {
+      text: "Active",
+      className:
+        "bg-[var(--color-brand-alert-light)] text-[var(--color-brand-alert)]",
+    },
     label: "ALERTS SENT",
     value: "6",
     dot: false,
@@ -65,7 +78,11 @@ export const ACTIVITY_ITEMS = [
     name: "Priya Verma",
     action: " joined the room",
     time: "2 minutes ago",
-    badge: { text: "MEMBER", className: "bg-[var(--color-brand-primary-light)] text-[var(--color-brand-primary)]" },
+    badge: {
+      text: "MEMBER",
+      className:
+        "bg-[var(--color-brand-primary-light)] text-[var(--color-brand-primary)]",
+    },
   },
   {
     id: 2,
@@ -75,7 +92,11 @@ export const ACTIVITY_ITEMS = [
     name: "Stock Alert sent",
     action: ' for "Embroidered Silk Saree"',
     time: "45 minutes ago",
-    badge: { text: "ALERT", className: "bg-[var(--color-brand-alert-light)] text-[var(--color-brand-alert)]" },
+    badge: {
+      text: "ALERT",
+      className:
+        "bg-[var(--color-brand-alert-light)] text-[var(--color-brand-alert)]",
+    },
   },
   {
     id: 3,
@@ -85,7 +106,11 @@ export const ACTIVITY_ITEMS = [
     name: "Rahul Mehta",
     action: " replied to your broadcast",
     time: "1 hour ago",
-    badge: { text: "MESSAGE", className: "bg-[var(--color-badge-neutral-bg)] text-[var(--color-badge-neutral-text)]" },
+    badge: {
+      text: "MESSAGE",
+      className:
+        "bg-[var(--color-badge-neutral-bg)] text-[var(--color-badge-neutral-text)]",
+    },
   },
   {
     id: 4,
@@ -95,7 +120,11 @@ export const ACTIVITY_ITEMS = [
     name: "Anjali K.",
     action: " shared the room link",
     time: "2 hours ago",
-    badge: { text: "SOCIAL", className: "bg-[var(--color-badge-blue-bg)] text-[var(--color-badge-blue-text)]" },
+    badge: {
+      text: "SOCIAL",
+      className:
+        "bg-[var(--color-badge-blue-bg)] text-[var(--color-badge-blue-text)]",
+    },
   },
 ] as const;
 

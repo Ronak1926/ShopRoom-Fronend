@@ -11,6 +11,7 @@ import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import { NAV_ITEMS } from "../_data/constants";
 
 const NAV_ICONS: Record<string, React.ElementType> = {
@@ -21,6 +22,7 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   notifications: NotificationsOutlinedIcon,
   analytics: EqualizerOutlinedIcon,
   billing: CreditCardOutlinedIcon,
+  profile: PersonOutlinedIcon,
 };
 
 interface SidebarProps {

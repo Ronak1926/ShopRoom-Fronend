@@ -63,6 +63,10 @@ export default function ShopkeeperDashboard() {
   function handleNavChange(id: string) {
     if (id === "myroom") {
       router.push(`/shopkeeper/room/${data?.room?.roomId ?? "_"}`);
+    } else if (id === "profile") {
+      router.push("/shopkeeper/profile");
+    } else if (id === "settings") {
+      router.push("/shopkeeper/settings");
     } else {
       setActiveNav(id);
     }
