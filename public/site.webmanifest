@@ -1,0 +1,17 @@
+{
+  "name": "ShopRoom",
+  "short_name": "ShopRoom",
+  "description": "Discover local shops, get real-time stock alerts, and stay ahead of the rush.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#4329BB",
+  "icons": [
+    {
+      "src": "/ShopRoomIcon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
