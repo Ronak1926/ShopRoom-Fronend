@@ -7,13 +7,15 @@ type Particle = {
   y: number;
   vx: number;
   vy: number;
+  baseR: number;
+  baseOp: number;
   r: number;
   opacity: number;
 };
 
-const COUNT = 85;
-const MAX_DIST = 130;
-const MOUSE_RADIUS = 160;
+const COUNT = 90;
+const MAX_DIST = 140;
+const MOUSE_RADIUS = 180;
 
 export default function ParticleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,14 +33,20 @@ export default function ParticleGrid() {
       if (!canvas) return;
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      particlesRef.current = Array.from({ length: COUNT }, () => ({
-        x: Math.random() * canvas!.width,
-        y: Math.random() * canvas!.height,
-        vx: (Math.random() - 0.5) * 0.38,
-        vy: (Math.random() - 0.5) * 0.38,
-        r: Math.random() * 1.4 + 0.6,
-        opacity: Math.random() * 0.35 + 0.15,
-      }));
+      particlesRef.current = Array.from({ length: COUNT }, () => {
+        const baseR = Math.random() * 1.5 + 0.7;
+        const baseOp = Math.random() * 0.28 + 0.12;
+        return {
+          x: Math.random() * canvas!.width,
+          y: Math.random() * canvas!.height,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          baseR,
+          baseOp,
+          r: baseR,
+          opacity: baseOp,
+        };
+      });
     }
 
     init();
@@ -74,29 +82,57 @@ export default function ParticleGrid() {
         const dx = p.x - mx;
         const dy = p.y - my;
         const d2 = dx * dx + dy * dy;
+        const inRange = d2 < MOUSE_RADIUS * MOUSE_RADIUS;
 
-        if (d2 < MOUSE_RADIUS * MOUSE_RADIUS && d2 > 1) {
+        // Smooth influence factor: 0 (far) → 1 (cursor)
+        const influence = inRange
+          ? Math.pow(1 - Math.sqrt(d2) / MOUSE_RADIUS, 2)
+          : 0;
+
+        // Repel gently
+        if (inRange && d2 > 1) {
           const d = Math.sqrt(d2);
-          const strength = ((MOUSE_RADIUS - d) / MOUSE_RADIUS) * 0.55;
-          p.vx += (dx / d) * strength * 0.14;
-          p.vy += (dy / d) * strength * 0.14;
+          const strength = influence * 0.28;
+          p.vx += (dx / d) * strength;
+          p.vy += (dy / d) * strength;
         }
 
-        p.vx *= 0.97;
-        p.vy *= 0.97;
+        p.vx *= 0.965;
+        p.vy *= 0.965;
         p.x += p.vx;
         p.y += p.vy;
 
-        // Soft wrap-around edges
+        // Wrap edges
         if (p.x < -10) p.x = W + 10;
         else if (p.x > W + 10) p.x = -10;
         if (p.y < -10) p.y = H + 10;
         else if (p.y > H + 10) p.y = -10;
 
+        // Lerp size: grow up to ~4.5× base radius near cursor
+        const targetR = p.baseR + influence * p.baseR * 4.5;
+        // Lerp opacity: brighten up to 0.95 near cursor
+        const targetOp = p.baseOp + influence * (0.95 - p.baseOp);
+        p.r += (targetR - p.r) * 0.1;
+        p.opacity += (targetOp - p.opacity) * 0.1;
+
+        // Glow halo for enlarged dots
+        const isGlowing = p.r > p.baseR * 1.8;
+        if (isGlowing) {
+          ctx.shadowBlur = p.r * 4;
+          ctx.shadowColor = `rgba(160,140,255,${p.opacity * 0.7})`;
+        }
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+        // Tint near-cursor dots toward lavender
+        const blend = Math.round(255 - influence * 80);
+        ctx.fillStyle = `rgba(${blend},${blend},255,${p.opacity})`;
         ctx.fill();
+
+        if (isGlowing) {
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+        }
       }
 
       // Draw connections — skip expensive sqrt when clearly too far
@@ -108,12 +144,17 @@ export default function ParticleGrid() {
           const d2c = dx * dx + dy * dy;
           if (d2c < MAX_DIST2) {
             const d = Math.sqrt(d2c);
-            const alpha = (1 - d / MAX_DIST) * 0.32;
+            const alpha = (1 - d / MAX_DIST) * 0.28;
+            // Brighten connections when either particle is enlarged
+            const boost = Math.max(
+              (ps[i].r - ps[i].baseR) / (ps[i].baseR * 4 + 0.001),
+              (ps[j].r - ps[j].baseR) / (ps[j].baseR * 4 + 0.001),
+            );
             ctx.beginPath();
             ctx.moveTo(ps[i].x, ps[i].y);
             ctx.lineTo(ps[j].x, ps[j].y);
-            ctx.strokeStyle = `rgba(91,71,212,${alpha})`;
-            ctx.lineWidth = 0.75;
+            ctx.strokeStyle = `rgba(91,71,212,${Math.min(alpha + boost * 0.4, 0.7)})`;
+            ctx.lineWidth = 0.75 + boost * 0.6;
             ctx.stroke();
           }
         }

@@ -63,7 +63,7 @@ export default function LandingNav() {
         </Link>
         <Link
           href="/signup"
-          className="h-9 px-5 flex items-center text-[14px] font-semibold text-white bg-(--color-brand-primary) rounded-full hover:bg-(--color-brand-primary-hover) transition-colors duration-150 shadow-[0_0_20px_rgba(91,71,212,0.5)]"
+          className="h-9 px-5 flex items-center text-[14px] font-semibold text-white bg-(--color-brand-primary) rounded-full hover:bg-(--color-brand-primary-hover) transition-colors duration-150"
         >
           Get Started
         </Link>

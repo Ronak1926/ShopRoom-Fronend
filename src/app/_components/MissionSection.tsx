@@ -23,20 +23,16 @@ export default function MissionSection() {
   return (
     <section className="w-full bg-(--color-bg-surface) overflow-hidden">
       <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row items-stretch min-h-[560px]">
-        {/* Left: shop photo */}
-        <div className="relative lg:w-[44%] min-h-[320px] lg:min-h-0">
+        {/* Left: shop photo — hard clean edge, no overlay */}
+        <div className="relative lg:w-[44%] min-h-[360px] lg:min-h-0 shrink-0">
           <Image
             src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=900&q=85"
             alt="A well-stocked local shop interior"
             fill
             sizes="(max-width: 1024px) 100vw, 44vw"
-            className="object-cover"
+            className="object-cover object-center"
             priority
           />
-          {/* Right-side fade into white */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-(--color-bg-surface) hidden lg:block pointer-events-none" />
-          {/* Bottom fade for mobile */}
-          <div className="absolute inset-0 bg-gradient-to-t from-(--color-bg-surface) via-transparent to-transparent lg:hidden pointer-events-none" />
         </div>
 
         {/* Right: text */}
