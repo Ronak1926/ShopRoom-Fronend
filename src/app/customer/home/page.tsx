@@ -11,6 +11,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
@@ -99,6 +100,8 @@ export default function CustomerHome() {
   const [activeChip, setActiveChip] = useState("All");
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -209,18 +212,25 @@ export default function CustomerHome() {
 
   const filterChips = ["All", ...categories, "Trending"];
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
         setFilterOpen(false);
       }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
     }
-    if (filterOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [filterOpen]);
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    setAuthToken(null);
+    router.replace("/login");
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
@@ -322,8 +332,29 @@ export default function CustomerHome() {
               />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
             </div>
-            <div className="w-9 h-9 rounded-full bg-(--color-brand-primary) text-white text-sm font-bold flex items-center justify-center cursor-pointer select-none shadow-sm">
-              A
+
+            {/* Profile avatar + dropdown */}
+            <div className="relative" ref={profileRef}>
+              <button
+                type="button"
+                onClick={() => setProfileOpen((o) => !o)}
+                className="w-9 h-9 rounded-full bg-(--color-brand-primary) text-white text-sm font-bold flex items-center justify-center cursor-pointer select-none shadow-sm border-0"
+              >
+                A
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-44 bg-(--color-bg-surface) border border-(--color-border-default) rounded-2xl shadow-lg py-1 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] font-medium text-red-500 hover:bg-red-50 transition-colors cursor-pointer border-0 bg-transparent text-left"
+                  >
+                    <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
+                    Sign out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
