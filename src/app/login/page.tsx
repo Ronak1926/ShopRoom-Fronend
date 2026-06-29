@@ -38,23 +38,22 @@ function CustomerForm() {
   const { status } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
   const [showPw, setShowPw] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isValid },
   } = useForm<FormValues>({ resolver: zodResolver(schema), mode: "onTouched" });
 
   async function onSubmit(values: FormValues) {
-    setServerError(null);
     const action = await dispatch(
       loginCustomer({ email: values.email, password: values.password }),
     );
     if (loginCustomer.fulfilled.match(action)) {
       router.replace("/customer/home");
     } else {
-      setServerError((action.payload as string) ?? "Invalid email or password");
+      setError("password", { message: "Incorrect email or password" });
     }
   }
 
@@ -127,12 +126,6 @@ function CustomerForm() {
           )}
         </div>
 
-        {serverError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
-            {serverError}
-          </div>
-        )}
-
         <button
           type="submit"
           disabled={!isValid || isLoading}
@@ -160,18 +153,17 @@ function CustomerForm() {
 function ShopkeeperForm() {
   const router = useRouter();
   const [showPw, setShowPw] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isValid },
   } = useForm<FormValues>({ resolver: zodResolver(schema), mode: "onTouched" });
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
-    setServerError(null);
     try {
       const res = await apiClient.post("/api/shopkeeper/login", {
         email: values.email,
@@ -180,9 +172,8 @@ function ShopkeeperForm() {
       const { token } = res.data as { token: string };
       localStorage.setItem("shopkeeper_token", token);
       router.replace("/shopkeeper/dashboard");
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      setServerError(e?.response?.data?.message ?? "Invalid email or password");
+    } catch {
+      setError("password", { message: "Incorrect email or password" });
     } finally {
       setIsLoading(false);
     }
@@ -245,12 +236,6 @@ function ShopkeeperForm() {
           <p className="text-[11px] text-red-500">{errors.password.message}</p>
         )}
       </div>
-
-      {serverError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
-          {serverError}
-        </div>
-      )}
 
       <button
         type="submit"
