@@ -1,4 +1,5 @@
 import Image from "next/image";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 
 export function ShopkeeperLeftPanel() {
   return (
@@ -23,19 +24,7 @@ export function ShopkeeperLeftPanel() {
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-white gap-8 py-10 px-8">
         {/* Shop icon */}
         <div className="w-[88px] h-[88px] rounded-[22px] bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
-          <svg
-            width="44"
-            height="44"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            <polyline points="9,22 9,12 15,12 15,22" />
-          </svg>
+          <StorefrontOutlinedIcon sx={{ fontSize: 44, color: "white" }} />
         </div>
 
         {/* Tagline */}

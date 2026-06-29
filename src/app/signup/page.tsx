@@ -8,12 +8,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { ContinueWithGoogle } from "../../components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { hydrateToken, registerCustomer } from "../../features/auth/authSlice";
 import { apiClient } from "../../utils/apiClient";
 import { getCookie } from "../../utils/cookieUtils";
+import { AuthTabButton } from "../../components/ui/AuthTabButton";
 
 const signupSchema = z
   .object({
@@ -32,30 +37,6 @@ const signupSchema = z
   });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
-
-const EyeIcon = ({ open }: { open: boolean }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    {open ? (
-      <>
-        <path
-          d="M2.5 12C4.5 7.5 8 5 12 5C16 5 19.5 7.5 21.5 12C19.5 16.5 16 19 12 19C8 19 4.5 16.5 2.5 12Z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
-      </>
-    ) : (
-      <>
-        <path
-          d="M3 3l18 18M10.5 10.68A3 3 0 0013.32 13.5M6.5 6.74C4.37 8.12 2.9 10 2.5 12c1.5 4.5 5 7 9.5 7a9.6 9.6 0 005.26-1.55M9 5.28A9.4 9.4 0 0112 5c4.5 0 8 2.5 9.5 7-.4 1.2-1.05 2.3-1.9 3.23"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </>
-    )}
-  </svg>
-);
 
 export default function SignupPage() {
   const dispatch = useAppDispatch();
@@ -178,16 +159,11 @@ export default function SignupPage() {
       <div className="flex flex-1 items-center justify-center px-6 py-10">
         <div className="w-full max-w-[480px]">
           {/* Role toggle */}
-          <div className="flex rounded-[10px] bg-[var(--color-auth-input-bg)] p-1 mb-6">
-            <div className="flex-1 text-center text-[13px] font-semibold py-2 rounded-[8px] bg-[var(--color-bg-surface)] text-[var(--color-auth-primary)] shadow-sm">
-              Customer
-            </div>
-            <a
-              href="/shopkeeper/signup"
-              className="flex-1 text-center text-[13px] font-medium py-2 rounded-[8px] text-[var(--color-auth-ink-muted)] hover:text-[var(--color-auth-ink)] transition"
-            >
+          <div className="flex rounded-[10px] bg-(--color-auth-input-bg) p-1 mb-6">
+            <AuthTabButton active={true}>Customer</AuthTabButton>
+            <AuthTabButton active={false} href="/shopkeeper/signup">
               Shopkeeper
-            </a>
+            </AuthTabButton>
           </div>
 
           <div className="rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-[var(--color-border-default)]">
@@ -249,25 +225,7 @@ export default function SignupPage() {
                   <label className={labelClass}>Email Address</label>
                   <div className="relative">
                     <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)]">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M4 7.5C4 6.67157 4.67157 6 5.5 6H18.5C19.3284 6 20 6.67157 20 7.5V16.5C20 17.3284 19.3284 18 18.5 18H5.5C4.67157 18 4 17.3284 4 16.5V7.5Z"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                        />
-                        <path
-                          d="M6.5 8.5L12 12.5L17.5 8.5"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <EmailOutlinedIcon sx={{ fontSize: 16 }} />
                     </div>
                     <input
                       {...register("email")}
@@ -299,7 +257,11 @@ export default function SignupPage() {
                         onClick={() => setShowPassword((v) => !v)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-[var(--color-auth-ink-muted)]"
                       >
-                        <EyeIcon open={showPassword} />
+                        {showPassword ? (
+                          <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
+                        ) : (
+                          <VisibilityOffOutlinedIcon sx={{ fontSize: 18 }} />
+                        )}
                       </button>
                     </div>
                     {errors.password && (

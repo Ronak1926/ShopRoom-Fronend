@@ -9,6 +9,7 @@ import { ShopkeeperLeftPanel } from "@/components/ui/ShopkeeperLeftPanel";
 import { useAppDispatch } from "@/hooks/redux";
 import { hydrateToken } from "@/features/auth/authSlice";
 import { getCookie } from "@/utils/cookieUtils";
+import { AuthTabButton } from "@/components/ui/AuthTabButton";
 import CustomerForm from "./CustomerForm";
 import ShopkeeperForm from "./ShopkeeperForm";
 
@@ -68,28 +69,12 @@ export default function LoginClient({ initialTab }: Props) {
           </div>
 
           <div className="flex rounded-[10px] bg-(--color-auth-input-bg) p-1 mb-6">
-            <button
-              type="button"
-              onClick={() => switchTab("customer")}
-              className={`flex-1 text-center text-[13px] py-2 rounded-lg transition font-[inherit] ${
-                !isShopkeeper
-                  ? "font-semibold bg-(--color-bg-surface) text-(--color-auth-primary) shadow-sm"
-                  : "font-medium text-(--color-auth-ink-muted) hover:text-(--color-auth-ink)"
-              }`}
-            >
+            <AuthTabButton active={!isShopkeeper} onClick={() => switchTab("customer")}>
               Customer
-            </button>
-            <button
-              type="button"
-              onClick={() => switchTab("shopkeeper")}
-              className={`flex-1 text-center text-[13px] py-2 rounded-lg transition font-[inherit] ${
-                isShopkeeper
-                  ? "font-semibold bg-(--color-bg-surface) text-(--color-auth-primary) shadow-sm"
-                  : "font-medium text-(--color-auth-ink-muted) hover:text-(--color-auth-ink)"
-              }`}
-            >
+            </AuthTabButton>
+            <AuthTabButton active={isShopkeeper} onClick={() => switchTab("shopkeeper")}>
               Shopkeeper
-            </button>
+            </AuthTabButton>
           </div>
 
           <div className="rounded-[14px] bg-(--color-bg-surface) px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-(--color-border-default)">
