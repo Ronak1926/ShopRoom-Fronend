@@ -7,6 +7,7 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { getCookie } from "@/utils/cookieUtils";
 import type { MapPin } from "@/components/map/MiniMap";
 
 // ── Viewport-keyed cache ──────────────────────────────────────────────────────
@@ -155,7 +156,7 @@ export default function FullMapPage() {
   const fetchPins = useCallback(
     async (map: import("leaflet").Map) => {
       const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        getCookie("token");
       if (!token) return;
       setAuthToken(token);
 
@@ -288,7 +289,7 @@ export default function FullMapPage() {
     if (!mapDivRef.current) return;
 
     const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      getCookie("token");
     if (token) setAuthToken(token);
 
     import("leaflet").then(async (L) => {

@@ -13,6 +13,7 @@ import { ContinueWithGoogle } from "../../components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { hydrateToken, registerCustomer } from "../../features/auth/authSlice";
 import { apiClient } from "../../utils/apiClient";
+import { getCookie } from "../../utils/cookieUtils";
 
 const signupSchema = z
   .object({
@@ -65,8 +66,8 @@ export default function SignupPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const customerToken = localStorage.getItem("token");
-    const shopkeeperToken = localStorage.getItem("shopkeeper_token");
+    const customerToken = getCookie("token");
+    const shopkeeperToken = getCookie("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
       router.replace("/customer/home");

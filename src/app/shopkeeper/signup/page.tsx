@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { ShopkeeperLeftPanel } from "../../../components/ui/ShopkeeperLeftPanel";
 import { apiClient } from "../../../utils/apiClient";
+import { getCookie, setCookie } from "../../../utils/cookieUtils";
 import { type Step1Values, type Step2Values } from "./_lib/schemas";
 import { StepIndicator } from "./_components/StepIndicator";
 import { Step1Account } from "./_components/Step1Account";
@@ -28,8 +29,8 @@ export default function ShopkeeperSignupPage() {
 
   // On mount: redirect if already authenticated; otherwise restore draft
   useEffect(() => {
-    const shopkeeperToken = localStorage.getItem("shopkeeper_token");
-    const customerToken = localStorage.getItem("token");
+    const shopkeeperToken = getCookie("shopkeeper_token");
+    const customerToken = getCookie("token");
     if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
       return;
@@ -242,7 +243,7 @@ export default function ShopkeeperSignupPage() {
                 userEmail={step1Email}
                 onSuccess={(token, inviteCode) => {
                   localStorage.removeItem("shopkeeper_draft_id");
-                  localStorage.setItem("shopkeeper_token", token);
+                  setCookie("shopkeeper_token", token);
                   localStorage.setItem("shopkeeper_invite_code", inviteCode);
                   router.push("/shopkeeper/dashboard");
                 }}

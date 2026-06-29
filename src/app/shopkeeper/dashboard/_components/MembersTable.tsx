@@ -9,6 +9,7 @@ import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "../../../../utils/apiClient";
+import { getCookie } from "../../../../utils/cookieUtils";
 
 export interface MemberRow {
   id: string;
@@ -57,7 +58,7 @@ export default function MembersTable({ dashboardLoading }: MembersTableProps) {
     if (isInitial) setInitialLoading(true);
     else setPaginating(true);
     try {
-      const token = localStorage.getItem("shopkeeper_token");
+      const token = getCookie("shopkeeper_token");
       const res = await apiClient.get<{
         members: MemberRow[];
         total: number;

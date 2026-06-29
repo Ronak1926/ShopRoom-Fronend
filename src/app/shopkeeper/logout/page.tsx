@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 
 export default function ShopkeeperLogoutPage() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function ShopkeeperLogoutPage() {
 
   useEffect(() => {
     // If not logged in, redirect immediately
-    const token = localStorage.getItem("shopkeeper_token");
+    const token = getCookie("shopkeeper_token");
     if (!token) {
       router.replace("/login?tab=shopkeeper");
       return;
@@ -29,7 +30,7 @@ export default function ShopkeeperLogoutPage() {
 
   function handleSignOut() {
     setSigningOut(true);
-    localStorage.removeItem("shopkeeper_token");
+    deleteCookie("shopkeeper_token");
     // Small delay so the button animation is visible before redirect
     setTimeout(() => {
       router.replace("/login?tab=shopkeeper");

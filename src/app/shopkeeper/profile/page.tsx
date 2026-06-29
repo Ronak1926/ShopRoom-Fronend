@@ -11,6 +11,7 @@ import ProfileRoomCard from "./_components/ProfileRoomCard";
 import ProfileShopDetailsCard from "./_components/ProfileShopDetailsCard";
 import ProfileAccountCard from "./_components/ProfileAccountCard";
 import { apiClient } from "../../../utils/apiClient";
+import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ export default function ShopkeeperProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("shopkeeper_token");
+    const token = getCookie("shopkeeper_token");
     if (!token) {
       router.replace("/login?tab=shopkeeper");
       return;
@@ -60,7 +61,7 @@ export default function ShopkeeperProfilePage() {
       .then((res: { data: ProfileData }) => setData(res.data))
       .catch((err: { response?: { status: number } }) => {
         if (err?.response?.status === 401) {
-          localStorage.removeItem("shopkeeper_token");
+          deleteCookie("shopkeeper_token");
           router.replace("/login?tab=shopkeeper");
         }
       })

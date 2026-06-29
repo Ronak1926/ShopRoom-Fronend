@@ -7,6 +7,7 @@ import TopBar from "../../dashboard/_components/TopBar";
 import ShareModal from "../../dashboard/_components/ShareModal";
 import MyRoom from "./_components/MyRoom";
 import { apiClient } from "../../../../utils/apiClient";
+import { getCookie } from "../../../../utils/cookieUtils";
 
 interface ShopData {
   shopName: string;
@@ -25,7 +26,7 @@ export default function RoomPage() {
   const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("shopkeeper_token");
+    const token = getCookie("shopkeeper_token");
     if (!token) {
       router.replace("/login?tab=shopkeeper");
       return;

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import { apiClient, setAuthToken } from "../../utils/apiClient";
+import { getCookie, setCookie, deleteCookie } from "../../utils/cookieUtils";
 
 import type {
   Customer,
@@ -80,8 +81,7 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     hydrateToken(state) {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = getCookie("token");
       state.token = token;
       setAuthToken(token);
     },
@@ -90,9 +90,7 @@ export const authSlice = createSlice({
       state.customer = null;
       state.status = "idle";
       state.error = null;
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-      }
+      deleteCookie("token");
       setAuthToken(null);
     },
   },
@@ -107,9 +105,7 @@ export const authSlice = createSlice({
         state.token = action.payload.token;
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", action.payload.token);
-        }
+        setCookie("token", action.payload.token);
         setAuthToken(action.payload.token);
       })
       .addCase(loginCustomer.rejected, (state, action) => {
@@ -125,9 +121,7 @@ export const authSlice = createSlice({
         state.token = action.payload.token;
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", action.payload.token);
-        }
+        setCookie("token", action.payload.token);
         setAuthToken(action.payload.token);
       })
       .addCase(googleAuthCustomer.rejected, (state, action) => {
@@ -143,9 +137,7 @@ export const authSlice = createSlice({
         state.token = action.payload.token;
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", action.payload.token);
-        }
+        setCookie("token", action.payload.token);
         setAuthToken(action.payload.token);
       })
       .addCase(registerCustomer.rejected, (state, action) => {

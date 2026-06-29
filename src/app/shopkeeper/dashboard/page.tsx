@@ -10,6 +10,7 @@ import QuickActionsPanel from "./_components/QuickActionsPanel";
 import MembersTable from "./_components/MembersTable";
 import ShareModal from "./_components/ShareModal";
 import { apiClient } from "../../../utils/apiClient";
+import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ export default function ShopkeeperDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("shopkeeper_token");
+    const token = getCookie("shopkeeper_token");
     if (!token) {
       router.replace("/login?tab=shopkeeper");
       return;
@@ -53,7 +54,7 @@ export default function ShopkeeperDashboard() {
       .then((res) => setData(res.data))
       .catch((err) => {
         if (err?.response?.status === 401) {
-          localStorage.removeItem("shopkeeper_token");
+          deleteCookie("shopkeeper_token");
           router.replace("/login?tab=shopkeeper");
         }
       })

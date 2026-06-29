@@ -15,6 +15,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { getCookie } from "@/utils/cookieUtils";
 
 export type MapPin = {
   shopId: string;
@@ -71,8 +72,7 @@ export default function MiniMap({
 
   // ── Fetch pins for current bbox ──────────────────────────────────────────
   const fetchPins = useCallback(async (map: import("leaflet").Map) => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = getCookie("token");
     if (!token) return;
     setAuthToken(token);
 

@@ -15,6 +15,7 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 import Sidebar from "@/components/customer/Sidebar";
 import ClearIcon from "@mui/icons-material/Clear";
 
@@ -116,9 +117,7 @@ export default function CustomerHome() {
 
   // Guard: redirect to login if no token
   useEffect(() => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) {
+    if (!getCookie("token")) {
       router.replace("/login");
     }
   }, [router]);
@@ -131,8 +130,7 @@ export default function CustomerHome() {
 
   const fetchDiscover = useCallback(
     async (chip: string, currentSort: "nearest" | "popular") => {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = getCookie("token");
       if (!token) {
         router.replace("/login");
         return;
@@ -161,7 +159,7 @@ export default function CustomerHome() {
           "response" in err &&
           (err as { response?: { status?: number } }).response?.status === 401
         ) {
-          localStorage.removeItem("token");
+          deleteCookie("token");
           router.replace("/login");
         }
       } finally {
@@ -173,8 +171,7 @@ export default function CustomerHome() {
 
   // Fetch customer location for MiniMap
   useEffect(() => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = getCookie("token");
     if (!token) return;
     setAuthToken(token);
     apiClient
@@ -227,7 +224,7 @@ export default function CustomerHome() {
   }, []);
 
   function handleLogout() {
-    localStorage.removeItem("token");
+    deleteCookie("token");
     setAuthToken(null);
     router.replace("/login");
   }
