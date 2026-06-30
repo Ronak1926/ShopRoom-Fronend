@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import ProfileAccountCard from "./_components/ProfileAccountCard";
 import { apiClient } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface ProfileData {
   shopkeeper: { id: string; email: string; createdAt: string };
@@ -40,7 +40,7 @@ interface ProfileData {
   };
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ShopkeeperProfilePage() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function ShopkeeperProfilePage() {
   useEffect(() => {
     const token = getCookie("shopkeeper_token");
     if (!token) {
-      router.replace("/login?tab=shopkeeper");
+      router.replace("/customer/login?tab=shopkeeper");
       return;
     }
 
@@ -62,7 +62,7 @@ export default function ShopkeeperProfilePage() {
       .catch((err: { response?: { status: number } }) => {
         if (err?.response?.status === 401) {
           deleteCookie("shopkeeper_token");
-          router.replace("/login?tab=shopkeeper");
+          router.replace("/customer/login?tab=shopkeeper");
         }
       })
       .finally(() => setInitialLoading(false));

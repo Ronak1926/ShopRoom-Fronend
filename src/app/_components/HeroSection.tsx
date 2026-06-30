@@ -34,7 +34,7 @@ export default function HeroSection() {
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
             <Link
-              href="/signup"
+              href="/customer/signup"
               className="h-[52px] px-9 flex items-center text-[16px] font-semibold text-white bg-(--color-brand-primary) rounded-full hover:bg-(--color-brand-primary-hover) active:bg-(--color-brand-primary-active) transition-colors duration-150"
             >
               Open a Shop Room

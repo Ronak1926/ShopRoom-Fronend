@@ -48,14 +48,14 @@ export default function CtaBanner() {
 
         <div className="flex flex-col sm:flex-row gap-4 mt-1">
           <Link
-            href="/signup"
+            href="/customer/signup"
             className="h-[52px] px-9 flex items-center gap-2 text-[16px] font-semibold text-white bg-(--color-brand-primary) rounded-full hover:bg-(--color-brand-primary-hover) transition-colors duration-150"
           >
             Open a Shop Room — Free
             <ArrowForwardOutlinedIcon sx={{ fontSize: 18 }} />
           </Link>
           <Link
-            href="/login"
+            href="/customer/login"
             className="h-[52px] px-9 flex items-center text-[16px] text-(--color-text-secondary) border border-(--color-border-default) rounded-full hover:border-(--color-border-strong) hover:text-(--color-text-primary) transition-all duration-150"
           >
             Sign in to your account

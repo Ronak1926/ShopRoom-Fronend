@@ -41,9 +41,10 @@ export default function LoginClient({ initialTab }: Props) {
 
   function switchTab(next: "customer" | "shopkeeper") {
     setTab(next);
-    router.replace(`/login${next === "shopkeeper" ? "?tab=shopkeeper" : ""}`, {
-      scroll: false,
-    });
+    router.replace(
+      `/customer/login${next === "shopkeeper" ? "?tab=shopkeeper" : ""}`,
+      { scroll: false },
+    );
   }
 
   if (!ready) return null;

@@ -219,7 +219,7 @@ function VerifyEmailContent() {
             </div>
 
             <div className="text-[13px] text-[var(--color-auth-ink-muted)]">
-              <Link href="/signup" className="hover:underline">
+              <Link href="/customer/signup" className="hover:underline">
                 ← Back to sign up
               </Link>
             </div>

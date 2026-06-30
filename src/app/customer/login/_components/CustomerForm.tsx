@@ -122,7 +122,7 @@ export default function CustomerForm() {
 
         <p className="text-center text-[13px] text-(--color-auth-ink-muted)">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-bold text-(--color-auth-primary)">
+          <Link href="/customer/signup" className="font-bold text-(--color-auth-primary)">
             Sign up
           </Link>
         </p>

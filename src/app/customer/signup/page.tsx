@@ -12,13 +12,13 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 
-import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
-import { ContinueWithGoogle } from "../../components/ui/ContinueWithGoogle";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { hydrateToken, registerCustomer } from "../../features/auth/authSlice";
-import { apiClient } from "../../utils/apiClient";
-import { getCookie } from "../../utils/cookieUtils";
-import { AuthTabButton } from "../../components/ui/AuthTabButton";
+import { AuthLeftPanel } from "@/components/ui/AuthLeftPanel";
+import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { hydrateToken, registerCustomer } from "@/features/auth/authSlice";
+import { apiClient } from "@/utils/apiClient";
+import { getCookie } from "@/utils/cookieUtils";
+import { AuthTabButton } from "@/components/ui/AuthTabButton";
 
 const signupSchema = z
   .object({
@@ -338,7 +338,7 @@ export default function SignupPage() {
                 <div className="text-center text-[14px] text-[var(--color-auth-ink-muted)]">
                   Already have an account?{" "}
                   <Link
-                    href="/login"
+                    href="/customer/login"
                     className="font-bold text-[var(--color-auth-primary)]"
                   >
                     Log in

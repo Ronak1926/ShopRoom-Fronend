@@ -115,7 +115,7 @@ export default function CustomerHome() {
   // Guard: redirect to login if no token
   useEffect(() => {
     if (!getCookie("token")) {
-      router.replace("/login");
+      router.replace("/customer/login");
     }
   }, [router]);
 
@@ -129,7 +129,7 @@ export default function CustomerHome() {
     async (chip: string, currentSort: "nearest" | "popular") => {
       const token = getCookie("token");
       if (!token) {
-        router.replace("/login");
+        router.replace("/customer/login");
         return;
       }
       setAuthToken(token);
@@ -157,7 +157,7 @@ export default function CustomerHome() {
           (err as { response?: { status?: number } }).response?.status === 401
         ) {
           deleteCookie("token");
-          router.replace("/login");
+          router.replace("/customer/login");
         }
       } finally {
         setLoading(false);

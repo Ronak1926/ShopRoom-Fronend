@@ -28,7 +28,7 @@ export default function RoomPage() {
   useEffect(() => {
     const token = getCookie("shopkeeper_token");
     if (!token) {
-      router.replace("/login?tab=shopkeeper");
+      router.replace("/customer/login?tab=shopkeeper");
       return;
     }
 

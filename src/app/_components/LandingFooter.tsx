@@ -6,7 +6,7 @@ import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 const platform = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Pricing", href: "#shopkeepers" },
-  { label: "For Shopkeepers", href: "/signup" },
+  { label: "For Shopkeepers", href: "/shopkeeper/signup" },
 ];
 
 const legal = [

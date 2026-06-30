@@ -36,13 +36,13 @@ export default function LandingNav() {
 
       <div className="flex items-center gap-3">
         <Link
-          href="/login"
+          href="/customer/login"
           className="h-9 px-4 flex items-center text-[14px] text-white/70 hover:text-white transition-colors duration-200"
         >
           Log In
         </Link>
         <Link
-          href="/signup"
+          href="/customer/signup"
           className="h-9 px-5 flex items-center text-[14px] font-semibold text-white bg-(--color-brand-primary) rounded-full hover:bg-(--color-brand-primary-hover) transition-colors duration-150"
         >
           Get Started

@@ -43,7 +43,7 @@ export default function ShopkeeperDashboard() {
   useEffect(() => {
     const token = getCookie("shopkeeper_token");
     if (!token) {
-      router.replace("/login?tab=shopkeeper");
+      router.replace("/customer/login?tab=shopkeeper");
       return;
     }
 
@@ -55,7 +55,7 @@ export default function ShopkeeperDashboard() {
       .catch((err) => {
         if (err?.response?.status === 401) {
           deleteCookie("shopkeeper_token");
-          router.replace("/login?tab=shopkeeper");
+          router.replace("/customer/login?tab=shopkeeper");
         }
       })
       .finally(() => setLoading(false));

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ export default function ShopkeeperLoginRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/login?tab=shopkeeper");
+    router.replace("/customer/login?tab=shopkeeper");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

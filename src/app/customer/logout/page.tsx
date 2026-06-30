@@ -5,7 +5,7 @@ export default function CustomerLogoutPage() {
     <SignOutConfirmation
       cookieName="token"
       namePayloadKey="fullName"
-      redirectTo="/login"
+      redirectTo="/customer/login"
       description="You'll need to sign back in to browse rooms and connect with your favourite shops."
     />
   );

@@ -259,7 +259,7 @@ export default function ShopkeeperSignupPage() {
           <p className="mt-4 text-center text-[12px] text-[var(--color-auth-ink-muted)]">
             Looking to shop?{" "}
             <Link
-              href="/signup"
+              href="/customer/signup"
               className="text-[var(--color-auth-primary)] hover:underline"
             >
               Create a customer account

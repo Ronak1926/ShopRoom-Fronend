@@ -5,7 +5,7 @@ export default function ShopkeeperLogoutPage() {
     <SignOutConfirmation
       cookieName="shopkeeper_token"
       namePayloadKey="shopName"
-      redirectTo="/login?tab=shopkeeper"
+      redirectTo="/customer/login?tab=shopkeeper"
       description="You'll need to sign back in to manage your shop and send stock alerts to your room."
     />
   );
