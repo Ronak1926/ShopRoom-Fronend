@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ShopkeeperLeftPanel } from "../../../components/ui/ShopkeeperLeftPanel";
+import { AuthTabButton } from "../../../components/ui/AuthTabButton";
 import { apiClient } from "../../../utils/apiClient";
 import { getCookie, setCookie } from "../../../utils/cookieUtils";
 import { type Step1Values, type Step2Values } from "./_lib/schemas";
@@ -190,6 +191,13 @@ export default function ShopkeeperSignupPage() {
             <span className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
               ShopRoom
             </span>
+          </div>
+
+          <div className="flex rounded-[10px] bg-(--color-auth-input-bg) p-1 mb-6">
+            <AuthTabButton active={false} href="/customer/signup">
+              Customer
+            </AuthTabButton>
+            <AuthTabButton active={true}>Shopkeeper</AuthTabButton>
           </div>
 
           {/* Card */}
