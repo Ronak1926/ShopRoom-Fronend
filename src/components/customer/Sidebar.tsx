@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
 // ── Nav items ──────────────────────────────────────────────────────────────
 
@@ -26,6 +28,8 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function Sidebar({ activeNav, onNavChange }: Props) {
+  const router = useRouter();
+
   return (
     <aside
       className="w-56 min-w-56 flex flex-col overflow-hidden bg-(--color-bg-surface)"
@@ -81,8 +85,8 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
         })}
       </nav>
 
-      {/* Create Room */}
-      <div className="px-4 pt-2 pb-5">
+      {/* Bottom actions */}
+      <div className="px-4 pt-2 pb-5 flex flex-col gap-1">
         <button
           type="button"
           className="group relative overflow-hidden flex items-center justify-center gap-2 w-full h-12 rounded-2xl text-white font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
@@ -92,11 +96,18 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
             boxShadow: "0 4px 16px rgba(91, 71, 212, 0.28)",
           }}
         >
-          {/* Sheen sweep on hover */}
           <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-
           <AddOutlinedIcon sx={{ fontSize: 18 }} />
           <span className="relative z-10">Create Room</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push("/customer/logout")}
+          className="flex items-center gap-2 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 px-3 transition-colors font-medium"
+          style={{ color: "var(--color-danger, #e53935)" }}
+        >
+          <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
+          Sign Out
         </button>
       </div>
     </aside>
