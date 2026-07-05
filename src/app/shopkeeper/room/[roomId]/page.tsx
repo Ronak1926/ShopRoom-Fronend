@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Sidebar from "../../dashboard/_components/Sidebar";
 import TopBar from "../../dashboard/_components/TopBar";
 import ShareModal from "../../dashboard/_components/ShareModal";
@@ -21,6 +21,7 @@ interface ShopData {
 
 export default function RoomPage() {
   const router = useRouter();
+  const params = useParams<{ roomId: string }>();
   const [shopData, setShopData] = useState<ShopData | null>(null);
   const [inviteLink, setInviteLink] = useState<string | undefined>(undefined);
   const [showShare, setShowShare] = useState(false);
@@ -47,6 +48,8 @@ export default function RoomPage() {
       });
   }, [router]);
 
+  const roomId = shopData?.room?.roomId ?? params.roomId;
+
   return (
     <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
       <Sidebar
@@ -63,11 +66,10 @@ export default function RoomPage() {
         />
 
         <MyRoom
+          roomId={roomId}
           shopName={shopData?.shopName ?? ""}
           logoUrl={shopData?.logoUrl ?? null}
           membersCount={shopData?.room?.membersCount ?? 0}
-          inviteLink={inviteLink}
-          onShareClick={() => setShowShare(true)}
         />
       </div>
 

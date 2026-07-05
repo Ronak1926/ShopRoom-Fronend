@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,10 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
+import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import { NAV_ITEMS } from "../_data/constants";
+import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 
 const NAV_ICONS: Record<string, React.ElementType> = {
   dashboard: DashboardOutlinedIcon,
@@ -32,30 +35,51 @@ interface SidebarProps {
 
 export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
   const router = useRouter();
+  const { collapsed, toggle } = useSidebarCollapse("shopkeeper");
 
   return (
     <aside
-      className="w-56 min-w-56 flex flex-col h-screen sticky top-0 bg-(--color-bg-surface)"
+      className={`flex flex-col h-screen sticky top-0 bg-(--color-bg-surface) transition-[width] duration-200 shrink-0 ${
+        collapsed ? "w-16 min-w-16" : "w-56 min-w-56"
+      }`}
       style={{ borderRight: "1px solid var(--color-border-default)" }}
     >
       {/* Brand */}
-      <div className="px-5 pt-6 pb-5 flex items-center gap-3">
+      <div
+        className={`pt-6 pb-5 flex items-center gap-3 ${collapsed ? "px-0 justify-center" : "px-5"}`}
+      >
         <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={20} height={18} />
-        <div>
-          <div
-            className="text-[17px] font-bold leading-none"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            ShopRoom
+        {!collapsed && (
+          <div>
+            <div
+              className="text-[17px] font-bold leading-none"
+              style={{ color: "var(--color-text-primary)" }}
+            >
+              ShopRoom
+            </div>
+            <div
+              className="text-[10px] tracking-[0.12em] uppercase mt-1"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              Management
+            </div>
           </div>
-          <div
-            className="text-[10px] tracking-[0.12em] uppercase mt-1"
-            style={{ color: "var(--color-text-secondary)" }}
-          >
-            Management
-          </div>
-        </div>
+        )}
       </div>
+
+      {/* Collapse toggle */}
+      <button
+        type="button"
+        onClick={toggle}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="mx-3 mb-2 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+      >
+        {collapsed ? (
+          <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
+        ) : (
+          <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
+        )}
+      </button>
 
       {/* Nav */}
       <nav className="flex-1 px-3 pt-1 flex flex-col gap-0.5">
@@ -67,7 +91,10 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
               key={id}
               type="button"
               onClick={() => onNavChange(id)}
-              className="relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl cursor-pointer text-[14px] select-none transition-all duration-150 text-left border-0"
+              title={collapsed ? label : undefined}
+              className={`relative flex items-center w-full py-2.5 rounded-xl cursor-pointer text-[14px] select-none transition-all duration-150 text-left border-0 ${
+                collapsed ? "justify-center px-0" : "gap-3 px-3"
+              }`}
               style={
                 active
                   ? {
@@ -89,17 +116,20 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
                 />
               )}
               <Icon sx={{ fontSize: 18 }} />
-              <span>{label}</span>
+              {!collapsed && <span>{label}</span>}
             </button>
           );
         })}
       </nav>
 
       {/* Bottom actions */}
-      <div className="px-4 pb-5 pt-2 flex flex-col gap-1">
+      <div className={`pb-5 pt-2 flex flex-col gap-1 ${collapsed ? "px-2.5" : "px-4"}`}>
         <button
           type="button"
-          className="flex items-center gap-2 w-full h-11 rounded-xl text-[14px] font-semibold cursor-pointer border-0 text-white px-4 transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+          title={collapsed ? "New Entry" : undefined}
+          className={`flex items-center justify-center w-full h-11 rounded-xl text-[14px] font-semibold cursor-pointer border-0 text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98] ${
+            collapsed ? "px-0" : "gap-2 px-4"
+          }`}
           style={{
             background:
               "linear-gradient(135deg, var(--color-brand-primary) 0%, color-mix(in srgb, var(--color-brand-primary) 60%, white) 100%)",
@@ -108,11 +138,14 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
           }}
         >
           <AddOutlinedIcon sx={{ fontSize: 16 }} />
-          New Entry
+          {!collapsed && "New Entry"}
         </button>
         <button
           type="button"
-          className="flex items-center gap-2 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 px-3 transition-colors"
+          title={collapsed ? "Help Center" : undefined}
+          className={`flex items-center text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors ${
+            collapsed ? "justify-center px-0" : "gap-2 px-3"
+          }`}
           style={{ color: "var(--color-text-secondary)" }}
           onMouseEnter={(e) =>
             (e.currentTarget.style.color = "var(--color-text-primary)")
@@ -122,16 +155,19 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
           }
         >
           <HelpOutlineOutlinedIcon sx={{ fontSize: 16 }} />
-          Help Center
+          {!collapsed && "Help Center"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/shopkeeper/logout")}
-          className="flex items-center gap-2 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 px-3 transition-colors font-medium"
+          title={collapsed ? "Sign Out" : undefined}
+          className={`flex items-center text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors font-medium ${
+            collapsed ? "justify-center px-0" : "gap-2 px-3"
+          }`}
           style={{ color: "var(--color-danger, #e53935)" }}
         >
           <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
-          Sign Out
+          {!collapsed && "Sign Out"}
         </button>
       </div>
     </aside>

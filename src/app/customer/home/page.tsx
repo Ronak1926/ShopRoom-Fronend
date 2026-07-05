@@ -12,6 +12,7 @@ import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
@@ -41,6 +42,7 @@ type RoomCard = {
   distanceKm: number | null;
   likes: number;
   activeNow: boolean;
+  isJoined: boolean;
 };
 
 type TrendingItem = {
@@ -80,6 +82,7 @@ export default function CustomerHome() {
   const [sort, setSort] = useState<"nearest" | "popular">("nearest");
   const [customerLat, setCustomerLat] = useState<number | null>(null);
   const [customerLng, setCustomerLng] = useState<number | null>(null);
+  const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
 
   // Guard: redirect to login if no token
   useEffect(() => {
@@ -130,6 +133,29 @@ export default function CustomerHome() {
         }
       } finally {
         setLoading(false);
+      }
+    },
+    [router],
+  );
+
+  const handleJoinRoom = useCallback(
+    async (room: RoomCard) => {
+      if (room.isJoined) {
+        router.push(`/customer/room/${room.roomId}`);
+        return;
+      }
+      const token = getCookie("token");
+      if (!token) {
+        router.replace("/customer/login");
+        return;
+      }
+      setAuthToken(token);
+      setJoiningRoomId(room.roomId);
+      try {
+        await apiClient.post(`/api/shop/join/${room.inviteCode}`);
+        router.push("/customer/myrooms");
+      } catch {
+        setJoiningRoomId(null);
       }
     },
     [router],
@@ -186,9 +212,14 @@ export default function CustomerHome() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  function handleNavChange(id: string) {
+    if (id === "myrooms") router.push("/customer/myrooms");
+    else setActiveNav(id);
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
+      <Sidebar activeNav={activeNav} onNavChange={handleNavChange} />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Bar */}
         <div className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) px-5 flex items-center gap-3 shrink-0">
@@ -423,9 +454,23 @@ export default function CustomerHome() {
                           {formatCount(room.likes)}
                         </span>
                       </div>
-                      <button className="h-9 px-5 bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-white text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors">
-                        Join Room
-                      </button>
+                      {room.isJoined ? (
+                        <button
+                          onClick={() => handleJoinRoom(room)}
+                          className="h-9 px-4 flex items-center gap-1.5 bg-(--color-success-light) text-(--color-success-text) text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors hover:bg-(--color-badge-success-bg)"
+                        >
+                          <CheckCircleOutlinedIcon sx={{ fontSize: 15 }} />
+                          Already in Room
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleJoinRoom(room)}
+                          disabled={joiningRoomId === room.roomId}
+                          className="h-9 px-5 bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors"
+                        >
+                          {joiningRoomId === room.roomId ? "Joining..." : "Join Room"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

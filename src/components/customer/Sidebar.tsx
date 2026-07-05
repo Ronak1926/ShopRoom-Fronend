@@ -8,6 +8,9 @@ import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlin
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
+import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
+import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 
 // ── Nav items ──────────────────────────────────────────────────────────────
 
@@ -29,23 +32,43 @@ type Props = {
 
 export default function Sidebar({ activeNav, onNavChange }: Props) {
   const router = useRouter();
+  const { collapsed, toggle } = useSidebarCollapse("customer");
 
   return (
     <aside
-      className="w-56 min-w-56 flex flex-col overflow-hidden bg-(--color-bg-surface)"
+      className={`flex flex-col overflow-hidden bg-(--color-bg-surface) transition-[width] duration-200 shrink-0 ${
+        collapsed ? "w-16 min-w-16" : "w-56 min-w-56"
+      }`}
       style={{ borderRight: "1px solid var(--color-border-default)" }}
     >
       {/* Brand */}
-      <div className="px-5 pt-6 pb-5 flex items-center gap-3">
-        {/* SVG fill is dark purple — invert to white so it shows on the colored bg */}
+      <div
+        className={`pt-6 pb-5 flex items-center gap-3 ${collapsed ? "px-0 justify-center" : "px-5"}`}
+      >
         <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={20} height={18} />
-        <span
-          className="text-[17px] font-bold leading-none"
-          style={{ color: "var(--color-text-primary)" }}
-        >
-          ShopRoom
-        </span>
+        {!collapsed && (
+          <span
+            className="text-[17px] font-bold leading-none"
+            style={{ color: "var(--color-text-primary)" }}
+          >
+            ShopRoom
+          </span>
+        )}
       </div>
+
+      {/* Collapse toggle */}
+      <button
+        type="button"
+        onClick={toggle}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="mx-3 mb-2 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+      >
+        {collapsed ? (
+          <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
+        ) : (
+          <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
+        )}
+      </button>
 
       {/* Nav */}
       <nav className="flex-1 px-3 pt-1 flex flex-col gap-0.5">
@@ -56,7 +79,10 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
               key={id}
               type="button"
               onClick={() => onNavChange(id)}
-              className="relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl cursor-pointer text-[14px] select-none transition-all duration-150 text-left border-0"
+              title={collapsed ? label : undefined}
+              className={`relative flex items-center w-full py-2.5 rounded-xl cursor-pointer text-[14px] select-none transition-all duration-150 text-left border-0 ${
+                collapsed ? "justify-center px-0" : "gap-3 px-3"
+              }`}
               style={
                 active
                   ? {
@@ -79,17 +105,20 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
                 />
               )}
               <Icon sx={{ fontSize: 18 }} />
-              <span>{label}</span>
+              {!collapsed && <span>{label}</span>}
             </button>
           );
         })}
       </nav>
 
       {/* Bottom actions */}
-      <div className="px-4 pt-2 pb-5 flex flex-col gap-1">
+      <div className={`pt-2 pb-5 flex flex-col gap-1 ${collapsed ? "px-2.5" : "px-4"}`}>
         <button
           type="button"
-          className="group relative overflow-hidden flex items-center justify-center gap-2 w-full h-12 rounded-2xl text-white font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
+          title={collapsed ? "Create Room" : undefined}
+          className={`group relative overflow-hidden flex items-center justify-center gap-2 w-full h-12 rounded-2xl text-white font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${
+            collapsed ? "px-0" : ""
+          }`}
           style={{
             background:
               "linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-primary-active))",
@@ -99,16 +128,19 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
         >
           <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
           <AddOutlinedIcon sx={{ fontSize: 18 }} />
-          <span className="relative z-10">Create Room</span>
+          {!collapsed && <span className="relative z-10">Create Room</span>}
         </button>
         <button
           type="button"
           onClick={() => router.push("/customer/logout")}
-          className="flex items-center gap-2 text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 px-3 transition-colors font-medium"
+          title={collapsed ? "Sign Out" : undefined}
+          className={`flex items-center cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors font-medium text-[13px] ${
+            collapsed ? "justify-center px-0" : "gap-2 px-3"
+          }`}
           style={{ color: "var(--color-danger, #e53935)" }}
         >
           <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
-          Sign Out
+          {!collapsed && "Sign Out"}
         </button>
       </div>
     </aside>

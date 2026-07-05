@@ -1,55 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
-import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
-import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import Avatar from "@/components/ui/Avatar";
+import MessageFeed from "@/components/chat/MessageFeed";
+import Composer from "@/components/chat/Composer";
+import { useRoomChat } from "@/hooks/useRoomChat";
+import { apiClient } from "@/utils/apiClient";
+import { getCookie } from "@/utils/cookieUtils";
 
 interface MyRoomProps {
+  roomId: string;
   shopName: string;
   logoUrl: string | null;
   membersCount: number;
-  inviteLink?: string;
-  onShareClick?: () => void;
 }
 
-const onlineMembers = [
-  { name: "Ananya Sharma", status: "Active now", online: true },
-  { name: "Rahul Verma", status: "Typing...", online: true },
-  { name: "Priya K.", status: "Active now", online: true },
-];
+interface MemberRow {
+  id: string;
+  customerId: string;
+  customerName: string;
+}
 
-const offlineMembers = [
-  { name: "Meera K.", status: "Last seen 2h ago", online: false },
-  { name: "Rohit S.", status: "Last seen 1d ago", online: false },
-];
-
-const messages = [
-  {
-    type: "shopkeeper",
-    sender: "ShopOwner",
-    time: "11:32 AM",
-    text: "Good morning everyone! We just received the new seasonal collection. I've attached the stock alert below for those interested in the first pick.",
-  },
-  {
-    type: "customer",
-    sender: "Ananya Sharma",
-    time: "10:42 AM",
-    text: "The designs look amazing! Do you have these in size M available? I'd love to drop by today.",
-  },
-];
-
-export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _inviteLink, onShareClick: _onShareClick }: MyRoomProps) {
+export default function MyRoom({ roomId, shopName, logoUrl, membersCount }: MyRoomProps) {
   const [activeTab, setActiveTab] = useState("Members");
-  const [message, setMessage] = useState("");
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [memberSearch, setMemberSearch] = useState("");
+  const {
+    messages,
+    typingUsers,
+    onlineCustomerIds,
+    loading,
+    sendMessage,
+    notifyTyping,
+  } = useRoomChat(roomId, "shopkeeper");
 
   const tabs = ["Room Info", "Members", "Pinned"];
+
+  useEffect(() => {
+    const token = getCookie("shopkeeper_token");
+    if (!token) return;
+    apiClient
+      .get<{ members: MemberRow[] }>("/api/shop/members", {
+        params: { page: 0, limit: 100 },
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setMembers(res.data.members))
+      .catch(() => {});
+  }, []);
+
+  const filteredMembers = members.filter((m) =>
+    m.customerName.toLowerCase().includes(memberSearch.toLowerCase()),
+  );
+  const onlineIds = new Set(onlineCustomerIds);
+  const onlineMembers = filteredMembers.filter((m) => onlineIds.has(m.customerId));
+  const offlineMembers = filteredMembers.filter((m) => !onlineIds.has(m.customerId));
 
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -90,6 +99,8 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
             />
             <input
               type="text"
+              value={memberSearch}
+              onChange={(e) => setMemberSearch(e.target.value)}
               placeholder="Search members..."
               className="w-full h-9 bg-(--color-bg-page) border border-(--color-border-default) rounded-lg pl-8 pr-3 text-sm text-(--color-text-primary) placeholder:text-(--color-text-hint) outline-none focus:border-(--color-brand-primary) transition-colors"
             />
@@ -98,51 +109,52 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
 
         {/* Member List */}
         <div className="overflow-y-auto flex-1">
-          {/* Online Section */}
           <div className="px-4 py-2 mt-2">
             <span className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-semibold">
               Online — {onlineMembers.length}
             </span>
           </div>
-          {onlineMembers.map((member) => (
+          {onlineMembers.map((m) => (
             <div
-              key={member.name}
+              key={m.id}
               className="flex items-center gap-3 px-4 h-12 hover:bg-(--color-bg-page) cursor-pointer transition-colors"
             >
-              <Avatar name={member.name} size="sm" status="online" />
+              <Avatar name={m.customerName} size="sm" status="online" />
               <div className="flex-1 min-w-0">
                 <div className="text-sm text-(--color-text-primary) truncate leading-tight">
-                  {member.name}
+                  {m.customerName}
                 </div>
                 <div className="text-[11px] text-(--color-text-hint) truncate">
-                  {member.status}
+                  Active now
                 </div>
               </div>
             </div>
           ))}
 
-          {/* Offline Section */}
           <div className="px-4 py-2 mt-2">
             <span className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-semibold">
               Offline — {offlineMembers.length}
             </span>
           </div>
-          {offlineMembers.map((member) => (
+          {offlineMembers.map((m) => (
             <div
-              key={member.name}
+              key={m.id}
               className="flex items-center gap-3 px-4 h-12 hover:bg-(--color-bg-page) cursor-pointer transition-colors"
             >
-              <Avatar name={member.name} size="sm" status="offline" />
+              <Avatar name={m.customerName} size="sm" status="offline" />
               <div className="flex-1 min-w-0">
                 <div className="text-sm text-(--color-text-primary) truncate leading-tight">
-                  {member.name}
-                </div>
-                <div className="text-[11px] text-(--color-text-hint) truncate">
-                  {member.status}
+                  {m.customerName}
                 </div>
               </div>
             </div>
           ))}
+
+          {members.length === 0 && (
+            <div className="px-4 py-8 text-center text-sm text-(--color-text-hint)">
+              No members yet. Share your invite link to get started!
+            </div>
+          )}
         </div>
       </aside>
 
@@ -150,7 +162,6 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
       <div className="flex-1 flex flex-col bg-(--color-bg-page) min-w-0">
         {/* Chat Top Bar */}
         <div className="h-14 bg-(--color-bg-surface) border-b border-(--color-border-default) px-5 flex items-center gap-4 shrink-0">
-          {/* Left: title + subtitle */}
           <div className="flex-1 min-w-0">
             <div className="text-[15px] font-bold text-(--color-text-primary) leading-tight">
               Shop Room Chat
@@ -160,7 +171,6 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
             </div>
           </div>
 
-          {/* Right: tabs + icons */}
           <div className="flex items-center gap-1 shrink-0">
             {tabs.map((tab) => (
               <button
@@ -184,120 +194,25 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
           </div>
         </div>
 
-        {/* Message Feed */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
-          {/* Date Separator */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-(--color-border-default)" />
-            <span className="text-xs text-(--color-text-hint) whitespace-nowrap">
-              Today, October 24th
-            </span>
-            <div className="flex-1 h-px bg-(--color-border-default)" />
-          </div>
+        <MessageFeed
+          messages={messages}
+          typingUsers={typingUsers}
+          loading={loading}
+          isOwnMessage={(m) => m.senderType === "SHOPKEEPER"}
+          emptyHint="No messages yet — say hello to your room!"
+        />
 
-          {/* Messages */}
-          {messages.map((msg, i) =>
-            msg.type === "shopkeeper" ? (
-              /* Shopkeeper message — left-aligned */
-              <div key={i} className="flex items-start gap-3 max-w-xl">
-                <Avatar name={shopName || "Shop Owner"} src={logoUrl} size="md" />
-                <div
-                  className="bg-(--color-msg-shopkeeper-bg) rounded-xl rounded-tl-none px-4 py-3 flex-1"
-                  style={{ borderLeft: "3px solid var(--color-msg-shopkeeper-border)" }}
-                >
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-[13px] font-bold text-(--color-brand-primary)">
-                      {msg.sender}
-                    </span>
-                    <span className="text-[11px] text-(--color-text-hint)">
-                      {msg.time}
-                    </span>
-                  </div>
-                  <p className="text-sm text-(--color-text-primary) leading-relaxed m-0">
-                    {msg.text}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              /* Customer message — right-aligned */
-              <div key={i} className="flex items-end gap-2 justify-end">
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-[11px] text-(--color-text-hint) pr-1">
-                    {msg.sender}
-                  </span>
-                  <div className="bg-(--color-msg-customer-bg) rounded-xl rounded-tr-none px-4 py-2.5 max-w-sm">
-                    <p className="text-sm text-(--color-text-primary) leading-relaxed m-0">
-                      {msg.text}
-                    </p>
-                    <div className="text-[11px] text-(--color-text-hint) text-right mt-1">
-                      {msg.time}
-                    </div>
-                  </div>
-                </div>
-                <Avatar name={msg.sender} size="sm" className="mb-6" />
-              </div>
-            )
-          )}
-
-          {/* Typing Indicator */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-(--color-text-hint) animate-bounce"
-                style={{ animationDelay: "0ms" }}
-              />
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-(--color-text-hint) animate-bounce"
-                style={{ animationDelay: "150ms" }}
-              />
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-(--color-text-hint) animate-bounce"
-                style={{ animationDelay: "300ms" }}
-              />
-            </div>
-            <span className="text-xs italic text-(--color-text-hint)">
-              Rahul Verma is typing...
-            </span>
-          </div>
-        </div>
-
-        {/* Message Composer */}
-        <div className="bg-(--color-bg-surface) border-t border-(--color-border-default) px-4 py-3 shrink-0">
-          <div className="flex items-center gap-2">
-            {/* Left icons */}
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors shrink-0">
-              <EmojiEmotionsOutlinedIcon sx={{ fontSize: 20 }} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors shrink-0">
-              <AttachFileOutlinedIcon sx={{ fontSize: 20, transform: "rotate(45deg)" }} />
-            </button>
-
-            {/* Input + hint */}
-            <div className="flex-1 flex flex-col gap-0.5">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="w-full h-10 bg-(--color-bg-page) border border-(--color-border-default) rounded-xl px-4 text-sm text-(--color-text-primary) placeholder:text-(--color-text-hint) outline-none focus:border-(--color-brand-primary) transition-colors"
-              />
-              <span className="text-[11px] text-(--color-text-hint) text-center">
-                Messages: Unlimited
-              </span>
-            </div>
-
-            {/* Right buttons */}
+        <Composer
+          onSend={sendMessage}
+          onTyping={notifyTyping}
+          hint="Messages: Unlimited"
+          extraAction={
             <button className="h-9 px-4 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)">
               <BoltOutlinedIcon sx={{ fontSize: 16 }} />
               Send Alert
             </button>
-            <button
-              className="w-9 h-9 rounded-full bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-white border-0 cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-0.5"
-            >
-              <SendOutlinedIcon sx={{ fontSize: 18 }} />
-            </button>
-          </div>
-        </div>
+          }
+        />
       </div>
     </div>
   );
