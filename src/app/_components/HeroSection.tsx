@@ -14,7 +14,7 @@ export default function HeroSection() {
       <ParticleGrid />
 
       {/* Radial glow behind headline */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_65%,rgba(91,71,212,0.14),transparent)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_65%,color-mix(in_srgb,var(--color-brand-primary)_14%,transparent),transparent)] pointer-events-none" />
 
       {/* Nav sits inside the dark container, above the canvas */}
       <LandingNav />

@@ -21,64 +21,103 @@
   --color-brand-alert-muted: #fac775;
   --color-brand-alert-text: #633806;
 
-  --color-bg-page: #f5f5f7;
+  --color-bg-page: #f8f9fc;
   --color-bg-surface: #ffffff;
-  --color-bg-surface-hover: #f0f0f5;
-  --color-bg-sidebar: #1a1a2e;
-  --color-landing-hero-bg: #0f1117;
-  --color-landing-nav-scrolled: rgba(15, 17, 23, 0.88);
-  --color-bg-sidebar-active: #2a2a4a;
-  --color-bg-overlay: rgba(26, 26, 46, 0.5);
+  --color-bg-surface-hover: #f1f2f8;
+  --color-bg-sidebar: #14142b;
+  --color-landing-hero-bg: #0b0b14;
+  --color-landing-nav-scrolled: rgba(11, 11, 20, 0.88);
+  --color-bg-sidebar-active: #23233f;
+  --color-bg-overlay: rgba(15, 23, 42, 0.55);
   --color-bg-input: #ffffff;
-  --color-bg-input-disabled: #f5f5f7;
+  --color-bg-input-disabled: #f1f2f8;
 
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #666680;
-  --color-text-hint: #9999bb;
-  --color-text-disabled: #bbbbcc;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #55596e;
+  --color-text-hint: #979ab0;
+  --color-text-disabled: #c3c5d6;
   --color-text-on-brand: #ffffff;
   --color-text-on-sidebar: #ffffff;
-  --color-text-sidebar-muted: #9999cc;
+  --color-text-sidebar-muted: #9295b8;
   --color-text-link: #5b47d4;
   --color-text-link-hover: #3a2db0;
 
   --color-border-default: #ddddee;
   --color-border-strong: #bbbbdd;
   --color-border-focus: #5b47d4;
-  --color-border-sidebar: #2e2e50;
+  --color-border-sidebar: #24243f;
 
   --color-success: #0f6e56;
   --color-success-light: #e1f5ee;
   --color-success-text: #085041;
 
-  --color-danger: #e24b4a;
-  --color-danger-light: #fcebeb;
-  --color-danger-text: #791f1f;
+  --color-danger: #dc2626;
+  --color-danger-hover: color-mix(in srgb, var(--color-danger) 85%, black);
+  --color-danger-active: color-mix(in srgb, var(--color-danger) 70%, black);
+  --color-danger-light: #fef2f2;
+  --color-danger-text: #991b1b;
   --color-danger-dot: #dc2626;
   --color-danger-bg: #fee2e2;
 
-  --color-online: #15803d;
+  /* Unified presence system — every "online/offline" indicator in the app
+     should read from these tokens (via <StatusDot>), never a raw hex. */
+  --color-status-online: #22c55e;
+  --color-status-away: #f59e0b;
+  --color-status-offline: #cbd5e1;
+  --color-online: #22c55e;
   --color-badge-success-bg: #dcfce7;
   --color-badge-success-text: #15803d;
+
+  /* Deterministic avatar palette — <Avatar> hashes a name to one of these. */
+  --color-avatar-1: #6366f1;
+  --color-avatar-2: #8b5cf6;
+  --color-avatar-3: #ec4899;
+  --color-avatar-4: #f43f5e;
+  --color-avatar-5: #f97316;
+  --color-avatar-6: #14b8a6;
+  --color-avatar-7: #3b82f6;
+  --color-avatar-8: #10b981;
 
   --color-avatar-indigo-bg: #e0e7ff;
   --color-avatar-indigo: #3730a3;
   --color-avatar-pink-bg: #fce7f3;
   --color-avatar-pink-dark: #9d174d;
 
-  --color-badge-neutral-bg: #f3f4f6;
-  --color-badge-neutral-text: #6b7280;
+  --color-badge-neutral-bg: #f1f2f8;
+  --color-badge-neutral-text: #55596e;
   --color-badge-blue-bg: #dbeafe;
   --color-badge-blue-text: #1d4ed8;
 
-  --shadow-brand-card: 0 4px 16px rgba(91, 71, 212, 0.08);
+  /* Neutral scale — use instead of ad-hoc grays (#e8e8f0, #d1d5db, etc.) */
+  --color-gray-50: #f8f9fc;
+  --color-gray-100: #f1f2f8;
+  --color-gray-200: #e4e5f1;
+  --color-gray-300: #cbcdde;
+  --color-gray-400: #a7a9c4;
+  --color-gray-500: #7c7f9e;
+  --color-gray-600: #55596e;
+  --color-gray-700: #3a3d52;
+  --color-gray-800: #23233f;
+  --color-gray-900: #14142b;
 
-  --color-msg-shopkeeper-bg: #eeedfe;
-  --color-msg-shopkeeper-border: #5b47d4;
-  --color-msg-customer-bg: #e6f1fb;
-  --color-msg-other-bg: #f5f5f7;
-  --color-msg-alert-bg: #fef3dc;
-  --color-msg-alert-border: #e8930a;
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:
+    0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md:
+    0 4px 12px -2px rgba(15, 23, 42, 0.08),
+    0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg:
+    0 12px 28px -6px rgba(15, 23, 42, 0.12),
+    0 4px 10px -4px rgba(15, 23, 42, 0.06);
+  --shadow-brand-card: 0 4px 16px color-mix(in srgb, var(--color-brand-primary) 10%, transparent);
+  --shadow-brand-glow: 0 8px 24px -4px color-mix(in srgb, var(--color-brand-primary) 35%, transparent);
+
+  --color-msg-shopkeeper-bg: #eef2ff;
+  --color-msg-shopkeeper-border: var(--color-brand-primary);
+  --color-msg-customer-bg: #eff6ff;
+  --color-msg-other-bg: #f8f9fc;
+  --color-msg-alert-bg: #fffbeb;
+  --color-msg-alert-border: #d97706;
 
   --font-sans: var(--font-manrope), "Inter", "Segoe UI", system-ui, sans-serif;
   --font-size-display: 48px;
@@ -140,6 +179,7 @@
   --z-modal: 500;
   --z-toast: 600;
   --z-tooltip: 700;
+  --z-map-overlay: 1500;
 
   --background: var(--color-bg-page);
   --foreground: var(--color-text-primary);
@@ -177,7 +217,7 @@ body {
   /* Landing page dot-grid texture — used in HeroSection */
   .hero-dot-grid {
     background-image: radial-gradient(
-      rgba(91, 71, 212, 0.22) 1px,
+      color-mix(in srgb, var(--color-brand-primary) 22%, transparent) 1px,
       transparent 1px
     );
     background-size: 32px 32px;

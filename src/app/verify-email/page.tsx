@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { apiClient } from "../../utils/apiClient";
@@ -98,7 +99,7 @@ function VerifyEmailContent() {
       <AuthLeftPanel />
 
       <div className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className="w-full max-w-[480px] rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-[var(--color-border-default)]">
+        <div className="w-full max-w-[480px] rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-(--shadow-md) border border-[var(--color-border-default)]">
           {/* Header */}
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
@@ -180,12 +181,12 @@ function VerifyEmailContent() {
 
             {/* Error / success messages */}
             {error && (
-              <div className="w-full rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
+              <div className="w-full rounded-[8px] border border-(--color-danger-bg) bg-(--color-danger-light) px-3 py-2 text-sm text-(--color-danger-text) text-center">
                 {error}
               </div>
             )}
             {resendSuccess && !error && (
-              <div className="w-full rounded-[8px] border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-600 text-center">
+              <div className="w-full rounded-[8px] border border-(--color-success)/30 bg-(--color-success-light) px-3 py-2 text-sm text-(--color-success-text) text-center">
                 A new code has been sent to your email.
               </div>
             )}
@@ -219,8 +220,12 @@ function VerifyEmailContent() {
             </div>
 
             <div className="text-[13px] text-[var(--color-auth-ink-muted)]">
-              <Link href="/customer/signup" className="hover:underline">
-                ← Back to sign up
+              <Link
+                href="/customer/signup"
+                className="inline-flex items-center gap-1 hover:underline"
+              >
+                <ArrowBackOutlinedIcon sx={{ fontSize: 14 }} />
+                Back to sign up
               </Link>
             </div>
           </div>

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
+import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 
 import { step2Schema, type Step2Values, INDIAN_STATES } from "../_lib/schemas";
 import { FieldError, inputCls, labelCls } from "./FormHelpers";
@@ -136,7 +138,7 @@ export function Step2ShopDetails({
             <button
               type="button"
               onClick={() => logoInputRef.current?.click()}
-              className="w-16 h-16 rounded-[10px] border-2 border-dashed border-[var(--color-auth-border)] bg-[var(--color-auth-input-bg)] flex items-center justify-center hover:border-[var(--color-auth-primary)] transition overflow-hidden shrink-0"
+              className="w-16 h-16 rounded-[10px] border-2 border-dashed border-[var(--color-auth-border)] bg-(--color-auth-input-bg) flex items-center justify-center hover:border-[var(--color-auth-primary)] transition overflow-hidden shrink-0"
             >
               {logoPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -173,7 +175,7 @@ export function Step2ShopDetails({
             </div>
           </div>
           {logoError && (
-            <span className="text-[12px] text-red-500">{logoError}</span>
+            <span className="text-[12px] text-(--color-danger)">{logoError}</span>
           )}
           <input
             ref={logoInputRef}
@@ -242,7 +244,7 @@ export function Step2ShopDetails({
                 onClick={() => setStateOpen((o) => !o)}
                 className={`h-11.5 w-full rounded-lg bg-(--color-auth-input-bg) px-4 pr-9 text-[14px] text-left outline-none border transition cursor-pointer flex items-center ${
                   e.state
-                    ? "border-red-400 ring-1 ring-red-300"
+                    ? "border-(--color-danger) ring-1 ring-(--color-danger-bg)"
                     : stateOpen
                       ? "border-(--color-auth-primary) ring-1 ring-(--color-auth-primary)"
                       : "border-transparent"
@@ -276,7 +278,7 @@ export function Step2ShopDetails({
               </svg>
               {/* Dropdown — opens upward */}
               {stateOpen && (
-                <div className="absolute bottom-full left-0 right-0 mb-1.5 z-50 rounded-lg bg-(--color-bg-surface) border border-(--color-auth-border) shadow-[0_-4px_20px_rgba(25,25,47,0.10)] overflow-hidden">
+                <div className="absolute bottom-full left-0 right-0 mb-1.5 z-50 rounded-lg bg-(--color-bg-surface) border border-(--color-auth-border) shadow-(--shadow-lg) overflow-hidden">
                   <ul className="overflow-y-auto max-h-55.5 py-1 [&::-webkit-scrollbar]:w-1.25 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-(--color-auth-border) [&::-webkit-scrollbar-thumb]:rounded-full">
                     {INDIAN_STATES.map((s) => (
                       <li
@@ -326,7 +328,7 @@ export function Step2ShopDetails({
               type="button"
               onClick={handleRequestLocation}
               disabled={locationLoading}
-              className="flex items-center gap-2 h-[46px] px-4 rounded-[8px] bg-[var(--color-auth-input-bg)] border border-transparent hover:border-[var(--color-auth-primary)] text-[14px] text-[var(--color-auth-ink-muted)] transition disabled:opacity-60"
+              className="flex items-center gap-2 h-[46px] px-4 rounded-[8px] bg-(--color-auth-input-bg) border border-transparent hover:border-[var(--color-auth-primary)] text-[14px] text-[var(--color-auth-ink-muted)] transition disabled:opacity-60"
             >
               <svg
                 width="16"
@@ -344,7 +346,7 @@ export function Step2ShopDetails({
               {locationLoading ? "Requesting access…" : "Allow location access"}
             </button>
           ) : (
-            <div className="flex items-center gap-2 h-[46px] px-4 rounded-[8px] bg-emerald-50 border border-emerald-200 text-[13px] text-emerald-700 font-medium">
+            <div className="flex items-center gap-2 h-[46px] px-4 rounded-[8px] bg-(--color-success-light) border border-(--color-success)/30 text-[13px] text-(--color-success-text) font-medium">
               <svg width="15" height="15" viewBox="0 0 12 12" fill="none">
                 <path
                   d="M2 6l3 3 5-5"
@@ -361,7 +363,7 @@ export function Step2ShopDetails({
                   setCoords(null);
                   setLocationGranted(null);
                 }}
-                className="ml-auto text-[11px] text-emerald-600 hover:underline"
+                className="ml-auto text-[11px] text-(--color-success-text) hover:underline"
               >
                 Remove
               </button>
@@ -395,7 +397,7 @@ export function Step2ShopDetails({
         <div className="flex flex-col gap-1">
           <label className={labelCls()}>Phone Number</label>
           <div className="flex">
-            <div className="h-[46px] flex items-center px-3 rounded-l-[8px] bg-[var(--color-auth-input-bg)] border-r border-[var(--color-auth-border)] text-[14px] text-[var(--color-auth-ink-muted)] font-semibold select-none shrink-0">
+            <div className="h-[46px] flex items-center px-3 rounded-l-[8px] bg-(--color-auth-input-bg) border-r border-[var(--color-auth-border)] text-[14px] text-[var(--color-auth-ink-muted)] font-semibold select-none shrink-0">
               +91
             </div>
             <input
@@ -403,9 +405,9 @@ export function Step2ShopDetails({
               type="tel"
               maxLength={10}
               placeholder="9876543210"
-              className={`flex-1 h-[46px] rounded-r-[8px] bg-[var(--color-auth-input-bg)] px-4 text-[14px] text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)]/50 outline-none border transition ${
+              className={`flex-1 h-[46px] rounded-r-[8px] bg-(--color-auth-input-bg) px-4 text-[14px] text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)]/50 outline-none border transition ${
                 e.phoneNumber
-                  ? "border-red-400 ring-1 ring-red-300"
+                  ? "border-(--color-danger) ring-1 ring-(--color-danger-bg)"
                   : "border-transparent focus:border-[var(--color-auth-primary)] focus:ring-1 focus:ring-[var(--color-auth-primary)]"
               }`}
             />
@@ -420,16 +422,24 @@ export function Step2ShopDetails({
           <button
             type="button"
             onClick={onBack}
-            className="flex-1 h-[46px] rounded-[8px] border border-[var(--color-border-default)] text-[var(--color-auth-ink)] font-semibold text-[14px] hover:bg-[var(--color-auth-input-bg)] transition"
+            className="flex-1 h-[46px] rounded-[8px] border border-[var(--color-border-default)] text-[var(--color-auth-ink)] font-semibold text-[14px] hover:bg-(--color-auth-input-bg) transition flex items-center justify-center gap-1.5"
           >
-            ← Back
+            <ArrowBackOutlinedIcon sx={{ fontSize: 16 }} />
+            Back
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 h-[46px] rounded-[8px] bg-[var(--color-auth-primary)] text-white font-semibold text-[14px] hover:bg-[var(--color-brand-primary-active)] disabled:opacity-60 transition"
+            className="flex-1 h-[46px] rounded-[8px] bg-(--color-auth-primary) text-white font-semibold text-[14px] hover:bg-(--color-brand-primary-active) disabled:opacity-60 transition flex items-center justify-center gap-1.5"
           >
-            {isLoading ? "Sending OTP…" : "Continue →"}
+            {isLoading ? (
+              "Sending OTP…"
+            ) : (
+              <>
+                Continue
+                <ArrowForwardOutlinedIcon sx={{ fontSize: 16 }} />
+              </>
+            )}
           </button>
         </div>
       </form>

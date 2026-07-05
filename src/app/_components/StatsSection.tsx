@@ -8,7 +8,7 @@
 export default function StatsSection() {
   return (
     <section className="w-full bg-(--color-landing-hero-bg) py-20 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(91,71,212,0.12),transparent)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,color-mix(in_srgb,var(--color-brand-primary)_12%,transparent),transparent)] pointer-events-none" />
       <div className="relative z-10 max-w-[1100px] mx-auto">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8">
           {stats.map(({ value, label, note }) => (

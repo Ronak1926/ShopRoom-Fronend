@@ -101,8 +101,10 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
           type="button"
           className="flex items-center gap-2 w-full h-11 rounded-xl text-[14px] font-semibold cursor-pointer border-0 text-white px-4 transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
           style={{
-            background: "linear-gradient(135deg, #5b47d4 0%, #7c63e8 100%)",
-            boxShadow: "0 4px 14px rgba(91,71,212,0.4)",
+            background:
+              "linear-gradient(135deg, var(--color-brand-primary) 0%, color-mix(in srgb, var(--color-brand-primary) 60%, white) 100%)",
+            boxShadow:
+              "0 4px 14px color-mix(in srgb, var(--color-brand-primary) 40%, transparent)",
           }}
         >
           <AddOutlinedIcon sx={{ fontSize: 16 }} />

@@ -201,11 +201,11 @@ export default function ShopkeeperSignupPage() {
           </div>
 
           {/* Card */}
-          <div className="rounded-[14px] bg-[var(--color-bg-surface)] px-8 py-8 shadow-[0_12px_40px_rgba(25,25,47,0.06)] border border-[var(--color-border-default)]">
+          <div className="rounded-[14px] bg-[var(--color-bg-surface)] px-8 py-8 shadow-(--shadow-md) border border-[var(--color-border-default)]">
             <StepIndicator current={currentStep} />
 
             {serverError && (
-              <div className="mb-5 rounded-[8px] bg-red-50 border border-red-200 px-4 py-3 text-[13px] text-red-600">
+              <div className="mb-5 rounded-[8px] bg-(--color-danger-light) border border-(--color-danger-bg) px-4 py-3 text-[13px] text-(--color-danger-text)">
                 {serverError}
               </div>
             )}

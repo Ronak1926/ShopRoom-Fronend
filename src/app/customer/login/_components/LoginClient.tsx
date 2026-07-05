@@ -78,7 +78,7 @@ export default function LoginClient({ initialTab }: Props) {
             </AuthTabButton>
           </div>
 
-          <div className="rounded-[14px] bg-(--color-bg-surface) px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-(--color-border-default)">
+          <div className="rounded-[14px] bg-(--color-bg-surface) px-10 py-10 shadow-(--shadow-md) border border-(--color-border-default)">
             <div className="flex flex-col items-center mb-7">
               <h1 className="text-[26px] font-extrabold text-(--color-auth-ink) tracking-[-0.65px]">
                 {isShopkeeper ? "Shopkeeper Login" : "Welcome back"}

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import StarRateRoundedIcon from "@mui/icons-material/StarRateRounded";
 
 export function ShopkeeperLeftPanel() {
   return (
@@ -24,7 +25,7 @@ export function ShopkeeperLeftPanel() {
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full text-white gap-8 py-10 px-8">
         {/* Shop icon */}
         <div className="w-[88px] h-[88px] rounded-[22px] bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
-          <StorefrontOutlinedIcon sx={{ fontSize: 44, color: "white" }} />
+          <StorefrontOutlinedIcon sx={{ fontSize: 44, color: "var(--color-text-on-brand)" }} />
         </div>
 
         {/* Tagline */}
@@ -57,7 +58,10 @@ export function ShopkeeperLeftPanel() {
           </div>
           <div className="w-px bg-white/20" />
           <div>
-            <p className="text-[26px] font-bold tracking-[-0.5px]">4.8★</p>
+            <p className="text-[26px] font-bold tracking-[-0.5px] flex items-center justify-center gap-1">
+              4.8
+              <StarRateRoundedIcon sx={{ fontSize: 20 }} />
+            </p>
             <p className="text-[11px] text-white/65 font-medium uppercase tracking-[0.5px]">
               Rating
             </p>

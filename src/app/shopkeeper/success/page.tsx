@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 
 export default function ShopkeeperSuccessPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg-page)] flex items-center justify-center px-6">
-      <div className="w-full max-w-[440px] rounded-[14px] bg-[var(--color-bg-surface)] px-8 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.06)] border border-[var(--color-border-default)] text-center">
+      <div className="w-full max-w-[440px] rounded-[14px] bg-[var(--color-bg-surface)] px-8 py-10 shadow-(--shadow-md) border border-[var(--color-border-default)] text-center">
         <div className="flex items-center gap-2 justify-center mb-8 text-[var(--color-auth-ink)]">
           <Image
             src="/ShopRoomIcon.svg"
@@ -19,13 +20,13 @@ export default function ShopkeeperSuccessPage() {
           </span>
         </div>
 
-        <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-5">
+        <div className="w-16 h-16 rounded-2xl bg-(--color-success-light) border border-(--color-success)/30 flex items-center justify-center mx-auto mb-5">
           <svg
             width="32"
             height="32"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#10b981"
+            stroke="var(--color-success)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -44,9 +45,10 @@ export default function ShopkeeperSuccessPage() {
 
         <Link
           href="/customer/login?tab=shopkeeper"
-          className="block h-[46px] w-full rounded-[8px] bg-[var(--color-auth-primary)] text-white font-semibold text-[14px] leading-[46px] hover:bg-[var(--color-brand-primary-active)] transition"
+          className="flex h-[46px] w-full items-center justify-center gap-1.5 rounded-[8px] bg-[var(--color-auth-primary)] text-white font-semibold text-[14px] hover:bg-[var(--color-brand-primary-active)] transition"
         >
-          Go to Login →
+          Go to Login
+          <ArrowForwardOutlinedIcon sx={{ fontSize: 16 }} />
         </Link>
       </div>
     </div>

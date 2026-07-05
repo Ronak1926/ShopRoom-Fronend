@@ -145,15 +145,15 @@ export default function SignupPage() {
   }
 
   const inputClass =
-    "w-full h-[48px] rounded-[8px] bg-[var(--color-auth-input-bg)] px-4 text-sm text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)] outline-none focus:ring-2 focus:ring-[var(--color-auth-primary)]/30 transition-shadow";
+    "w-full h-[48px] rounded-[8px] bg-(--color-auth-input-bg) px-4 text-sm text-(--color-auth-ink) placeholder:text-(--color-auth-ink-muted) outline-none focus:ring-2 focus:ring-(--color-auth-primary)/30 transition-shadow";
   const labelClass =
-    "text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-[var(--color-auth-ink)]";
-  const errorClass = "mt-1 text-[11px] text-red-500";
+    "text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)";
+  const errorClass = "mt-1 text-[11px] text-(--color-danger)";
 
   if (!ready) return null;
 
   return (
-    <div className="flex flex-1 bg-[var(--color-bg-page)]">
+    <div className="flex flex-1 bg-(--color-bg-page)">
       <AuthLeftPanel />
 
       <div className="flex flex-1 items-center justify-center px-6 py-10">
@@ -166,9 +166,9 @@ export default function SignupPage() {
             </AuthTabButton>
           </div>
 
-          <div className="rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-[0_12px_40px_rgba(25,25,47,0.04)] border border-[var(--color-border-default)]">
+          <div className="rounded-[12px] bg-(--color-bg-surface) px-10 py-10 shadow-(--shadow-md) border border-(--color-border-default)">
             <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
+              <div className="flex items-center gap-2 text-(--color-auth-ink)">
                 <Image
                   src="/ShopRoomIcon.svg"
                   alt="ShopRoom"
@@ -180,10 +180,10 @@ export default function SignupPage() {
                   ShopRoom
                 </div>
               </div>
-              <h1 className="mt-6 text-[26px] font-extrabold tracking-[-0.65px] text-[var(--color-auth-ink)] text-center">
+              <h1 className="mt-6 text-[26px] font-extrabold tracking-[-0.65px] text-(--color-auth-ink) text-center">
                 Create your account
               </h1>
-              <p className="mt-2 text-[14px] text-[var(--color-auth-ink-muted)] text-center">
+              <p className="mt-2 text-[14px] text-(--color-auth-ink-muted) text-center">
                 Find rooms near your favourite shops.
               </p>
             </div>
@@ -194,11 +194,11 @@ export default function SignupPage() {
               </div>
 
               <div className="my-6 flex items-center gap-4 w-[400px]">
-                <div className="h-px flex-1 bg-[var(--color-border-default)]" />
-                <span className="text-[10px] tracking-[1px] text-[var(--color-auth-ink-muted)] uppercase opacity-50">
+                <div className="h-px flex-1 bg-(--color-border-default)" />
+                <span className="text-[10px] tracking-[1px] text-(--color-auth-ink-muted) uppercase opacity-50">
                   OR
                 </span>
-                <div className="h-px flex-1 bg-[var(--color-border-default)]" />
+                <div className="h-px flex-1 bg-(--color-border-default)" />
               </div>
 
               <form
@@ -213,7 +213,7 @@ export default function SignupPage() {
                     {...register("fullName")}
                     placeholder="Cameron Williamson"
                     autoComplete="name"
-                    className={`${inputClass} ${errors.fullName ? "ring-2 ring-red-400" : ""}`}
+                    className={`${inputClass} ${errors.fullName ? "ring-2 ring-(--color-danger)" : ""}`}
                   />
                   {errors.fullName && (
                     <p className={errorClass}>{errors.fullName.message}</p>
@@ -224,7 +224,7 @@ export default function SignupPage() {
                 <div className="flex flex-col gap-1">
                   <label className={labelClass}>Email Address</label>
                   <div className="relative">
-                    <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)]">
+                    <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-(--color-auth-ink-muted)">
                       <EmailOutlinedIcon sx={{ fontSize: 16 }} />
                     </div>
                     <input
@@ -232,7 +232,7 @@ export default function SignupPage() {
                       type="email"
                       placeholder="cameron@example.com"
                       autoComplete="email"
-                      className={`${inputClass} pl-12 ${errors.email ? "ring-2 ring-red-400" : ""}`}
+                      className={`${inputClass} pl-12 ${errors.email ? "ring-2 ring-(--color-danger)" : ""}`}
                     />
                   </div>
                   {errors.email && (
@@ -250,12 +250,12 @@ export default function SignupPage() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         autoComplete="new-password"
-                        className={`${inputClass} pr-12 ${errors.password ? "ring-2 ring-red-400" : ""}`}
+                        className={`${inputClass} pr-12 ${errors.password ? "ring-2 ring-(--color-danger)" : ""}`}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-[var(--color-auth-ink-muted)]"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
                       >
                         {showPassword ? (
                           <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
@@ -276,7 +276,7 @@ export default function SignupPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       autoComplete="new-password"
-                      className={`${inputClass} ${errors.confirmPassword ? "ring-2 ring-red-400" : ""}`}
+                      className={`${inputClass} ${errors.confirmPassword ? "ring-2 ring-(--color-danger)" : ""}`}
                     />
                     {errors.confirmPassword && (
                       <p className={errorClass}>
@@ -287,12 +287,12 @@ export default function SignupPage() {
                 </div>
 
                 {/* Location toggle */}
-                <div className="w-full rounded-[8px] border border-[var(--color-auth-border)] bg-[var(--color-auth-panel-bg)]/50 p-4 flex items-center justify-between">
+                <div className="w-full rounded-[8px] border border-(--color-auth-border) bg-(--color-auth-panel-bg)/50 p-4 flex items-center justify-between">
                   <div>
-                    <div className="text-[14px] font-bold text-[var(--color-auth-ink)]">
+                    <div className="text-[14px] font-bold text-(--color-auth-ink)">
                       Allow location access
                     </div>
-                    <div className="text-[11px] text-[var(--color-auth-ink-muted)]">
+                    <div className="text-[11px] text-(--color-auth-ink-muted)">
                       Show rooms near your current position.
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export default function SignupPage() {
                     type="button"
                     onClick={handleLocationToggle}
                     disabled={locationLoading}
-                    className={`relative w-[44px] h-[24px] rounded-full transition-colors disabled:opacity-60 ${allowLocation ? "bg-[var(--color-auth-primary)]" : "bg-[var(--color-auth-border)]/60"}`}
+                    className={`relative w-[44px] h-[24px] rounded-full transition-colors disabled:opacity-60 ${allowLocation ? "bg-(--color-auth-primary)" : "bg-(--color-auth-border)/60"}`}
                     aria-pressed={allowLocation}
                   >
                     {locationLoading ? (
@@ -316,13 +316,13 @@ export default function SignupPage() {
                 </div>
 
                 {locationError && (
-                  <div className="rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 text-center">
+                  <div className="rounded-[8px] border border-(--color-brand-alert-muted) bg-(--color-brand-alert-light) px-3 py-2 text-sm text-(--color-brand-alert-text) text-center">
                     {locationError}
                   </div>
                 )}
 
                 {serverError && (
-                  <div className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 text-center">
+                  <div className="rounded-[8px] border border-(--color-danger-bg) bg-(--color-danger-light) px-3 py-2 text-sm text-(--color-danger-text) text-center">
                     {serverError}
                   </div>
                 )}
@@ -330,16 +330,16 @@ export default function SignupPage() {
                 <button
                   type="submit"
                   disabled={!isValid || isLoading}
-                  className="w-full h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] font-bold disabled:opacity-50 transition-opacity"
+                  className="w-full h-[56px] rounded-[8px] bg-(--color-auth-primary) text-white text-[16px] font-bold disabled:opacity-50 transition-opacity"
                 >
                   {isLoading ? "Creating Account" : "Create Account"}
                 </button>
 
-                <div className="text-center text-[14px] text-[var(--color-auth-ink-muted)]">
+                <div className="text-center text-[14px] text-(--color-auth-ink-muted)">
                   Already have an account?{" "}
                   <Link
                     href="/customer/login"
-                    className="font-bold text-[var(--color-auth-primary)]"
+                    className="font-bold text-(--color-auth-primary)"
                   >
                     Log in
                   </Link>
@@ -347,7 +347,7 @@ export default function SignupPage() {
               </form>
             </div>
 
-            <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-[var(--color-auth-ink-muted)] opacity-50">
+            <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
               <span>© 2026 SHOPROOM</span>
               <span>PRIVACY POLICY</span>
               <span>HELP CENTER</span>

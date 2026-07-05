@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
+import StatusDot from "@/components/ui/StatusDot";
 
 export type MapPin = {
   shopId: string;
@@ -146,14 +147,14 @@ export default function MiniMap({
           html: `
             <div style="
               width:36px;height:36px;border-radius:50%;
-              background:#5b47d4;border:2.5px solid #fff;
-              box-shadow:0 2px 8px rgba(0,0,0,0.25);
+              background:var(--color-brand-primary);border:2.5px solid #fff;
+              box-shadow:0 2px 8px rgba(15,23,42,0.28);
               display:flex;align-items:center;justify-content:center;
               overflow:hidden;cursor:pointer;
             ">${logoHtml}</div>
             <div style="
-              width:8px;height:8px;background:#5b47d4;border-radius:50%;
-              margin:-4px auto 0;box-shadow:0 1px 3px rgba(0,0,0,0.3);
+              width:8px;height:8px;background:var(--color-brand-primary);border-radius:50%;
+              margin:-4px auto 0;box-shadow:0 1px 3px rgba(15,23,42,0.3);
             "></div>
           `,
           iconSize: [36, 44],
@@ -163,16 +164,16 @@ export default function MiniMap({
 
         const coverBg = pin.coverUrl
           ? `<div style="height:80px;background:url(${pin.coverUrl}) center/cover;border-radius:6px 6px 0 0;"></div>`
-          : `<div style="height:40px;background:linear-gradient(135deg,#5b47d4,#8067e8);border-radius:6px 6px 0 0;"></div>`;
+          : `<div style="height:40px;background:linear-gradient(135deg,var(--color-brand-primary),var(--color-avatar-2));border-radius:6px 6px 0 0;"></div>`;
 
         const popupContent = `
           <div style="width:180px;font-family:sans-serif;border-radius:6px;overflow:hidden;box-shadow:none;">
             ${coverBg}
             <div style="padding:8px 10px;">
-              <div style="font-weight:700;font-size:13px;color:#1a1a2e;">${pin.shopName}</div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#9999bb;margin-top:2px;">${pin.category}</div>
-              <div style="font-size:11px;color:#666680;margin-top:5px;">👥 ${pin.membersCount} members</div>
-              ${pin.distanceKm !== null ? `<div style="font-size:11px;color:#5b47d4;margin-top:2px;">📍 ${pin.distanceKm} km away</div>` : ""}
+              <div style="font-weight:700;font-size:13px;color:var(--color-text-primary);">${pin.shopName}</div>
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-hint);margin-top:2px;">${pin.category}</div>
+              <div style="font-size:11px;color:var(--color-text-secondary);margin-top:5px;">👥 ${pin.membersCount} members</div>
+              ${pin.distanceKm !== null ? `<div style="font-size:11px;color:var(--color-brand-primary);margin-top:2px;">📍 ${pin.distanceKm} km away</div>` : ""}
             </div>
           </div>
         `;
@@ -253,8 +254,8 @@ export default function MiniMap({
           className: "",
           html: `
             <div style="position:relative;width:16px;height:16px;">
-              <div style="position:absolute;inset:0;border-radius:50%;background:rgba(91,71,212,0.25);animation:pulse 1.8s infinite;"></div>
-              <div style="position:absolute;inset:3px;border-radius:50%;background:#5b47d4;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>
+              <div style="position:absolute;inset:0;border-radius:50%;background:color-mix(in srgb, var(--color-brand-primary) 25%, transparent);animation:pulse 1.8s infinite;"></div>
+              <div style="position:absolute;inset:3px;border-radius:50%;background:var(--color-brand-primary);border:2px solid white;box-shadow:0 1px 4px rgba(15,23,42,0.3);"></div>
             </div>
           `,
           iconSize: [16, 16],
@@ -310,16 +311,17 @@ export default function MiniMap({
 
       {/* Pin count badge */}
       <div
-        className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-(--color-text-primary) px-2.5 py-1 rounded-full shadow-sm pointer-events-none"
+        className="absolute top-2 left-2 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-(--color-text-primary) pl-2 pr-2.5 py-1 rounded-full shadow-(--shadow-xs) pointer-events-none"
         style={{ zIndex: 1000 }}
       >
+        <StatusDot status="online" size={6} />
         {pinCount} shop{pinCount !== 1 ? "s" : ""} in view
       </div>
 
       {/* Expand to full-screen */}
       <button
         onClick={() => router.push("/customer/map")}
-        className="absolute top-2 right-2 w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm cursor-pointer border-0 hover:bg-(--color-brand-primary-light) transition-colors"
+        className="absolute top-2 right-2 w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-(--shadow-xs) cursor-pointer border-0 hover:bg-(--color-brand-primary-light) transition-colors"
         style={{ zIndex: 1000 }}
         title="Open full map"
       >
@@ -331,9 +333,9 @@ export default function MiniMap({
       {/* Location label */}
       <div
         className="absolute bottom-0 left-0 right-0 px-3 py-2 border-t border-(--color-border-default) pointer-events-none"
-        style={{ backgroundColor: "rgba(255,255,255,0.92)", zIndex: 1000 }}
+        style={{ backgroundColor: "rgba(255,255,255,0.94)", zIndex: 1000 }}
       >
-        <div className="text-[10px] uppercase tracking-widest text-(--color-text-hint) font-medium">
+        <div className="text-[10px] uppercase tracking-widest text-(--color-text-hint) font-semibold">
           Active Search Area
         </div>
         <div className="text-[13px] font-semibold text-(--color-text-primary)">

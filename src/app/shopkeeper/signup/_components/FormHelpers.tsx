@@ -32,13 +32,13 @@ export function EyeIcon({ open }: { open: boolean }) {
 
 export function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
-  return <span className="text-[12px] text-red-500 mt-0.5">{msg}</span>;
+  return <span className="text-[12px] text-(--color-danger) mt-0.5">{msg}</span>;
 }
 
 export function inputCls(hasError: boolean) {
-  return `h-[46px] w-full rounded-[8px] bg-[var(--color-auth-input-bg)] px-4 text-[14px] text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)]/50 outline-none border transition ${
+  return `h-(--height-input) w-full rounded-[8px] bg-[var(--color-auth-input-bg)] px-4 text-[14px] text-[var(--color-auth-ink)] placeholder:text-[var(--color-auth-ink-muted)]/50 outline-none border transition ${
     hasError
-      ? "border-red-400 ring-1 ring-red-300"
+      ? "border-(--color-danger) ring-1 ring-(--color-danger-bg)"
       : "border-transparent focus:border-[var(--color-auth-primary)] focus:ring-1 focus:ring-[var(--color-auth-primary)]"
   }`;
 }

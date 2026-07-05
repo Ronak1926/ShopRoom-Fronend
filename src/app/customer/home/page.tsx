@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
@@ -11,20 +11,23 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 import Sidebar from "@/components/customer/Sidebar";
+import Avatar from "@/components/ui/Avatar";
+import StatusDot from "@/components/ui/StatusDot";
 import ClearIcon from "@mui/icons-material/Clear";
 
 // Lazy-load MiniMap so Leaflet (browser-only) doesn't break SSR
 const MiniMap = dynamic(() => import("@/components/map/MiniMap"), {
   ssr: false,
-  loading: () => <div className="h-52 bg-gray-100 animate-pulse" />,
+  loading: () => (
+    <div className="h-52 bg-(--color-gray-100) animate-pulse" />
+  ),
 });
-
-
 
 type RoomCard = {
   roomId: string;
@@ -58,40 +61,6 @@ type DiscoverResponse = {
 function formatCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
   return String(n);
-}
-
-function ShopLogo({
-  logoUrl,
-  shopName,
-  className,
-}: {
-  logoUrl: string | null;
-  shopName: string;
-  className?: string;
-}) {
-  const initials = shopName
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-
-  if (logoUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={logoUrl}
-        alt={shopName}
-        className={`object-cover ${className ?? ""}`}
-      />
-    );
-  }
-  return (
-    <div
-      className={`flex items-center justify-center text-xs font-bold text-white bg-(--color-brand-primary) ${className ?? ""}`}
-    >
-      {initials}
-    </div>
-  );
 }
 
 export default function CustomerHome() {
@@ -224,7 +193,7 @@ export default function CustomerHome() {
         {/* Top Bar */}
         <div className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) px-5 flex items-center gap-3 shrink-0">
           {/* Search pill */}
-          <div className="flex items-center h-10 rounded-xl bg-(--color-bg-page) border border-(--color-border-default) px-3 gap-2 flex-1 max-w-xl">
+          <div className="flex items-center h-10 rounded-xl bg-(--color-bg-page) border border-(--color-border-default) px-3 gap-2 flex-1 max-w-xl transition-colors focus-within:border-(--color-brand-primary)">
             <SearchOutlinedIcon
               sx={{
                 fontSize: 18,
@@ -283,7 +252,7 @@ export default function CustomerHome() {
 
             {/* Dropdown panel */}
             {filterOpen && (
-              <div className="absolute top-[calc(100%+8px)] left-0 z-50 bg-(--color-bg-surface) border border-(--color-border-default) rounded-2xl shadow-lg p-3 min-w-52">
+              <div className="absolute top-[calc(100%+8px)] left-0 z-50 bg-(--color-bg-surface) border border-(--color-border-default) rounded-2xl shadow-(--shadow-lg) p-3 min-w-52">
                 <p className="text-[11px] font-semibold text-(--color-text-hint) uppercase tracking-wider mb-2 px-1">
                   Category
                 </p>
@@ -311,17 +280,15 @@ export default function CustomerHome() {
 
           {/* Right icons */}
           <div className="ml-auto flex items-center gap-2">
-            <div className="relative w-9 h-9 flex items-center justify-center cursor-pointer">
+            <button className="relative w-9 h-9 flex items-center justify-center cursor-pointer border-0 bg-transparent rounded-full hover:bg-(--color-bg-page) transition-colors">
               <NotificationsNoneOutlinedIcon
                 sx={{ fontSize: 22, color: "var(--color-text-secondary)" }}
               />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-            </div>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-(--color-danger-dot) ring-2 ring-(--color-bg-surface)" />
+            </button>
 
             {/* Profile avatar */}
-            <div className="w-9 h-9 rounded-full bg-(--color-brand-primary) text-white text-sm font-bold flex items-center justify-center select-none shadow-sm">
-              A
-            </div>
+            <Avatar name="Account" size="md" />
           </div>
         </div>
 
@@ -364,11 +331,11 @@ export default function CustomerHome() {
                   key={i}
                   className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden animate-pulse"
                 >
-                  <div className="h-44 bg-gray-100" />
+                  <div className="h-44 bg-(--color-gray-100)" />
                   <div className="px-4 pt-6 pb-4 space-y-2">
-                    <div className="h-4 bg-gray-100 rounded w-3/4" />
-                    <div className="h-3 bg-gray-100 rounded w-1/2" />
-                    <div className="h-3 bg-gray-100 rounded w-2/3" />
+                    <div className="h-4 bg-(--color-gray-100) rounded w-3/4" />
+                    <div className="h-3 bg-(--color-gray-100) rounded w-1/2" />
+                    <div className="h-3 bg-(--color-gray-100) rounded w-2/3" />
                   </div>
                 </div>
               ))}
@@ -381,7 +348,7 @@ export default function CustomerHome() {
               {filteredRooms.map((room) => (
                 <div
                   key={room.roomId}
-                  className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden cursor-pointer hover:shadow-lg transition-shadow group"
+                  className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden cursor-pointer hover:shadow-(--shadow-lg) hover:-translate-y-0.5 transition-all duration-200 group"
                 >
                   {/* Image zone */}
                   <div className="relative h-44">
@@ -393,21 +360,22 @@ export default function CustomerHome() {
                         className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full bg-(--color-brand-primary-light)" />
+                      <div className="w-full h-full bg-gradient-to-br from-(--color-brand-primary-light) to-(--color-brand-primary-muted)" />
                     )}
 
                     {/* Shop logo overlay */}
-                    <div className="absolute bottom-0 left-3 translate-y-1/2 w-10 h-10 rounded-full border-2 border-white shadow-md shrink-0 overflow-hidden">
-                      <ShopLogo
-                        logoUrl={room.logoUrl}
-                        shopName={room.shopName}
-                        className="w-full h-full rounded-full"
+                    <div className="absolute bottom-0 left-4 translate-y-1/2">
+                      <Avatar
+                        name={room.shopName}
+                        src={room.logoUrl}
+                        size="lg"
+                        className="border-[3px] border-(--color-bg-surface) shadow-(--shadow-md)"
                       />
                     </div>
 
                     {/* Distance badge */}
                     {room.distanceKm !== null && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-(--color-text-primary) px-2 py-1 rounded-full">
+                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-(--color-text-primary) px-2 py-1 rounded-full shadow-(--shadow-xs)">
                         <NearMeOutlinedIcon
                           sx={{
                             fontSize: 12,
@@ -420,23 +388,16 @@ export default function CustomerHome() {
                   </div>
 
                   {/* Card body */}
-                  <div className="px-4 pt-6 pb-4">
-                    <div className="text-[15px] font-bold text-(--color-text-primary) mt-1">
+                  <div className="px-4 pt-7 pb-4">
+                    <div className="text-[15px] font-bold text-(--color-text-primary) mt-1 truncate">
                       {room.shopName}
                     </div>
-                    <div className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-medium mt-0.5">
+                    <div className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-semibold mt-0.5">
                       {room.category}
                     </div>
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-3 mt-2.5">
                       <div className="flex items-center gap-1.5">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{
-                            backgroundColor: room.activeNow
-                              ? "var(--color-online)"
-                              : "#d1d5db",
-                          }}
-                        />
+                        <StatusDot status={room.activeNow ? "online" : "offline"} size={7} />
                         <span className="text-xs text-(--color-text-secondary)">
                           {room.activeNow ? "Active now" : "Inactive"}
                         </span>
@@ -453,7 +414,7 @@ export default function CustomerHome() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-center justify-between mt-3.5 pt-3.5 border-t border-(--color-border-default)">
                       <div className="flex items-center gap-1">
                         <FavoriteBorderIcon
                           sx={{ fontSize: 15, color: "var(--color-danger)" }}
@@ -472,8 +433,12 @@ export default function CustomerHome() {
 
               {/* No results */}
               {filteredRooms.length === 0 && debouncedQuery && (
-                <div className="col-span-3 py-16 text-center">
-                  <div className="text-4xl mb-3">ðŸ”</div>
+                <div className="col-span-full py-16 flex flex-col items-center text-center">
+                  <div className="w-14 h-14 rounded-full bg-(--color-bg-page) flex items-center justify-center mb-4">
+                    <SearchOffOutlinedIcon
+                      sx={{ fontSize: 26, color: "var(--color-text-hint)" }}
+                    />
+                  </div>
                   <div className="text-[15px] font-semibold text-(--color-text-primary)">
                     No rooms found
                   </div>
@@ -487,13 +452,11 @@ export default function CustomerHome() {
         </div>
       </div>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-          Zone 3: Right Panel
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* Right Panel */}
       <aside className="w-72 min-w-72 bg-(--color-bg-surface) border-l border-(--color-border-default) flex flex-col overflow-hidden">
         {/* Map section — contained card with padding */}
         <div className="px-4 pt-4 pb-0 shrink-0">
-          <div className="rounded-2xl overflow-hidden border border-(--color-border-default) shadow-sm">
+          <div className="rounded-2xl overflow-hidden border border-(--color-border-default) shadow-(--shadow-xs)">
             <MiniMap customerLat={customerLat} customerLng={customerLng} />
           </div>
         </div>
@@ -506,7 +469,7 @@ export default function CustomerHome() {
           <span className="text-[13px] font-bold text-(--color-text-primary) tracking-tight">
             Most Popular This Week
           </span>
-          <StarOutlinedIcon sx={{ fontSize: 16, color: "#f59e0b" }} />
+          <StarOutlinedIcon sx={{ fontSize: 16, color: "var(--color-brand-alert-hover)" }} />
         </div>
 
         {/* Trending list */}
@@ -520,13 +483,13 @@ export default function CustomerHome() {
                 <span className="w-5 text-[12px] font-bold text-(--color-text-hint) shrink-0 text-center">
                   {index + 1}
                 </span>
-                <div className="w-9 h-9 rounded-xl shrink-0 overflow-hidden shadow-sm">
-                  <ShopLogo
-                    logoUrl={item.logoUrl}
-                    shopName={item.shopName}
-                    className="w-full h-full rounded-xl"
-                  />
-                </div>
+                <Avatar
+                  name={item.shopName}
+                  src={item.logoUrl}
+                  size="md"
+                  shape="square"
+                  className="shadow-(--shadow-xs)"
+                />
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-semibold text-(--color-text-primary) truncate leading-tight">
                     {item.shopName}

@@ -6,7 +6,7 @@ export default function LandingNav() {
     <nav className="relative z-20 w-full h-16 flex items-center justify-between px-6">
       <Link href="/" className="flex items-center gap-2 shrink-0">
         <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-(--color-brand-primary)">
-          <StorefrontOutlinedIcon sx={{ fontSize: 18, color: "#fff" }} />
+          <StorefrontOutlinedIcon sx={{ fontSize: 18, color: "var(--color-text-on-brand)" }} />
         </span>
         <span className="text-[18px] font-bold text-white tracking-tight">
           ShopRoom

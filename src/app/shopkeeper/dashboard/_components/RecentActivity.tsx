@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import Avatar from "@/components/ui/Avatar";
 
 export interface RecentJoin {
   id: string;
@@ -23,14 +23,6 @@ function timeAgo(iso: string): string {
   const days = Math.floor(hrs / 24);
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
-
-const AVATAR_COLORS = [
-  "bg-[var(--color-brand-primary-light)]",
-  "bg-[var(--color-brand-alert-light)]",
-  "bg-[var(--color-avatar-pink-bg)]",
-  "bg-[var(--color-avatar-indigo-bg)]",
-  "bg-[var(--color-badge-neutral-bg)]",
-];
 
 export default function RecentActivity({
   recentJoins,
@@ -72,13 +64,7 @@ export default function RecentActivity({
             key={item.id}
             className={`flex items-center gap-3 py-3 ${idx < recentJoins.length - 1 ? "border-b border-(--color-bg-page)" : ""}`}
           >
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}
-            >
-              <PersonOutlinedIcon
-                sx={{ fontSize: 18, color: "var(--color-brand-primary)" }}
-              />
-            </div>
+            <Avatar name={item.customerName} size="md" />
             <div className="flex-1 min-w-0">
               <div>
                 <span className="text-[13px] font-bold text-(--color-text-primary)">

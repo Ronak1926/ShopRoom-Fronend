@@ -4,12 +4,12 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import NotificationsOffOutlinedIcon from "@mui/icons-material/NotificationsOffOutlined";
 import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "../../../../utils/apiClient";
 import { getCookie } from "../../../../utils/cookieUtils";
+import Avatar from "@/components/ui/Avatar";
 
 export interface MemberRow {
   id: string;
@@ -38,13 +38,6 @@ function formatDate(iso: string) {
     year: "numeric",
   });
 }
-
-const AVATAR_COLORS = [
-  "bg-[var(--color-brand-primary-light)]",
-  "bg-[var(--color-brand-alert-light)]",
-  "bg-[var(--color-avatar-pink-bg)]",
-  "bg-[var(--color-avatar-indigo-bg)]",
-];
 
 export default function MembersTable({ dashboardLoading }: MembersTableProps) {
   const [page, setPage] = useState(0);
@@ -152,20 +145,11 @@ export default function MembersTable({ dashboardLoading }: MembersTableProps) {
             </tr>
           )}
           {!showSkeleton &&
-            members.map((m, idx) => (
+            members.map((m) => (
               <tr key={m.id}>
                 <td className={TD}>
                   <div className="flex items-center">
-                    <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 mr-2.5 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}
-                    >
-                      <PersonOutlinedIcon
-                        sx={{
-                          fontSize: 17,
-                          color: "var(--color-text-secondary)",
-                        }}
-                      />
-                    </div>
+                    <Avatar name={m.customerName} size="md" className="mr-2.5" />
                     <div>
                       <div className="text-sm font-bold text-(--color-text-primary)">
                         {m.customerName}

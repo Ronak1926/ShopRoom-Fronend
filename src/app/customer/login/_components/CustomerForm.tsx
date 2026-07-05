@@ -77,7 +77,7 @@ export default function CustomerForm() {
             />
           </div>
           {errors.email && (
-            <p className="text-[11px] text-red-500">{errors.email.message}</p>
+            <p className="text-[11px] text-(--color-danger)">{errors.email.message}</p>
           )}
         </div>
 
@@ -106,7 +106,7 @@ export default function CustomerForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-[11px] text-red-500">
+            <p className="text-[11px] text-(--color-danger)">
               {errors.password.message}
             </p>
           )}

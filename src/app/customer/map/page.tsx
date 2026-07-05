@@ -9,6 +9,7 @@ import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import type { MapPin } from "@/components/map/MiniMap";
+import Avatar, { getAvatarColor, getInitials } from "@/components/ui/Avatar";
 
 // ── Viewport-keyed cache ──────────────────────────────────────────────────────
 const CACHE_TTL_MS = 30_000;
@@ -57,12 +58,6 @@ function HoverCard({
     ? { bottom: cH - cardBottomY, left, width: CARD_W, zIndex: 2000, transition: "left 0.12s, bottom 0.12s" }
     : { top: y + 8, left, width: CARD_W, zIndex: 2000, transition: "left 0.12s, top 0.12s" };
 
-  const initials = pin.shopName
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-
   return (
     <div
       className="absolute rounded-2xl overflow-hidden shadow-2xl border border-(--color-border-default) bg-(--color-bg-surface) pointer-events-none"
@@ -81,18 +76,12 @@ function HoverCard({
           <div className="w-full h-full bg-linear-to-br from-[#5b47d4] to-[#8067e8]" />
         )}
         {/* Logo overlay */}
-        <div className="absolute bottom-0 left-3 translate-y-1/2 w-9 h-9 rounded-full border-2 border-white shadow-md overflow-hidden bg-(--color-brand-primary) flex items-center justify-center">
-          {pin.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={pin.logoUrl}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-[10px] font-bold text-white">{initials}</span>
-          )}
-        </div>
+        <Avatar
+          name={pin.shopName}
+          src={pin.logoUrl}
+          size="md"
+          className="absolute bottom-0 left-3 translate-y-1/2 border-2 border-white shadow-md overflow-hidden"
+        />
         {/* Distance badge */}
         {pin.distanceKm !== null && (
           <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm text-[10px] font-semibold text-(--color-text-primary) px-1.5 py-0.5 rounded-full">
@@ -217,27 +206,24 @@ export default function FullMapPage() {
       setHoverState(null);
 
       pins.forEach((pin) => {
-        const initials = pin.shopName
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((w: string) => w[0]?.toUpperCase() ?? "")
-          .join("");
+        const initials = getInitials(pin.shopName);
+        const pinColor = getAvatarColor(pin.shopName);
 
         const logoHtml = pin.logoUrl
           ? `<img src="${pin.logoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="" />`
-          : `<span style="font-size:10px;font-weight:700;color:#fff;">${initials}</span>`;
+          : `<span style="font-size:10px;font-weight:700;color:var(--color-text-on-brand);">${initials}</span>`;
 
         const icon = L.divIcon({
           className: "",
           html: `
             <div style="
               width:40px;height:40px;border-radius:50%;
-              background:#5b47d4;border:2.5px solid #fff;
+              background:${pinColor};border:2.5px solid #fff;
               box-shadow:0 2px 10px rgba(91,71,212,0.35);
               display:flex;align-items:center;justify-content:center;
               overflow:hidden;cursor:pointer;
             ">${logoHtml}</div>
-            <div style="width:8px;height:8px;background:#5b47d4;border-radius:50%;margin:-4px auto 0;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+            <div style="width:8px;height:8px;background:${pinColor};border-radius:50%;margin:-4px auto 0;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
           `,
           iconSize: [40, 48],
           iconAnchor: [20, 48],
@@ -354,7 +340,7 @@ export default function FullMapPage() {
           html: `
             <div style="position:relative;width:18px;height:18px;">
               <div style="position:absolute;inset:0;border-radius:50%;background:rgba(91,71,212,0.25);animation:pulse 1.8s infinite;"></div>
-              <div style="position:absolute;inset:3px;border-radius:50%;background:#5b47d4;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>
+              <div style="position:absolute;inset:3px;border-radius:50%;background:var(--color-brand-primary);border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>
             </div>
           `,
           iconSize: [18, 18],
@@ -401,19 +387,16 @@ export default function FullMapPage() {
       <div ref={mapDivRef} className="w-full h-full" />
 
       {/* Top bar */}
-      <div
-        className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2"
-        style={{ zIndex: 1500 }}
-      >
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-1500">
         {/* Explore pill */}
-        <div className="flex items-center gap-2 h-10 px-4 bg-white rounded-full shadow-lg text-sm font-semibold text-(--color-text-primary)">
+        <div className="flex items-center gap-2 h-10 px-4 bg-(--color-bg-surface) rounded-full shadow-lg text-sm font-semibold text-(--color-text-primary)">
           <LocationOnOutlinedIcon
             sx={{ fontSize: 16, color: "var(--color-brand-primary)" }}
           />
           Explore on Map
         </div>
         {/* Shop count — updates as viewport changes */}
-        <div className="h-10 px-4 bg-white rounded-full shadow-lg flex items-center gap-1.5 text-sm font-semibold text-(--color-text-primary)">
+        <div className="h-10 px-4 bg-(--color-bg-surface) rounded-full shadow-lg flex items-center gap-1.5 text-sm font-semibold text-(--color-text-primary)">
           <span className="w-2 h-2 rounded-full bg-(--color-brand-primary) animate-pulse" />
           {pinCount} shop{pinCount !== 1 ? "s" : ""} in this area
         </div>

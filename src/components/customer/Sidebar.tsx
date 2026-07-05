@@ -93,7 +93,8 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
           style={{
             background:
               "linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-primary-active))",
-            boxShadow: "0 4px 16px rgba(91, 71, 212, 0.28)",
+            boxShadow:
+              "0 4px 16px color-mix(in srgb, var(--color-brand-primary) 28%, transparent)",
           }}
         >
           <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />

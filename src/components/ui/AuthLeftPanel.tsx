@@ -17,8 +17,7 @@ export function AuthLeftPanel() {
             width={256}
             height={548}
             priority
-            className="w-auto max-h-[60vh] drop-shadow-[0_24px_60px_rgba(0,0,0,0.45)]"
-            style={{ height: "auto", maxHeight: "60vh" }}
+            className="w-auto h-auto max-h-[60vh] drop-shadow-[0_24px_60px_rgba(0,0,0,0.45)]"
           />
         </div>
 

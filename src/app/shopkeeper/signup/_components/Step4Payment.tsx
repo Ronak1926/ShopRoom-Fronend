@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 
 import { PLANS, type PlanId } from "../_lib/schemas";
 import { apiClient } from "../../../../utils/apiClient";
@@ -148,7 +149,7 @@ export function Step4Payment({
       </div>
 
       {/* Dev notice */}
-      <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] text-amber-700 mb-4 flex items-center gap-2">
+      <div className="rounded-[10px] border border-(--color-brand-alert-muted) bg-(--color-brand-alert-light) px-4 py-2.5 text-[11px] text-(--color-brand-alert-text) mb-4 flex items-center gap-2">
         <svg
           width="13"
           height="13"
@@ -217,11 +218,16 @@ export function Step4Payment({
         disabled={isProcessing || !selectedPlan}
         className="w-full h-[48px] rounded-[8px] bg-[var(--color-auth-primary)] text-white font-semibold text-[15px] hover:bg-[var(--color-brand-primary-active)] disabled:opacity-60 transition"
       >
-        {isProcessing
-          ? "Processing…"
-          : selectedPlan
-            ? `Pay ₹${PLANS.find((p) => p.id === selectedPlan)?.price} & Complete Registration`
-            : "Select a plan to continue"}
+        {isProcessing ? (
+          "Processing…"
+        ) : selectedPlan ? (
+          <span className="inline-flex items-center justify-center gap-1.5">
+            {`Pay ₹${PLANS.find((p) => p.id === selectedPlan)?.price} & Complete Registration`}
+            <ArrowForwardOutlinedIcon sx={{ fontSize: 16 }} />
+          </span>
+        ) : (
+          "Select a plan to continue"
+        )}
       </button>
 
       <button

@@ -82,7 +82,7 @@ export function ContinueWithGoogle() {
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="w-full h-[50px] rounded-[8px] border border-[#C9C4D7]/30 px-6 py-[14px] flex items-center justify-center gap-3 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full h-[50px] rounded-[8px] border border-(--color-border-default)/30 px-6 py-[14px] flex items-center justify-center gap-3 bg-(--color-bg-surface) hover:bg-(--color-bg-surface-hover) transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <Image
           src="/Google.svg"
@@ -96,7 +96,7 @@ export function ContinueWithGoogle() {
         </span>
       </button>
       {error && (
-        <p className="mt-2 text-center text-xs text-red-500">{error}</p>
+        <p className="mt-2 text-center text-xs text-(--color-danger)">{error}</p>
       )}
     </div>
   );

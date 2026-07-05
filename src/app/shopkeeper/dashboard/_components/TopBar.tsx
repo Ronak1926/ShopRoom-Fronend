@@ -15,7 +15,7 @@ export default function TopBar({ inviteLink, onShareClick }: TopBarProps) {
   return (
     <header className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) flex items-center px-6 gap-4 sticky top-0 z-10">
       {/* Search */}
-      <div className="flex items-center gap-2 bg-(--color-bg-page) rounded-full h-9.5 px-3.5 w-70 shrink-0">
+      <div className="flex items-center gap-2 bg-(--color-bg-page) border border-(--color-border-default) rounded-xl h-10 px-3.5 w-70 shrink-0 transition-colors focus-within:border-(--color-brand-primary)">
         <SearchOutlinedIcon
           sx={{ fontSize: 16, color: "var(--color-text-secondary)" }}
         />

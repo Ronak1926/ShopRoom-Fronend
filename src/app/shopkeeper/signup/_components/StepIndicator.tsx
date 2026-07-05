@@ -13,7 +13,7 @@ export function StepIndicator({ current }: { current: number }) {
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
                   done
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-(--color-success) text-white"
                     : active
                       ? "bg-[var(--color-auth-primary)] text-white"
                       : "bg-[var(--color-auth-input-bg)] text-[var(--color-auth-ink-muted)]"
@@ -46,7 +46,7 @@ export function StepIndicator({ current }: { current: number }) {
             {i < STEP_LABELS.length - 1 && (
               <div
                 className={`w-6 h-px mb-4 transition-all ${
-                  done ? "bg-emerald-400" : "bg-[var(--color-border-default)]"
+                  done ? "bg-(--color-success)" : "bg-[var(--color-border-default)]"
                 }`}
               />
             )}

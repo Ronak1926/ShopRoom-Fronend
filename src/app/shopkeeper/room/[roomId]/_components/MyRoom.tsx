@@ -8,6 +8,8 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
+import Avatar from "@/components/ui/Avatar";
 
 interface MyRoomProps {
   shopName: string;
@@ -42,15 +44,6 @@ const messages = [
     text: "The designs look amazing! Do you have these in size M available? I'd love to drop by today.",
   },
 ];
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _inviteLink, onShareClick: _onShareClick }: MyRoomProps) {
   const [activeTab, setActiveTab] = useState("Members");
@@ -107,8 +100,8 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
         <div className="overflow-y-auto flex-1">
           {/* Online Section */}
           <div className="px-4 py-2 mt-2">
-            <span className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-medium">
-              Online — 14
+            <span className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-semibold">
+              Online — {onlineMembers.length}
             </span>
           </div>
           {onlineMembers.map((member) => (
@@ -116,12 +109,7 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
               key={member.name}
               className="flex items-center gap-3 px-4 h-12 hover:bg-(--color-bg-page) cursor-pointer transition-colors"
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold text-(--color-text-secondary)"
-                style={{ backgroundColor: "#e8e8f0" }}
-              >
-                {getInitials(member.name)}
-              </div>
+              <Avatar name={member.name} size="sm" status="online" />
               <div className="flex-1 min-w-0">
                 <div className="text-sm text-(--color-text-primary) truncate leading-tight">
                   {member.name}
@@ -130,17 +118,13 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
                   {member.status}
                 </div>
               </div>
-              <div
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: "#22c55e" }}
-              />
             </div>
           ))}
 
           {/* Offline Section */}
           <div className="px-4 py-2 mt-2">
-            <span className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-medium">
-              Offline — 298
+            <span className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-semibold">
+              Offline — {offlineMembers.length}
             </span>
           </div>
           {offlineMembers.map((member) => (
@@ -148,12 +132,7 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
               key={member.name}
               className="flex items-center gap-3 px-4 h-12 hover:bg-(--color-bg-page) cursor-pointer transition-colors"
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold text-(--color-text-secondary)"
-                style={{ backgroundColor: "#e8e8f0" }}
-              >
-                {getInitials(member.name)}
-              </div>
+              <Avatar name={member.name} size="sm" status="offline" />
               <div className="flex-1 min-w-0">
                 <div className="text-sm text-(--color-text-primary) truncate leading-tight">
                   {member.name}
@@ -162,10 +141,6 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
                   {member.status}
                 </div>
               </div>
-              <div
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: "#d1d5db" }}
-              />
             </div>
           ))}
         </div>
@@ -200,14 +175,12 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
                 {tab}
               </button>
             ))}
-            <NotificationsNoneOutlinedIcon
-              sx={{ fontSize: 20, color: "var(--color-text-secondary)", cursor: "pointer", marginLeft: "8px" }}
-              className="hover:text-(--color-text-primary) transition-colors"
-            />
-            <MoreVertOutlinedIcon
-              sx={{ fontSize: 20, color: "var(--color-text-secondary)", cursor: "pointer", marginLeft: "4px" }}
-              className="hover:text-(--color-text-primary) transition-colors"
-            />
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors ml-1">
+              <NotificationsNoneOutlinedIcon sx={{ fontSize: 20 }} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors">
+              <MoreVertOutlinedIcon sx={{ fontSize: 20 }} />
+            </button>
           </div>
         </div>
 
@@ -227,12 +200,10 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
             msg.type === "shopkeeper" ? (
               /* Shopkeeper message — left-aligned */
               <div key={i} className="flex items-start gap-3 max-w-xl">
-                <div className="w-9 h-9 rounded-full bg-(--color-brand-primary) flex items-center justify-center text-white text-sm font-bold shrink-0">
-                  S
-                </div>
+                <Avatar name={shopName || "Shop Owner"} src={logoUrl} size="md" />
                 <div
-                  className="bg-(--color-bg-surface) rounded-xl rounded-tl-none px-4 py-3 border border-(--color-border-default) flex-1"
-                  style={{ borderLeft: "3px solid var(--color-brand-primary)" }}
+                  className="bg-(--color-msg-shopkeeper-bg) rounded-xl rounded-tl-none px-4 py-3 flex-1"
+                  style={{ borderLeft: "3px solid var(--color-msg-shopkeeper-border)" }}
                 >
                   <div className="flex items-baseline gap-2 mb-1">
                     <span className="text-[13px] font-bold text-(--color-brand-primary)">
@@ -254,7 +225,7 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
                   <span className="text-[11px] text-(--color-text-hint) pr-1">
                     {msg.sender}
                   </span>
-                  <div className="bg-(--color-bg-surface) border border-(--color-border-default) rounded-xl rounded-tr-none px-4 py-2.5 max-w-sm">
+                  <div className="bg-(--color-msg-customer-bg) rounded-xl rounded-tr-none px-4 py-2.5 max-w-sm">
                     <p className="text-sm text-(--color-text-primary) leading-relaxed m-0">
                       {msg.text}
                     </p>
@@ -263,12 +234,7 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
                     </div>
                   </div>
                 </div>
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-(--color-text-secondary) shrink-0 mb-6"
-                  style={{ backgroundColor: "#e8e8f0" }}
-                >
-                  {getInitials(msg.sender)}
-                </div>
+                <Avatar name={msg.sender} size="sm" className="mb-6" />
               </div>
             )
           )}
@@ -299,14 +265,12 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
         <div className="bg-(--color-bg-surface) border-t border-(--color-border-default) px-4 py-3 shrink-0">
           <div className="flex items-center gap-2">
             {/* Left icons */}
-            <EmojiEmotionsOutlinedIcon
-              sx={{ fontSize: 20, color: "var(--color-text-secondary)", cursor: "pointer", flexShrink: 0 }}
-              className="hover:text-(--color-text-primary) transition-colors"
-            />
-            <AttachFileOutlinedIcon
-              sx={{ fontSize: 20, color: "var(--color-text-secondary)", cursor: "pointer", flexShrink: 0, transform: "rotate(45deg)" }}
-              className="hover:text-(--color-text-primary) transition-colors"
-            />
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors shrink-0">
+              <EmojiEmotionsOutlinedIcon sx={{ fontSize: 20 }} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors shrink-0">
+              <AttachFileOutlinedIcon sx={{ fontSize: 20, transform: "rotate(45deg)" }} />
+            </button>
 
             {/* Input + hint */}
             <div className="flex-1 flex flex-col gap-0.5">
@@ -323,11 +287,9 @@ export default function MyRoom({ shopName, logoUrl, membersCount, inviteLink: _i
             </div>
 
             {/* Right buttons */}
-            <button
-              className="h-9 px-4 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90 shrink-0"
-              style={{ backgroundColor: "var(--color-brand-alert)" }}
-            >
-              ⚡ Send Alert
+            <button className="h-9 px-4 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)">
+              <BoltOutlinedIcon sx={{ fontSize: 16 }} />
+              Send Alert
             </button>
             <button
               className="w-9 h-9 rounded-full bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-white border-0 cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-0.5"
