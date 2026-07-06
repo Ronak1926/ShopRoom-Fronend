@@ -3,28 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Sidebar from "../../dashboard/_components/Sidebar";
-import TopBar from "../../dashboard/_components/TopBar";
-import ShareModal from "../../dashboard/_components/ShareModal";
 import MyRoom from "./_components/MyRoom";
-import { apiClient } from "../../../../utils/apiClient";
+import { apiClient, setAuthToken } from "../../../../utils/apiClient";
 import { getCookie } from "../../../../utils/cookieUtils";
-
-interface ShopData {
-  shopName: string;
-  logoUrl: string | null;
-  room?: {
-    roomId: string;
-    inviteLink?: string;
-    membersCount: number;
-  };
-}
+import type { RoomDetails } from "@/components/chat/types";
 
 export default function RoomPage() {
   const router = useRouter();
   const params = useParams<{ roomId: string }>();
-  const [shopData, setShopData] = useState<ShopData | null>(null);
-  const [inviteLink, setInviteLink] = useState<string | undefined>(undefined);
-  const [showShare, setShowShare] = useState(false);
+  const [room, setRoom] = useState<RoomDetails | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = getCookie("shopkeeper_token");
@@ -32,23 +20,14 @@ export default function RoomPage() {
       router.replace("/customer/login?tab=shopkeeper");
       return;
     }
+    setAuthToken(token);
 
     apiClient
-      .get("/api/shop/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const data = res.data as ShopData;
-        setShopData(data);
-        if (data.room?.inviteLink) setInviteLink(data.room.inviteLink);
-      })
-      .catch(() => {
-        const code = localStorage.getItem("shopkeeper_invite_code");
-        if (code) setInviteLink(`${window.location.origin}/join/${code}`);
-      });
-  }, [router]);
-
-  const roomId = shopData?.room?.roomId ?? params.roomId;
+      .get<RoomDetails>(`/api/rooms/${params.roomId}`)
+      .then((res) => setRoom(res.data))
+      .catch(() => router.replace("/shopkeeper/dashboard"))
+      .finally(() => setLoading(false));
+  }, [params.roomId, router]);
 
   return (
     <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
@@ -59,25 +38,16 @@ export default function RoomPage() {
         }}
       />
 
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <TopBar
-          inviteLink={inviteLink}
-          onShareClick={() => setShowShare(true)}
-        />
-
-        <MyRoom
-          roomId={roomId}
-          shopName={shopData?.shopName ?? ""}
-          logoUrl={shopData?.logoUrl ?? null}
-          membersCount={shopData?.room?.membersCount ?? 0}
-        />
-      </div>
-
-      {showShare && inviteLink && (
-        <ShareModal
-          inviteLink={inviteLink}
-          onClose={() => setShowShare(false)}
-        />
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center text-sm text-(--color-text-hint)">
+          Loading room...
+        </div>
+      ) : room ? (
+        <MyRoom room={room} />
+      ) : (
+        <div className="flex-1 flex items-center justify-center text-sm text-(--color-text-hint)">
+          Room not found.
+        </div>
       )}
     </div>
   );

@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/components/customer/Sidebar";
-import CustomerRoom, { type RoomDetails } from "./_components/CustomerRoom";
+import CustomerRoom from "./_components/CustomerRoom";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
+import type { RoomDetails } from "@/components/chat/types";
 
 export default function CustomerRoomPage() {
   const router = useRouter();

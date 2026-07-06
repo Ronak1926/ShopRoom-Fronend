@@ -9,7 +9,6 @@ interface ComposerProps {
   onSend: (text: string) => void;
   onTyping: () => void;
   placeholder?: string;
-  hint?: string;
   extraAction?: ReactNode;
 }
 
@@ -17,7 +16,6 @@ export default function Composer({
   onSend,
   onTyping,
   placeholder = "Type a message...",
-  hint,
   extraAction,
 }: ComposerProps) {
   const [text, setText] = useState("");

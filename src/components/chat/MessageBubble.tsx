@@ -14,71 +14,63 @@ function formatTime(iso: string): string {
 }
 
 export default function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
-  if (message.senderType === "SHOPKEEPER") {
-    // Admin message — always left-aligned, visually distinct regardless of
-    // which side of the chat is viewing it, per spec: shows shop name +
-    // owner name above the bubble so it reads as an "official" message.
-    return (
-      <div className="flex items-start gap-3 max-w-xl">
-        <Avatar name={message.sender.shopName ?? message.sender.name} size="md" />
-        <div
-          className="bg-(--color-msg-shopkeeper-bg) rounded-xl rounded-tl-none px-4 py-3 flex-1"
-          style={{ borderLeft: "3px solid var(--color-msg-shopkeeper-border)" }}
-        >
-          <div className="flex items-baseline gap-2 mb-1 flex-wrap">
-            <span className="text-[13px] font-bold text-(--color-brand-primary)">
-              {message.sender.shopName}
-            </span>
-            <span className="text-[11px] text-(--color-text-secondary)">
-              {message.sender.name}
-            </span>
-            <span className="text-[11px] text-(--color-text-hint)">
-              {formatTime(message.createdAt)}
-            </span>
-          </div>
-          <p className="text-sm text-(--color-text-primary) leading-relaxed m-0 whitespace-pre-wrap break-words">
-            {message.text}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const isAdmin = message.senderType === "SHOPKEEPER";
+  const avatarName = isAdmin ? (message.sender.shopName ?? message.sender.name) : message.sender.name;
+  const avatarSize = isAdmin ? "md" : "sm";
 
-  if (isOwnMessage) {
-    return (
-      <div className="flex items-end gap-2 justify-end">
-        <div className="flex flex-col items-end gap-1">
-          <div className="bg-(--color-msg-customer-bg) rounded-xl rounded-tr-none px-4 py-2.5 max-w-sm">
-            <p className="text-sm text-(--color-text-primary) leading-relaxed m-0 whitespace-pre-wrap break-words">
-              {message.text}
-            </p>
-            <div className="text-[11px] text-(--color-text-hint) text-right mt-1">
-              {formatTime(message.createdAt)}
-            </div>
-          </div>
-        </div>
-        <Avatar name={message.sender.name} size="sm" className="mb-1" />
-      </div>
-    );
-  }
+  // Your own message is always the solid blue bubble, whichever role you are.
+  // Every *received* message — an admin's or another customer's — gets the
+  // same white bubble + blue left accent strip, so a shopkeeper looking at a
+  // customer's message reads as consistently "intentional" as a customer
+  // looking at the shop's message, not a different, unstyled default.
+  const bubbleClass = isOwnMessage
+    ? "bg-(--color-brand-primary) text-white"
+    : "bg-(--color-bg-surface) text-(--color-text-primary) shadow-(--shadow-sm)";
 
-  // Another customer's message
+  const accentBorder = !isOwnMessage
+    ? { borderLeft: "3px solid var(--color-brand-primary)" }
+    : undefined;
+
   return (
-    <div className="flex items-end gap-2">
-      <Avatar name={message.sender.name} size="sm" className="mb-1" />
-      <div className="flex flex-col items-start gap-1">
-        <span className="text-[11px] text-(--color-text-hint) pl-1">
-          {message.sender.name}
-        </span>
-        <div className="bg-(--color-msg-other-bg) border border-(--color-border-default) rounded-xl rounded-tl-none px-4 py-2.5 max-w-sm">
-          <p className="text-sm text-(--color-text-primary) leading-relaxed m-0 whitespace-pre-wrap break-words">
+    <div className={`flex items-end gap-2 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+      {!isOwnMessage && <Avatar name={avatarName} size={avatarSize} className="mb-1" />}
+
+      <div className={`flex flex-col gap-1 max-w-sm ${isOwnMessage ? "items-end" : "items-start"}`}>
+        {(isAdmin || !isOwnMessage) && (
+          <div className="flex items-baseline gap-2 px-1 flex-wrap">
+            {isAdmin ? (
+              <>
+                <span className="text-[13px] font-bold text-(--color-brand-primary)">
+                  {message.sender.shopName}
+                </span>
+                <span className="text-[11px] text-(--color-text-secondary)">
+                  {message.sender.name}
+                </span>
+              </>
+            ) : (
+              <span className="text-[11px] text-(--color-text-hint)">{message.sender.name}</span>
+            )}
+          </div>
+        )}
+
+        <div
+          className={`${bubbleClass} rounded-xl px-4 py-2.5 ${isOwnMessage ? "rounded-tr-none" : "rounded-tl-none"}`}
+          style={accentBorder}
+        >
+          <p className="text-sm leading-relaxed m-0 whitespace-pre-wrap wrap-break-word">
             {message.text}
           </p>
-          <div className="text-[11px] text-(--color-text-hint) mt-1">
+          <div
+            className={`text-[11px] mt-1 ${
+              isOwnMessage ? "text-right text-white/70" : "text-(--color-text-hint)"
+            }`}
+          >
             {formatTime(message.createdAt)}
           </div>
         </div>
       </div>
+
+      {isOwnMessage && <Avatar name={avatarName} size={avatarSize} className="mb-1" />}
     </div>
   );
 }

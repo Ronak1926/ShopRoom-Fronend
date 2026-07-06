@@ -8,7 +8,7 @@ import KPICards from "./_components/KPICards";
 import RecentActivity, { type RecentJoin } from "./_components/RecentActivity";
 import QuickActionsPanel from "./_components/QuickActionsPanel";
 import MembersTable from "./_components/MembersTable";
-import ShareModal from "./_components/ShareModal";
+import ShareModal from "@/components/ui/ShareModal";
 import { apiClient } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 

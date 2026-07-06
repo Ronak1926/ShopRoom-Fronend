@@ -19,8 +19,8 @@ export interface TypingUser {
   name: string;
 }
 
-const TYPING_IDLE_MS = 2500;
-const TYPING_SAFETY_TIMEOUT_MS = 5000;
+const TYPING_IDLE_MS = 1200;
+const TYPING_SAFETY_TIMEOUT_MS = 3000;
 const COOKIE_BY_ROLE: Record<Role, string> = {
   customer: "token",
   shopkeeper: "shopkeeper_token",
