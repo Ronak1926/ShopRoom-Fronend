@@ -1,16 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
-/** Persists sidebar collapsed state per role so each of the customer and
- * shopkeeper shells remember their own preference across page loads. */
+function readStored(storageKey: string): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(storageKey) === "1";
+}
+
+/**
+ * Persists sidebar collapsed state per role so each of the customer and
+ * shopkeeper shells remember their own preference across page loads.
+ *
+ * Reads localStorage synchronously in the initial state (not in a
+ * useEffect) — every page renders its own <Sidebar>, so client-side
+ * navigation between pages fully remounts it. An effect-based read would
+ * flash the sidebar open on every navigation before snapping back to
+ * collapsed a tick later.
+ */
 export function useSidebarCollapse(role: "customer" | "shopkeeper") {
   const storageKey = `sidebar_collapsed_${role}`;
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    setCollapsed(localStorage.getItem(storageKey) === "1");
-  }, [storageKey]);
+  const [collapsed, setCollapsed] = useState(() => readStored(storageKey));
 
   const toggle = useCallback(() => {
     setCollapsed((prev) => {

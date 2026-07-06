@@ -10,6 +10,7 @@ import Avatar from "@/components/ui/Avatar";
 import MessageFeed from "@/components/chat/MessageFeed";
 import Composer from "@/components/chat/Composer";
 import { useRoomChat } from "@/hooks/useRoomChat";
+import { getSocket } from "@/lib/socket";
 import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 
@@ -52,6 +53,45 @@ export default function MyRoom({ roomId, shopName, logoUrl, membersCount }: MyRo
       .then((res) => setMembers(res.data.members))
       .catch(() => {});
   }, []);
+
+  // Live-update the member list as people join/leave, instead of only
+  // reflecting new members after a manual page refresh.
+  useEffect(() => {
+    const socket = getSocket("shopkeeper");
+
+    function handleMemberJoined(payload: {
+      roomId: string;
+      customerId: string;
+      customerName: string;
+    }) {
+      if (payload.roomId !== roomId) return;
+      setMembers((prev) =>
+        prev.some((m) => m.customerId === payload.customerId)
+          ? prev
+          : [
+              ...prev,
+              {
+                id: payload.customerId,
+                customerId: payload.customerId,
+                customerName: payload.customerName,
+              },
+            ],
+      );
+    }
+
+    function handleMemberLeft(payload: { roomId: string; customerId: string }) {
+      if (payload.roomId !== roomId) return;
+      setMembers((prev) => prev.filter((m) => m.customerId !== payload.customerId));
+    }
+
+    socket.on("member:joined", handleMemberJoined);
+    socket.on("member:left", handleMemberLeft);
+
+    return () => {
+      socket.off("member:joined", handleMemberJoined);
+      socket.off("member:left", handleMemberLeft);
+    };
+  }, [roomId]);
 
   const filteredMembers = members.filter((m) =>
     m.customerName.toLowerCase().includes(memberSearch.toLowerCase()),
@@ -205,7 +245,6 @@ export default function MyRoom({ roomId, shopName, logoUrl, membersCount }: MyRo
         <Composer
           onSend={sendMessage}
           onTyping={notifyTyping}
-          hint="Messages: Unlimited"
           extraAction={
             <button className="h-9 px-4 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)">
               <BoltOutlinedIcon sx={{ fontSize: 16 }} />

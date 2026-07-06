@@ -43,7 +43,9 @@ export default function Composer({
           <EmojiEmotionsOutlinedIcon sx={{ fontSize: 20 }} />
         </button>
         <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors shrink-0">
-          <AttachFileOutlinedIcon sx={{ fontSize: 20, transform: "rotate(45deg)" }} />
+          <AttachFileOutlinedIcon
+            sx={{ fontSize: 20, transform: "rotate(45deg)" }}
+          />
         </button>
 
         <div className="flex-1 flex flex-col gap-0.5">
@@ -58,11 +60,6 @@ export default function Composer({
             placeholder={placeholder}
             className="w-full h-10 bg-(--color-bg-page) border border-(--color-border-default) rounded-xl px-4 text-sm text-(--color-text-primary) placeholder:text-(--color-text-hint) outline-none focus:border-(--color-brand-primary) transition-colors"
           />
-          {hint && (
-            <span className="text-[11px] text-(--color-text-hint) text-center">
-              {hint}
-            </span>
-          )}
         </div>
 
         {extraAction}
