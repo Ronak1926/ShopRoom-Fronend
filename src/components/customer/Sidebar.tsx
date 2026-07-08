@@ -1,13 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
@@ -31,7 +28,6 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function Sidebar({ activeNav, onNavChange }: Props) {
-  const router = useRouter();
   const { collapsed, toggle } = useSidebarCollapse("customer");
 
   return (
@@ -110,39 +106,6 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
           );
         })}
       </nav>
-
-      {/* Bottom actions */}
-      <div className={`pt-2 pb-5 flex flex-col gap-1 ${collapsed ? "px-2.5" : "px-4"}`}>
-        <button
-          type="button"
-          title={collapsed ? "Create Room" : undefined}
-          className={`group relative overflow-hidden flex items-center justify-center gap-2 w-full h-12 rounded-2xl text-white font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] ${
-            collapsed ? "px-0" : ""
-          }`}
-          style={{
-            background:
-              "linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-primary-active))",
-            boxShadow:
-              "0 4px 16px color-mix(in srgb, var(--color-brand-primary) 28%, transparent)",
-          }}
-        >
-          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-          <AddOutlinedIcon sx={{ fontSize: 18 }} />
-          {!collapsed && <span className="relative z-10">Create Room</span>}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push("/customer/logout")}
-          title={collapsed ? "Sign Out" : undefined}
-          className={`flex items-center cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors font-medium text-[13px] ${
-            collapsed ? "justify-center px-0" : "gap-2 px-3"
-          }`}
-          style={{ color: "var(--color-danger, #e53935)" }}
-        >
-          <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
-          {!collapsed && "Sign Out"}
-        </button>
-      </div>
     </aside>
   );
 }

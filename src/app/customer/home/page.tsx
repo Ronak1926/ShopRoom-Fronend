@@ -82,6 +82,7 @@ export default function CustomerHome() {
   const [sort, setSort] = useState<"nearest" | "popular">("nearest");
   const [customerLat, setCustomerLat] = useState<number | null>(null);
   const [customerLng, setCustomerLng] = useState<number | null>(null);
+  const [customerName, setCustomerName] = useState("Account");
   const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
 
   // Guard: redirect to login if no token
@@ -169,6 +170,7 @@ export default function CustomerHome() {
     apiClient
       .get<{
         customer: {
+          fullName: string;
           allowLocationAccess: boolean;
           latitude: number | null;
           longitude: number | null;
@@ -176,6 +178,7 @@ export default function CustomerHome() {
       }>("/api/customers/me")
       .then((res) => {
         const c = res.data.customer;
+        setCustomerName(c.fullName);
         if (c.allowLocationAccess && c.latitude && c.longitude) {
           setCustomerLat(c.latitude);
           setCustomerLng(c.longitude);
@@ -319,7 +322,14 @@ export default function CustomerHome() {
             </button>
 
             {/* Profile avatar */}
-            <Avatar name="Account" size="md" />
+            <button
+              type="button"
+              title="Profile"
+              onClick={() => router.push("/customer/profile")}
+              className="border-0 bg-transparent p-0 cursor-pointer rounded-full hover:opacity-80 transition-opacity"
+            >
+              <Avatar name={customerName} size="md" />
+            </button>
           </div>
         </div>
 

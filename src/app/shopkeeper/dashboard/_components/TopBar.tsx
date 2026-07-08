@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useRouter } from "next/navigation";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
@@ -12,6 +13,8 @@ interface TopBarProps {
 }
 
 export default function TopBar({ inviteLink, onShareClick }: TopBarProps) {
+  const router = useRouter();
+
   return (
     <header className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) flex items-center px-6 gap-4 sticky top-0 z-10">
       {/* Search */}
@@ -41,9 +44,14 @@ export default function TopBar({ inviteLink, onShareClick }: TopBarProps) {
         <button className="w-8 h-8 flex items-center justify-center bg-transparent border-0 rounded-lg cursor-pointer text-(--color-text-secondary) hover:text-(--color-text-primary) transition-colors">
           <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
         </button>
-        <div className="w-8 h-8 rounded-full bg-(--color-brand-primary-light) flex items-center justify-center text-(--color-brand-primary)">
+        <button
+          type="button"
+          title="Profile"
+          onClick={() => router.push("/shopkeeper/profile")}
+          className="w-8 h-8 rounded-full bg-(--color-brand-primary-light) flex items-center justify-center text-(--color-brand-primary) border-0 cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <PersonOutlinedIcon sx={{ fontSize: 18 }} />
-        </div>
+        </button>
       </div>
     </header>
   );

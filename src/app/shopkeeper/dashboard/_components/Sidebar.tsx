@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
@@ -9,7 +8,6 @@ import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import EqualizerOutlinedIcon from "@mui/icons-material/EqualizerOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
@@ -34,7 +32,6 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
-  const router = useRouter();
   const { collapsed, toggle } = useSidebarCollapse("shopkeeper");
 
   return (
@@ -156,18 +153,6 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
         >
           <HelpOutlineOutlinedIcon sx={{ fontSize: 16 }} />
           {!collapsed && "Help Center"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push("/shopkeeper/logout")}
-          title={collapsed ? "Sign Out" : undefined}
-          className={`flex items-center text-[13px] cursor-pointer bg-transparent border-0 w-full rounded-xl h-9 transition-colors font-medium ${
-            collapsed ? "justify-center px-0" : "gap-2 px-3"
-          }`}
-          style={{ color: "var(--color-danger, #e53935)" }}
-        >
-          <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
-          {!collapsed && "Sign Out"}
         </button>
       </div>
     </aside>
