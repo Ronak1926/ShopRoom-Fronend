@@ -5,12 +5,14 @@ import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
+import DeleteSweepOutlinedIcon from "@mui/icons-material/DeleteSweepOutlined";
 import Avatar from "@/components/ui/Avatar";
 import ShareModal from "@/components/ui/ShareModal";
 import type { RoomDetails } from "./types";
 
 interface RoomInfoPanelProps {
   room: RoomDetails;
+  onClearChat: () => void;
 }
 
 function formatDate(iso: string): string {
@@ -28,8 +30,9 @@ function formatDate(iso: string): string {
  * button rather than its own tab, opening the same ShareModal used
  * elsewhere in the app (e.g. the dashboard's Quick Actions).
  */
-export default function RoomInfoPanel({ room }: RoomInfoPanelProps) {
+export default function RoomInfoPanel({ room, onClearChat }: RoomInfoPanelProps) {
   const [showShare, setShowShare] = useState(false);
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   const inviteLink = useMemo(
     () =>
@@ -67,6 +70,39 @@ export default function RoomInfoPanel({ room }: RoomInfoPanelProps) {
           <ShareOutlinedIcon sx={{ fontSize: 18 }} />
           Share Room Link
         </button>
+
+        {/* Clear Chat — wipes this participant's own view only, never
+            affects the shared room history for anyone else. */}
+        {confirmingClear ? (
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-(--color-danger-light) border border-(--color-danger)">
+            <p className="flex-1 text-[13px] text-(--color-danger-text) m-0">
+              Clear all messages for you? This won&apos;t affect other members.
+            </p>
+            <button
+              onClick={() => setConfirmingClear(false)}
+              className="h-8 px-3 rounded-lg text-[12px] font-semibold text-(--color-text-secondary) bg-transparent border-0 cursor-pointer hover:bg-(--color-bg-surface-hover)"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                onClearChat();
+                setConfirmingClear(false);
+              }}
+              className="h-8 px-3 rounded-lg text-[12px] font-semibold text-white bg-(--color-danger) hover:bg-(--color-danger-hover) border-0 cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmingClear(true)}
+            className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-(--color-bg-surface) border border-(--color-border-default) hover:bg-(--color-bg-surface-hover) text-(--color-danger) text-sm font-semibold cursor-pointer transition-colors"
+          >
+            <DeleteSweepOutlinedIcon sx={{ fontSize: 18 }} />
+            Clear Chat
+          </button>
+        )}
 
         {/* Description */}
         {room.description && (

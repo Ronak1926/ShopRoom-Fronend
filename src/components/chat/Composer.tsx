@@ -4,12 +4,16 @@ import { useState, type ReactNode, type KeyboardEvent } from "react";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import ReplyPreview from "./ReplyPreview";
+import type { ChatMessage } from "@/hooks/useRoomChat";
 
 interface ComposerProps {
-  onSend: (text: string) => void;
+  onSend: (text: string, replyToId?: string) => void;
   onTyping: () => void;
   placeholder?: string;
   extraAction?: ReactNode;
+  replyingTo?: ChatMessage | null;
+  onCancelReply?: () => void;
 }
 
 export default function Composer({
@@ -17,14 +21,17 @@ export default function Composer({
   onTyping,
   placeholder = "Type a message...",
   extraAction,
+  replyingTo,
+  onCancelReply,
 }: ComposerProps) {
   const [text, setText] = useState("");
 
   function handleSend() {
     const trimmed = text.trim();
     if (!trimmed) return;
-    onSend(trimmed);
+    onSend(trimmed, replyingTo?.id);
     setText("");
+    onCancelReply?.();
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -36,6 +43,17 @@ export default function Composer({
 
   return (
     <div className="bg-(--color-bg-surface) border-t border-(--color-border-default) px-4 py-3 shrink-0">
+      {replyingTo && (
+        <div className="mb-2">
+          <ReplyPreview
+            senderName={replyingTo.sender.shopName ?? replyingTo.sender.name}
+            text={replyingTo.deletedForEveryone ? "" : replyingTo.text}
+            deletedForEveryone={replyingTo.deletedForEveryone}
+            onCancel={onCancelReply}
+          />
+        </div>
+      )}
+
       <div className="flex items-center gap-2">
         <button className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-transparent cursor-pointer text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors shrink-0">
           <EmojiEmotionsOutlinedIcon sx={{ fontSize: 20 }} />

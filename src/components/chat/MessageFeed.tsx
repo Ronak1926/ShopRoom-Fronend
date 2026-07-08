@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import type { ChatMessage, TypingUser } from "@/hooks/useRoomChat";
@@ -10,8 +10,16 @@ interface MessageFeedProps {
   typingUsers: TypingUser[];
   loading: boolean;
   isOwnMessage: (message: ChatMessage) => boolean;
+  currentViewerId: string | null;
+  seenIneligibleIds: Set<string>;
+  onReply: (message: ChatMessage) => void;
+  onEdit: (messageId: string, text: string) => void;
+  onDelete: (messageId: string, scope: "everyone" | "me") => void;
+  onReact: (messageId: string, emoji: string) => void;
   emptyHint?: string;
 }
+
+const HIGHLIGHT_DURATION_MS = 1500;
 
 function dayLabel(iso: string): string {
   const date = new Date(iso);
@@ -36,13 +44,48 @@ export default function MessageFeed({
   typingUsers,
   loading,
   isOwnMessage,
+  currentViewerId,
+  seenIneligibleIds,
+  onReply,
+  onEdit,
+  onDelete,
+  onReact,
   emptyHint = "No messages yet — say hello!",
 }: MessageFeedProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const highlightTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length, typingUsers.length]);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimeout.current) clearTimeout(highlightTimeout.current);
+    };
+  }, []);
+
+  const registerRef = useCallback((id: string, el: HTMLDivElement | null) => {
+    if (el) messageRefs.current.set(id, el);
+    else messageRefs.current.delete(id);
+  }, []);
+
+  // The WhatsApp "jump to and flash the original" behavior — only works for
+  // messages already loaded client-side (there's no load-more/pagination UI
+  // yet, so this covers the common case of replying within recent history).
+  const handleReplyPreviewClick = useCallback((messageId: string) => {
+    const el = messageRefs.current.get(messageId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(messageId);
+    if (highlightTimeout.current) clearTimeout(highlightTimeout.current);
+    highlightTimeout.current = setTimeout(
+      () => setHighlightedId((cur) => (cur === messageId ? null : cur)),
+      HIGHLIGHT_DURATION_MS,
+    );
+  }, []);
 
   return (
     <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4 bg-(--color-gray-100)">
@@ -73,7 +116,19 @@ export default function MessageFeed({
                   <div className="flex-1 h-px bg-(--color-border-default)" />
                 </div>
               )}
-              <MessageBubble message={message} isOwnMessage={isOwnMessage(message)} />
+              <MessageBubble
+                message={message}
+                isOwnMessage={isOwnMessage(message)}
+                currentViewerId={currentViewerId}
+                seenIneligible={seenIneligibleIds.has(message.id)}
+                highlighted={highlightedId === message.id}
+                onReply={onReply}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onReact={onReact}
+                onReplyPreviewClick={handleReplyPreviewClick}
+                registerRef={registerRef}
+              />
             </div>
           );
         })}
