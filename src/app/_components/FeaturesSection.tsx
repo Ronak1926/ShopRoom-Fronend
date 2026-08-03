@@ -3,6 +3,7 @@ import type { SvgIconProps } from "@mui/material/SvgIcon";
 import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import Reveal from "./Reveal";
 
 type Feature = {
   Icon: ComponentType<SvgIconProps>;
@@ -36,21 +37,24 @@ export default function FeaturesSection() {
     <section id="features" className="w-full bg-(--color-bg-page) py-24 px-6">
       <div className="max-w-[1100px] mx-auto">
         {/* Header */}
-        <div className="flex flex-col items-start mb-16 gap-3">
+        <Reveal className="flex flex-col items-start mb-16 gap-3">
           <span className="text-[11px] font-bold tracking-[0.14em] uppercase text-(--color-brand-primary)">
             The Experience
           </span>
-          <h2 className="text-[clamp(30px,4vw,48px)] font-bold text-(--color-text-primary) leading-[1.1] tracking-tight">
+          <h2 className="font-display text-[clamp(30px,4vw,48px)] font-semibold text-(--color-text-primary) leading-[1.1] tracking-tight">
             Curated Proximity.
           </h2>
           <p className="text-[15px] text-(--color-text-secondary) max-w-[500px] leading-relaxed mt-1">
             Every feature is designed around one principle: get the right
             information to the right person, at the right moment.
           </p>
-        </div>
+        </Reveal>
 
         {/* Feature columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-(--color-border-default)">
+        <Reveal
+          delay={0.15}
+          className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-(--color-border-default)"
+        >
           {features.map(({ Icon, title, description }, i) => (
             <div
               key={title}
@@ -72,7 +76,7 @@ export default function FeaturesSection() {
               </div>
             </div>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -1,0 +1,33 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8f7ff" />
+      <stop offset="50%" stop-color="#e4e0fb" />
+      <stop offset="100%" stop-color="#c3b8f0" />
+    </linearGradient>
+    <radialGradient id="glowRadial" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <filter id="blurSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="40" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#sky)" />
+  <ellipse cx="220" cy="120" rx="320" ry="240" fill="url(#glowRadial)" filter="url(#blurSoft)" opacity="0.5" />
+  <ellipse cx="650" cy="480" rx="260" ry="200" fill="url(#glowRadial)" filter="url(#blurSoft)" opacity="0.2" />
+
+  <circle cx="90" cy="70" r="2.4" fill="#5b47d4" opacity="0.25" />
+  <circle cx="180" cy="40" r="1.8" fill="#5b47d4" opacity="0.2" />
+  <circle cx="320" cy="80" r="2.8" fill="#f7dfa6" opacity="0.4" />
+  <circle cx="430" cy="35" r="2" fill="#5b47d4" opacity="0.2" />
+  <circle cx="540" cy="65" r="2.4" fill="#5b47d4" opacity="0.25" />
+  <circle cx="620" cy="30" r="1.8" fill="#f7dfa6" opacity="0.35" />
+  <circle cx="710" cy="90" r="2.2" fill="#5b47d4" opacity="0.2" />
+  <circle cx="760" cy="150" r="1.8" fill="#5b47d4" opacity="0.18" />
+  <circle cx="40" cy="180" r="1.8" fill="#5b47d4" opacity="0.18" />
+  <circle cx="250" cy="200" r="1.5" fill="#5b47d4" opacity="0.15" />
+  <circle cx="500" cy="150" r="1.6" fill="#f7dfa6" opacity="0.3" />
+  <circle cx="770" cy="260" r="1.6" fill="#ffffff" opacity="0.3" />
+</svg>

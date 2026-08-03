@@ -20,7 +20,7 @@ export default function HeroSection() {
       <LandingNav />
 
       {/* Hero content */}
-      <section className="relative z-10 flex flex-col items-center justify-center min-h-[82vh] px-6 text-center pb-16">
+      <section className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
         <div className="flex flex-col items-center gap-6 max-w-[720px]">
           <h1 className="text-[clamp(40px,6vw,68px)] font-bold text-white leading-[1.05] tracking-[-0.02em] max-w-[650px]">
             Your shop&apos;s news, <br className="hidden sm:block" />
@@ -50,11 +50,6 @@ export default function HeroSection() {
           <p className="text-[13px] text-white/25 tracking-wide mt-1">
             Free for 30 days · No credit card required
           </p>
-        </div>
-
-        {/* Scroll chevron */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/25 animate-bounce">
-          <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 24 }} />
         </div>
       </section>
     </div>

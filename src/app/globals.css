@@ -120,6 +120,7 @@
   --color-msg-alert-border: #d97706;
 
   --font-sans: var(--font-manrope), "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
   --font-size-display: 48px;
   --font-size-h1: 32px;
   --font-size-h2: 24px;
@@ -190,6 +191,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
 }
 
 @media (prefers-color-scheme: dark) {

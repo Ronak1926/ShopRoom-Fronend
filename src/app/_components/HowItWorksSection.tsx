@@ -3,6 +3,7 @@ import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
 import type { ComponentType } from "react";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
+import Reveal from "./Reveal";
 
 type Step = {
   number: string;
@@ -43,17 +44,17 @@ export default function HowItWorksSection() {
     >
       <div className="max-w-[1100px] mx-auto">
         {/* Header */}
-        <div className="text-center mb-20">
+        <Reveal className="text-center mb-20">
           <p className="text-[11px] font-bold tracking-[0.14em] uppercase text-(--color-brand-primary) mb-3">
             How it works
           </p>
-          <h2 className="text-[clamp(30px,4vw,44px)] font-bold text-(--color-text-primary) tracking-tight">
+          <h2 className="font-display text-[clamp(30px,4vw,44px)] font-semibold text-(--color-text-primary) tracking-tight">
             Live in three steps.
           </h2>
-        </div>
+        </Reveal>
 
         {/* Steps — connected line on desktop */}
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+        <Reveal delay={0.15} className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Connector line */}
           <div className="hidden md:block absolute top-7 left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-(--color-brand-primary-muted) via-(--color-brand-primary) to-(--color-brand-primary-muted) opacity-30" />
 
@@ -84,7 +85,7 @@ export default function HowItWorksSection() {
               </div>
             </div>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

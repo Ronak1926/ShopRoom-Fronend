@@ -1,5 +1,6 @@
 ﻿import Image from "next/image";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import Reveal from "./Reveal";
 
 const points = [
   {
@@ -36,12 +37,12 @@ export default function MissionSection() {
         </div>
 
         {/* Right: text */}
-        <div className="lg:w-[56%] flex flex-col justify-center px-8 py-16 lg:pl-4 lg:pr-16 gap-8">
+        <Reveal className="lg:w-[56%] flex flex-col justify-center px-8 py-16 lg:pl-4 lg:pr-16 gap-8">
           <div>
             <p className="text-[11px] font-bold tracking-[0.14em] uppercase text-(--color-brand-primary) mb-4">
               Our mission
             </p>
-            <h2 className="text-[clamp(28px,3.2vw,42px)] font-bold text-(--color-text-primary) leading-[1.15] tracking-tight">
+            <h2 className="font-display text-[clamp(28px,3.2vw,42px)] font-semibold text-(--color-text-primary) leading-[1.15] tracking-tight">
               The new standard for
               <br />
               local commerce.
@@ -74,7 +75,7 @@ export default function MissionSection() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

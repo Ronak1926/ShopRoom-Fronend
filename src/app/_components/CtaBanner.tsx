@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import Reveal from "./Reveal";
 
 const perks = [
   "Free for 30 days",
@@ -17,12 +18,12 @@ export default function CtaBanner() {
       {/* Top border */}
       <div className="absolute top-0 inset-x-0 h-px bg-(--color-border-default)" />
 
-      <div className="relative z-10 max-w-[640px] mx-auto flex flex-col items-center gap-7 text-center">
+      <Reveal className="relative z-10 max-w-[640px] mx-auto flex flex-col items-center gap-7 text-center">
         <div>
           <p className="text-[11px] font-bold tracking-[0.14em] uppercase text-(--color-brand-primary) mb-4">
             For Shopkeepers
           </p>
-          <h2 className="text-[clamp(28px,4vw,46px)] font-bold text-(--color-text-primary) leading-[1.1] tracking-tight max-w-[580px]">
+          <h2 className="font-display text-[clamp(28px,4vw,46px)] font-semibold text-(--color-text-primary) leading-[1.1] tracking-tight max-w-[580px]">
             Ready to bring your shop online?
           </h2>
         </div>
@@ -65,7 +66,7 @@ export default function CtaBanner() {
         <p className="text-[12px] text-(--color-text-hint) tracking-wide">
           Already trusted by 500+ shopkeepers across India
         </p>
-      </div>
+      </Reveal>
     </section>
   );
 }

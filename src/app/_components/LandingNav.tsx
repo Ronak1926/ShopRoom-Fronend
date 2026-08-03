@@ -15,6 +15,7 @@ function readLoggedInState(): LoggedInState {
 
 export default function LandingNav() {
   const [loggedIn, setLoggedIn] = useState<LoggedInState>(null);
+  const [scrolled, setScrolled] = useState(false);
 
   // This is a real landing page hit via SSR + hydration (unlike an
   // already-authenticated dashboard shell reached by client-side nav), so
@@ -26,11 +27,28 @@ export default function LandingNav() {
     return () => clearTimeout(id);
   }, []);
 
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 24);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <nav className="relative z-20 w-full h-16 flex items-center justify-between px-6">
+    <nav
+      className={`fixed top-0 inset-x-0 z-20 w-full flex items-center justify-between px-6 transition-all duration-300 ${
+        scrolled
+          ? "h-14 bg-(--color-landing-nav-scrolled) backdrop-blur-md border-b border-white/8"
+          : "h-16 bg-transparent border-b border-transparent"
+      }`}
+    >
       <Link href="/" className="flex items-center gap-2 shrink-0">
         <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-(--color-brand-primary)">
-          <StorefrontOutlinedIcon sx={{ fontSize: 18, color: "var(--color-text-on-brand)" }} />
+          <StorefrontOutlinedIcon
+            sx={{ fontSize: 18, color: "var(--color-text-on-brand)" }}
+          />
         </span>
         <span className="text-[18px] font-bold text-white tracking-tight">
           ShopRoom
