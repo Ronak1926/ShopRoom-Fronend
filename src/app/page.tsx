@@ -1,10 +1,23 @@
-﻿import type { Metadata } from "next";
-import HeroSection from "./_components/HeroSection";
+import type { Metadata } from "next";
+import Navbar from "./_components/Navbar";
+import Hero from "./_components/Hero";
+import TrustedCarousel from "./_components/TrustedCarousel";
+import Features from "./_components/Features";
+import Industries from "./_components/Industries";
+import WhyShopRoom from "./_components/WhyShopRoom";
+import HowItWorks from "./_components/HowItWorks";
+import NotificationShowcase from "./_components/NotificationShowcase";
+import CommunitySection from "./_components/CommunitySection";
+import Testimonials from "./_components/Testimonials";
+import Pricing from "./_components/Pricing";
+import FAQ from "./_components/FAQ";
+import FinalCTA from "./_components/FinalCTA";
+import Footer from "./_components/Footer";
 
 export const metadata: Metadata = {
-  title: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
+  title: "ShopRoom — Bring Your Shop Closer to Your Customers",
   description:
-    "ShopRoom connects customers to their favourite local shops with real-time stock updates, personalised alerts, and hyper-local discovery. Zero algorithms, just your street.",
+    "Create your own room, invite customers, share updates, and grow your business together on ShopRoom — the platform built for local shopkeepers.",
   alternates: {
     canonical: "/",
   },
@@ -12,26 +25,26 @@ export const metadata: Metadata = {
     url: "/",
   },
 };
-import MissionSection from "./_components/MissionSection";
-import FeaturesSection from "./_components/FeaturesSection";
-import StatsSection from "./_components/StatsSection";
-import HowItWorksSection from "./_components/HowItWorksSection";
-import CtaBanner from "./_components/CtaBanner";
-import LandingFooter from "./_components/LandingFooter";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-(--color-landing-hero-bg)">
+    <div className="flex flex-col min-h-screen bg-(--color-bg-page)">
+      <Navbar />
       <main>
-        {/* HeroSection now includes LandingNav inside the shared particle canvas */}
-        <HeroSection />
-        <MissionSection />
-        <FeaturesSection />
-        <StatsSection />
-        <HowItWorksSection />
-        <CtaBanner />
+        <Hero />
+        <TrustedCarousel />
+        <Features />
+        <Industries />
+        <WhyShopRoom />
+        <HowItWorks />
+        <NotificationShowcase />
+        <CommunitySection />
+        <Testimonials />
+        <Pricing />
+        <FAQ />
+        <FinalCTA />
       </main>
-      <LandingFooter />
+      <Footer />
     </div>
   );
 }
