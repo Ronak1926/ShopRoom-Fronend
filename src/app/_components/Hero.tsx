@@ -107,10 +107,10 @@ export default function Hero() {
         >
           <div className="relative w-full max-w-[560px] lg:max-w-none">
             <Image
-              src="/auth-illustration.png"
+              src="/hero_background.png"
               alt="Shopkeepers and customers connecting on ShopRoom"
-              width={1536}
-              height={1024}
+              width={1250}
+              height={1250}
               priority
               sizes="(max-width: 1024px) 92vw, 760px"
               className="w-full h-auto object-contain"
