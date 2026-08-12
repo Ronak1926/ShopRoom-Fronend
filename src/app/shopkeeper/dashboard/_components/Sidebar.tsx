@@ -14,6 +14,7 @@ import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import { NAV_ITEMS } from "../_data/constants";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
+import SidebarNotifications from "./SidebarNotifications";
 
 const NAV_ICONS: Record<string, React.ElementType> = {
   dashboard: DashboardOutlinedIcon,
@@ -29,10 +30,18 @@ const NAV_ICONS: Record<string, React.ElementType> = {
 interface SidebarProps {
   activeNav: string;
   onNavChange: (id: string) => void;
+  /** Force the rail into its collapsed state and hide the toggle. Used by the
+   *  Notification Studio, which needs the extra width for its own toolbar. */
+  forceCollapsed?: boolean;
 }
 
-export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
-  const { collapsed, toggle } = useSidebarCollapse("shopkeeper");
+export default function Sidebar({
+  activeNav,
+  onNavChange,
+  forceCollapsed = false,
+}: SidebarProps) {
+  const { collapsed: storedCollapsed, toggle } = useSidebarCollapse("shopkeeper");
+  const collapsed = forceCollapsed || storedCollapsed;
 
   return (
     <aside
@@ -64,23 +73,28 @@ export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
         )}
       </div>
 
-      {/* Collapse toggle */}
-      <button
-        type="button"
-        onClick={toggle}
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="mx-3 mb-2 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors cursor-pointer"
-      >
-        {collapsed ? (
-          <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
-        ) : (
-          <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
-        )}
-      </button>
+      {/* Collapse toggle — hidden when the rail is force-collapsed by a page */}
+      {!forceCollapsed && (
+        <button
+          type="button"
+          onClick={toggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="mx-3 mb-2 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+        >
+          {collapsed ? (
+            <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
+          ) : (
+            <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
+          )}
+        </button>
+      )}
 
       {/* Nav */}
-      <nav className="flex-1 px-3 pt-1 flex flex-col gap-0.5">
+      <nav className="flex-1 px-3 pt-1 flex flex-col gap-0.5 overflow-y-auto">
         {NAV_ITEMS.map(({ id, label }) => {
+          if (id === "notifications") {
+            return <SidebarNotifications key={id} collapsed={collapsed} />;
+          }
           const Icon = NAV_ICONS[id];
           const active = activeNav === id;
           return (
