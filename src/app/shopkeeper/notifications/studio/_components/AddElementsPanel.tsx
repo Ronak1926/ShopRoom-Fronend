@@ -9,7 +9,7 @@ import {
 } from "../_data/studioData";
 import { STUDIO_ICONS } from "./studioIcons";
 
-function ElementGrid({ items }: { items: ToolItem[] }) {
+function ElementGrid({ items, onAdd }: { items: ToolItem[]; onAdd: (id: string) => void }) {
   return (
     <div className="grid grid-cols-3 gap-2">
       {items.map(({ id, label, iconKey }) => {
@@ -18,6 +18,7 @@ function ElementGrid({ items }: { items: ToolItem[] }) {
           <button
             key={id}
             type="button"
+            onClick={() => onAdd(id)}
             className="flex flex-col items-center justify-center gap-1.5 aspect-square rounded-xl border border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
           >
             <Icon sx={{ fontSize: 20 }} />
@@ -39,7 +40,12 @@ function GroupLabel({ children }: { children: string }) {
   );
 }
 
-export default function AddElementsPanel({ width }: { width: number }) {
+interface Props {
+  width: number;
+  onAdd: (id: string) => void;
+}
+
+export default function AddElementsPanel({ width, onAdd }: Props) {
   return (
     <aside
       // width is drag-controlled, so it must be an inline style
@@ -55,17 +61,17 @@ export default function AddElementsPanel({ width }: { width: number }) {
       <div className="px-4 pb-4 flex flex-col gap-5">
         <section>
           <GroupLabel>Basic</GroupLabel>
-          <ElementGrid items={BASIC_ELEMENTS} />
+          <ElementGrid items={BASIC_ELEMENTS} onAdd={onAdd} />
         </section>
 
         <section>
           <GroupLabel>Product</GroupLabel>
-          <ElementGrid items={PRODUCT_ELEMENTS} />
+          <ElementGrid items={PRODUCT_ELEMENTS} onAdd={onAdd} />
         </section>
 
         <section>
           <GroupLabel>General</GroupLabel>
-          <ElementGrid items={GENERAL_ELEMENTS} />
+          <ElementGrid items={GENERAL_ELEMENTS} onAdd={onAdd} />
         </section>
 
         <section>

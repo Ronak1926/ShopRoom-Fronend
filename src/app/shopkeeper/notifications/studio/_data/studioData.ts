@@ -47,23 +47,6 @@ export const GENERAL_ELEMENTS: ToolItem[] = [
   { id: "rating", label: "Rating", iconKey: "rating" },
 ];
 
-// Layer list (bottom-left) — order is top-of-canvas first
-export interface LayerItem {
-  id: string;
-  label: string;
-  iconKey: string;
-}
-
-export const LAYERS: LayerItem[] = [
-  { id: "l1", label: "Text - New Arrival", iconKey: "text" },
-  { id: "l2", label: "Text - Fresh collection just landed!", iconKey: "text" },
-  { id: "l3", label: "Badge - Limited Stock", iconKey: "badge" },
-  { id: "l4", label: "Product Image", iconKey: "productImage" },
-  { id: "l5", label: "Stock Box", iconKey: "stock" },
-  { id: "l6", label: "Button - Shop Now", iconKey: "buttons" },
-  { id: "l7", label: "Background", iconKey: "background" },
-];
-
 // Timeline animation tracks (bottom-center). offset/width are 0–100 percent
 // across the 0s–4s ruler; tone maps to a token-backed colour in the component.
 export interface TimelineTrack {

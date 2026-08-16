@@ -1,270 +1,258 @@
 "use client";
 
-import type { ReactNode } from "react";
+import TouchAppOutlinedIcon from "@mui/icons-material/TouchAppOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import FormatAlignLeftOutlinedIcon from "@mui/icons-material/FormatAlignLeftOutlined";
-import FormatAlignCenterOutlinedIcon from "@mui/icons-material/FormatAlignCenterOutlined";
-import FormatAlignRightOutlinedIcon from "@mui/icons-material/FormatAlignRightOutlined";
-import FormatAlignJustifyOutlinedIcon from "@mui/icons-material/FormatAlignJustifyOutlined";
-import FormatBoldIcon from "@mui/icons-material/FormatBold";
-import FormatItalicIcon from "@mui/icons-material/FormatItalic";
-import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
-import FormatSizeOutlinedIcon from "@mui/icons-material/FormatSizeOutlined";
-import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
-import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
-import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
+import FlipToFrontOutlinedIcon from "@mui/icons-material/FlipToFrontOutlined";
+import FlipToBackOutlinedIcon from "@mui/icons-material/FlipToBackOutlined";
+import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
+import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
+import { findNode, nodeLabel, type LayerMove } from "@/features/notifications/tree";
+import type { CompositionNode, NotificationDesign } from "@/features/notifications/types";
+import { ColorField, NumberField, Row, Section, Select, Slider } from "./properties/fields";
 
-// ── Small building blocks ──────────────────────────────────────────────────────
+const ENTRY = ["NONE", "FADE_IN", "SLIDE_UP", "SLIDE_DOWN", "ZOOM_IN", "BOUNCE_IN"] as const;
+const ATTENTION = ["NONE", "PULSE", "GLOW", "FLOAT", "WIGGLE", "SHAKE"] as const;
+const EXIT = ["NONE", "FADE_OUT", "SLIDE_DOWN", "ZOOM_OUT"] as const;
+const EASINGS = ["easeOut", "easeIn", "easeInOut", "linear"] as const;
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="px-4 py-4 border-t border-(--color-border-default)">
-      <h4 className="text-[13px] font-bold text-(--color-text-primary) mb-3">
-        {title}
-      </h4>
-      {children}
-    </section>
-  );
+const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
+  { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },
+  { move: "front", label: "To front", icon: FlipToFrontOutlinedIcon },
+  { move: "backward", label: "Backward", icon: ArrowDownwardOutlinedIcon },
+  { move: "back", label: "To back", icon: FlipToBackOutlinedIcon },
+];
+
+interface Props {
+  width: number;
+  design: NotificationDesign | null;
+  selectedId: string | null;
+  updateElement: (id: string, patch: (n: CompositionNode) => CompositionNode) => void;
+  onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onMoveLayer: (id: string, move: LayerMove) => void;
+  onToggleLock: (id: string) => void;
 }
 
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <label className="flex items-center gap-2 h-9 px-2.5 rounded-lg border border-(--color-border-default) bg-(--color-bg-input)">
-      <span className="text-[11px] font-medium text-(--color-text-hint)">
-        {label}
-      </span>
-      <input
-        defaultValue={value}
-        className="w-full min-w-0 bg-transparent border-0 outline-none text-[13px] font-medium text-(--color-text-primary) text-right"
-      />
-    </label>
-  );
-}
+export default function PropertiesPanel({
+  width,
+  design,
+  selectedId,
+  updateElement,
+  onDelete,
+  onDuplicate,
+  onMoveLayer,
+  onToggleLock,
+}: Props) {
+  const node = design && selectedId ? findNode(design.elements, selectedId) : null;
 
-function SelectBox({ value }: { value: string }) {
-  return (
-    <div className="flex items-center h-9 px-3 rounded-lg border border-(--color-border-default) bg-(--color-bg-input) text-[13px] font-medium text-(--color-text-primary) cursor-pointer">
-      {value}
-      <KeyboardArrowDownOutlinedIcon
-        sx={{ fontSize: 16, color: "var(--color-text-hint)" }}
-        className="ml-auto"
-      />
-    </div>
-  );
-}
-
-function IconToggleRow({
-  icons,
-  activeIndex,
-}: {
-  icons: React.ElementType[];
-  activeIndex: number;
-}) {
-  return (
-    <div className="grid grid-cols-4 gap-1.5">
-      {icons.map((Icon, i) => (
-        <button
-          key={i}
-          type="button"
-          className={`h-9 flex items-center justify-center rounded-lg border transition-colors cursor-pointer ${
-            i === activeIndex
-              ? "border-(--color-brand-primary) bg-(--color-brand-primary-light) text-(--color-brand-primary)"
-              : "border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover)"
-          }`}
-        >
-          <Icon sx={{ fontSize: 18 }} />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function StyleRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-[12px] text-(--color-text-secondary)">{label}</span>
-      {children}
-    </div>
-  );
-}
-
-// ── Panel ───────────────────────────────────────────────────────────────────────
-
-export default function PropertiesPanel({ width }: { width: number }) {
   return (
     <aside
       // width is drag-controlled, so it must be an inline style
       style={{ width }}
       className="shrink-0 flex flex-col bg-(--color-bg-surface) overflow-y-auto"
     >
-      {/* Header */}
-      <div className="flex items-center px-4 py-4">
-        <h3 className="text-[15px] font-bold text-(--color-text-primary)">Text</h3>
+      {!node ? (
+        <div className="flex flex-col items-center justify-center text-center gap-2 px-6 py-16 text-(--color-text-hint)">
+          <TouchAppOutlinedIcon sx={{ fontSize: 30 }} />
+          <p className="text-[13px]">Select an element on the canvas or in Layers to edit it.</p>
+        </div>
+      ) : (
+        <Inspector
+          key={node.id}
+          node={node}
+          update={(p) => updateElement(node.id, p)}
+          onDelete={() => onDelete(node.id)}
+          onDuplicate={() => onDuplicate(node.id)}
+          onMoveLayer={(m) => onMoveLayer(node.id, m)}
+          onToggleLock={() => onToggleLock(node.id)}
+        />
+      )}
+    </aside>
+  );
+}
+
+interface InspectorProps {
+  node: CompositionNode;
+  update: (patch: (n: CompositionNode) => CompositionNode) => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  onMoveLayer: (m: LayerMove) => void;
+  onToggleLock: () => void;
+}
+
+function Inspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock }: InspectorProps) {
+  const f = node.frame;
+  const style = node.style ?? {};
+  const hasText = typeof node.content?.text === "string";
+  const hidden = node.visible === false;
+  const locked = !!node.locked;
+
+  const setFrame = (k: "x" | "y" | "width" | "height" | "rotation", v: number) =>
+    update((n) => ({ ...n, frame: { ...n.frame, [k]: v } }));
+  const setStyle = (patch: Partial<NonNullable<CompositionNode["style"]>>) =>
+    update((n) => ({ ...n, style: { ...n.style, ...patch } }));
+  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
+    update((n) => ({
+      ...n,
+      animation: {
+        ...n.animation,
+        [slot]:
+          type === "NONE"
+            ? undefined
+            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
+      },
+    }));
+
+  return (
+    <>
+      {/* Element */}
+      <div className="flex items-center gap-1 px-4 py-3 border-b border-(--color-border-default)">
+        <div className="min-w-0">
+          <input
+            value={nodeLabel(node)}
+            onChange={(e) => update((n) => ({ ...n, name: e.target.value }))}
+            className="w-full bg-transparent border-0 outline-none text-[14px] font-bold text-(--color-text-primary)"
+          />
+          <p className="text-[10px] uppercase tracking-wide text-(--color-text-hint)">{node.type}</p>
+        </div>
+        <button
+          type="button"
+          title="Duplicate"
+          onClick={onDuplicate}
+          className="ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer"
+        >
+          <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
+        </button>
         <button
           type="button"
           title="Delete element"
-          className="ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-(--color-danger) hover:bg-(--color-danger-light) transition-colors cursor-pointer"
+          onClick={onDelete}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-(--color-danger) hover:bg-(--color-danger-light) transition-colors cursor-pointer"
         >
           <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
         </button>
       </div>
 
-      {/* Alignment */}
-      <div className="px-4 pb-4">
-        <IconToggleRow
-          activeIndex={1}
-          icons={[
-            FormatAlignLeftOutlinedIcon,
-            FormatAlignCenterOutlinedIcon,
-            FormatAlignRightOutlinedIcon,
-            FormatAlignJustifyOutlinedIcon,
-          ]}
-        />
+      {hasText && (
+        <Section title="Content">
+          <textarea
+            defaultValue={node.content?.text ?? ""}
+            onChange={(e) => update((n) => ({ ...n, content: { ...n.content, text: e.target.value } }))}
+            rows={2}
+            className="w-full resize-none rounded-lg border border-(--color-border-default) bg-(--color-bg-input) px-3 py-2 text-[13px] text-(--color-text-primary) outline-none focus:border-(--color-brand-primary)"
+          />
+        </Section>
+      )}
 
-        {/* Text content */}
-        <textarea
-          defaultValue="New Arrival"
-          rows={2}
-          className="mt-3 w-full resize-none rounded-lg border border-(--color-border-default) bg-(--color-bg-input) px-3 py-2 text-[13px] text-(--color-text-primary) outline-none focus:border-(--color-brand-primary)"
-        />
+      <Section title="Transform">
+        <div className="grid grid-cols-2 gap-2">
+          <NumberField label="X" value={f.x} onChange={(v) => setFrame("x", v)} />
+          <NumberField label="Y" value={f.y} onChange={(v) => setFrame("y", v)} />
+          <NumberField label="W" value={f.width} onChange={(v) => setFrame("width", v)} />
+          <NumberField label="H" value={f.height} onChange={(v) => setFrame("height", v)} />
+        </div>
+        <div className="mt-2">
+          <NumberField label="Rotation" value={f.rotation ?? 0} onChange={(v) => setFrame("rotation", v)} suffix="deg" />
+        </div>
+      </Section>
 
-        {/* Font / size / color */}
-        <div className="mt-3 grid grid-cols-[1fr_auto_auto] gap-2">
-          <SelectBox value="Poppins" />
-          <SelectBox value="28" />
+      <Section title="Style">
+        <div className="flex flex-col gap-2.5">
+          <Row label="Color / tint">
+            <ColorField value={style.color} onChange={(v) => setStyle({ color: v })} />
+          </Row>
+          {style.fontSize != null && (
+            <Row label="Font size">
+              <NumberField label="" value={style.fontSize} onChange={(v) => setStyle({ fontSize: v })} />
+            </Row>
+          )}
+          <Row label="Opacity">
+            <Slider value={style.opacity ?? 1} min={0} max={1} step={0.05} onChange={(v) => setStyle({ opacity: v })} />
+          </Row>
+          <Row label="Blur">
+            <Slider value={style.blur ?? 0} min={0} max={40} step={1} onChange={(v) => setStyle({ blur: v })} />
+          </Row>
+          <Row label="Radius">
+            <Slider value={style.borderRadius ?? 0} min={0} max={100} step={1} onChange={(v) => setStyle({ borderRadius: v })} />
+          </Row>
+        </div>
+      </Section>
+
+      <Section title="Layer">
+        <div className="grid grid-cols-2 gap-1.5">
+          {LAYER_BUTTONS.map(({ move, label, icon: Icon }) => (
+            <button
+              key={move}
+              type="button"
+              onClick={() => onMoveLayer(move)}
+              className="flex items-center gap-1.5 h-8 px-2 rounded-lg border border-(--color-border-default) text-[11px] font-medium text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+            >
+              <Icon sx={{ fontSize: 14 }} />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
           <button
             type="button"
-            title="Text colour"
-            className="w-9 h-9 rounded-lg border border-(--color-border-default) bg-(--color-brand-primary) cursor-pointer"
-          />
+            onClick={() => update((n) => ({ ...n, visible: hidden }))}
+            className="flex items-center gap-1.5 h-8 px-2 rounded-lg border border-(--color-border-default) text-[11px] font-medium text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer"
+          >
+            {hidden ? <VisibilityOffOutlinedIcon sx={{ fontSize: 14 }} /> : <VisibilityOutlinedIcon sx={{ fontSize: 14 }} />}
+            {hidden ? "Hidden" : "Visible"}
+          </button>
+          <button
+            type="button"
+            onClick={onToggleLock}
+            className={`flex items-center gap-1.5 h-8 px-2 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
+              locked
+                ? "border-(--color-brand-primary) text-(--color-brand-primary) bg-(--color-brand-primary-light)"
+                : "border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover)"
+            }`}
+          >
+            {locked ? <LockOutlinedIcon sx={{ fontSize: 14 }} /> : <LockOpenOutlinedIcon sx={{ fontSize: 14 }} />}
+            {locked ? "Locked" : "Unlocked"}
+          </button>
         </div>
+      </Section>
 
-        {/* Style toggles */}
-        <div className="mt-2 grid grid-cols-5 gap-1.5">
-          {[FormatBoldIcon, FormatItalicIcon, FormatUnderlinedIcon, FormatSizeOutlinedIcon, TuneOutlinedIcon].map(
-            (Icon, i) => (
-              <button
-                key={i}
-                type="button"
-                className="h-9 flex items-center justify-center rounded-lg border border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer"
-              >
-                <Icon sx={{ fontSize: 18 }} />
-              </button>
-            ),
+      <Section title="Animation">
+        <div className="flex flex-col gap-2.5">
+          <Row label="Entry">
+            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
+          </Row>
+          <Row label="Attention">
+            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
+          </Row>
+          <Row label="Exit">
+            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
+          </Row>
+          {node.animation?.entry && (
+            <>
+              <Row label="Duration">
+                <NumberField label="" value={node.animation.entry.durationMs ?? 500} suffix="ms" onChange={(v) =>
+                  update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, durationMs: v } } }))
+                } />
+              </Row>
+              <Row label="Delay">
+                <NumberField label="" value={node.animation.entry.delayMs ?? 0} suffix="ms" onChange={(v) =>
+                  update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, delayMs: v } } }))
+                } />
+              </Row>
+              <Row label="Easing">
+                <Select value={node.animation.entry.easing ?? "easeOut"} options={EASINGS} onChange={(v) =>
+                  update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, easing: v } } }))
+                } />
+              </Row>
+            </>
           )}
         </div>
-      </div>
-
-      {/* Position & Size */}
-      <Section title="Position & Size">
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
-          <Field label="X" value="24" />
-          <Field label="Y" value="48" />
-          <button
-            type="button"
-            title="Lock aspect ratio"
-            className="row-span-2 w-9 h-9 flex items-center justify-center rounded-lg border border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer"
-          >
-            <LinkOutlinedIcon sx={{ fontSize: 16 }} />
-          </button>
-          <Field label="W" value="327" />
-          <Field label="H" value="72" />
-        </div>
       </Section>
-
-      {/* Style */}
-      <Section title="Style">
-        <div className="flex flex-col gap-3">
-          <StyleRow label="Color">
-            <div className="flex items-center gap-2 h-8 px-2 rounded-lg border border-(--color-border-default) bg-(--color-bg-input)">
-              <span className="w-4 h-4 rounded bg-(--color-text-primary)" />
-              <span className="text-[12px] font-medium text-(--color-text-primary)">
-                #1A1A1A
-              </span>
-            </div>
-          </StyleRow>
-          <StyleRow label="Background">
-            <div className="flex items-center gap-2 h-8 px-2 rounded-lg border border-(--color-border-default) bg-(--color-bg-input)">
-              <span className="w-4 h-4 rounded border border-(--color-border-default)" />
-              <span className="text-[12px] font-medium text-(--color-text-secondary)">
-                Transparent
-              </span>
-            </div>
-          </StyleRow>
-          <StyleRow label="Padding">
-            <input
-              defaultValue="16"
-              className="w-20 h-8 px-2.5 rounded-lg border border-(--color-border-default) bg-(--color-bg-input) text-[12px] font-medium text-(--color-text-primary) text-right outline-none"
-            />
-          </StyleRow>
-          <StyleRow label="Border Radius">
-            <input
-              defaultValue="12"
-              className="w-20 h-8 px-2.5 rounded-lg border border-(--color-border-default) bg-(--color-bg-input) text-[12px] font-medium text-(--color-text-primary) text-right outline-none"
-            />
-          </StyleRow>
-        </div>
-      </Section>
-
-      {/* Animation */}
-      <Section title="Animation">
-        <div className="flex flex-col gap-3">
-          <StyleRow label="Entry Animation">
-            <div className="w-36">
-              <SelectBox value="Fade In" />
-            </div>
-          </StyleRow>
-          <StyleRow label="Duration">
-            <div className="w-36">
-              <SelectBox value="0.6s" />
-            </div>
-          </StyleRow>
-          <StyleRow label="Delay">
-            <div className="w-36">
-              <SelectBox value="0s" />
-            </div>
-          </StyleRow>
-        </div>
-      </Section>
-
-      {/* On Click Action */}
-      <Section title="On Click Action">
-        <p className="text-[11px] font-medium text-(--color-text-hint) mb-1.5">
-          Action Type
-        </p>
-        <SelectBox value="Open Product" />
-
-        <p className="text-[11px] font-medium text-(--color-text-hint) mt-3 mb-1.5">
-          Select Product
-        </p>
-        <div className="flex items-center gap-3 p-2.5 rounded-xl border border-(--color-border-default)">
-          <span className="w-10 h-10 rounded-lg bg-(--color-brand-primary-light) flex items-center justify-center text-(--color-brand-primary) shrink-0">
-            <FormatSizeOutlinedIcon sx={{ fontSize: 18 }} />
-          </span>
-          <div className="min-w-0">
-            <div className="text-[13px] font-semibold text-(--color-text-primary) truncate">
-              Air Max Purple
-            </div>
-            <div className="text-[11px] text-(--color-text-hint)">
-              ID: #P12345
-            </div>
-          </div>
-          <button
-            type="button"
-            title="Remove product"
-            className="ml-auto w-7 h-7 flex items-center justify-center rounded-md text-(--color-text-hint) hover:bg-(--color-bg-surface-hover) hover:text-(--color-text-primary) transition-colors cursor-pointer"
-          >
-            <CloseOutlinedIcon sx={{ fontSize: 15 }} />
-          </button>
-        </div>
-      </Section>
-    </aside>
+    </>
   );
 }
