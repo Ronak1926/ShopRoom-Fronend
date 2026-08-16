@@ -5,72 +5,125 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
+import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import {
   SCENE_CATEGORIES,
-  blankScene,
   filterScenes,
   SCENES,
   type Scene,
   type SceneCategory,
 } from "@/features/notifications/scenes";
+import { SCENE_CATEGORY_ICONS } from "./sceneCategoryIcons";
 import ScenePreview from "./ScenePreview";
-import type { Background } from "@/features/notifications/types";
+import BuildYourOwnScenePanel from "./BuildYourOwnScenePanel";
+import type { LibraryItem } from "@/features/notifications/sceneLibrary";
+import type { Background, NodeStyle, NotificationDesign } from "@/features/notifications/types";
 
 type Tab = "background" | "scenes" | "uploads";
 
 interface Props {
   width: number;
+  design: NotificationDesign | null;
   appliedSceneId: string | null;
+  selectedId: string | null;
+  editingScene: boolean;
+  onSelectElement: (id: string) => void;
   onApplyScene: (scene: Scene) => void;
   onDetachScene: () => void;
   onSetBackground: (bg: Background) => void;
+  onStartEditing: () => void;
+  onStopEditing: () => void;
+  onInsertIntoScene: (item: LibraryItem) => void;
+  onSetSceneStyle: (patch: Partial<NodeStyle>) => void;
+  onNewBlankScene: () => void;
 }
 
 export default function BackgroundScenesPanel({
   width,
+  design,
   appliedSceneId,
+  selectedId,
+  editingScene,
+  onSelectElement,
   onApplyScene,
   onDetachScene,
   onSetBackground,
+  onStartEditing,
+  onStopEditing,
+  onInsertIntoScene,
+  onSetSceneStyle,
+  onNewBlankScene,
 }: Props) {
   const [tab, setTab] = useState<Tab>("scenes");
+  const sceneGroup = design?.elements.find((n) => n.id === "scene");
+  const appliedPreset = SCENES.find((s) => s.id === appliedSceneId);
+  const sceneName = appliedPreset?.name ?? sceneGroup?.name ?? "My Scene";
 
   return (
     <aside
       // width is drag-controlled, so it must be an inline style
       style={{ width }}
-      className="shrink-0 flex flex-col bg-(--color-bg-surface) overflow-y-auto"
+      className="shrink-0 flex flex-col bg-(--color-bg-surface) overflow-hidden"
     >
-      <div className="px-4 pt-4 pb-2">
-        <h2 className="text-[15px] font-bold text-(--color-text-primary)">Backgrounds &amp; Scenes</h2>
-      </div>
+      {tab === "scenes" && editingScene && sceneGroup ? (
+        <BuildYourOwnScenePanel
+          sceneName={sceneName}
+          sceneChildren={sceneGroup.children ?? []}
+          sceneStyle={sceneGroup.style}
+          selectedId={selectedId}
+          onSelectElement={onSelectElement}
+          onInsert={onInsertIntoScene}
+          onSetSceneStyle={onSetSceneStyle}
+          onNewBlankScene={onNewBlankScene}
+          onBack={onStopEditing}
+        />
+      ) : (
+        <div className="flex flex-col h-full overflow-y-auto">
+          <div className="px-4 pt-4 pb-2">
+            <h2 className="text-[15px] font-bold text-(--color-text-primary)">Backgrounds &amp; Scenes</h2>
+          </div>
 
-      <div className="px-4 flex items-center gap-4 border-b border-(--color-border-default)">
-        {(["background", "scenes", "uploads"] as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            className={`pb-2.5 text-[13px] font-medium capitalize border-b-2 -mb-px transition-colors cursor-pointer ${
-              tab === t
-                ? "border-(--color-brand-primary) text-(--color-brand-primary)"
-                : "border-transparent text-(--color-text-secondary) hover:text-(--color-text-primary)"
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
+          <div className="px-4 flex items-center gap-4 border-b border-(--color-border-default)">
+            {(["background", "scenes", "uploads"] as Tab[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={`pb-2.5 text-[13px] font-medium capitalize border-b-2 -mb-px transition-colors cursor-pointer ${
+                  tab === t
+                    ? "border-(--color-brand-primary) text-(--color-brand-primary)"
+                    : "border-transparent text-(--color-text-secondary) hover:text-(--color-text-primary)"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
 
-      <div className="p-4">
-        {tab === "scenes" && (
-          <ScenesTab appliedSceneId={appliedSceneId} onApply={onApplyScene} onDetach={onDetachScene} />
-        )}
-        {tab === "background" && (
-          <BackgroundTab appliedSceneId={appliedSceneId} onSet={onSetBackground} onDetach={onDetachScene} />
-        )}
-        {tab === "uploads" && <UploadsTab />}
-      </div>
+          <div className="p-4">
+            {tab === "scenes" && (
+              <ScenesTab
+                appliedSceneId={appliedSceneId}
+                hasScene={!!sceneGroup}
+                onApply={(s) => {
+                  onApplyScene(s);
+                  onStartEditing();
+                }}
+                onDetach={onDetachScene}
+                onCustomize={onStartEditing}
+                onNewBlank={() => {
+                  onNewBlankScene();
+                  onStartEditing();
+                }}
+              />
+            )}
+            {tab === "background" && (
+              <BackgroundTab appliedSceneId={appliedSceneId} onSet={onSetBackground} onDetach={onDetachScene} />
+            )}
+            {tab === "uploads" && <UploadsTab />}
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
@@ -79,12 +132,18 @@ export default function BackgroundScenesPanel({
 
 function ScenesTab({
   appliedSceneId,
+  hasScene,
   onApply,
   onDetach,
+  onCustomize,
+  onNewBlank,
 }: {
   appliedSceneId: string | null;
+  hasScene: boolean;
   onApply: (s: Scene) => void;
   onDetach: () => void;
+  onCustomize: () => void;
+  onNewBlank: () => void;
 }) {
   const [category, setCategory] = useState<SceneCategory>("All");
   const [query, setQuery] = useState("");
@@ -93,26 +152,41 @@ function ScenesTab({
 
   return (
     <>
-      {applied && (
+      {(applied || hasScene) && (
         <div className="mb-4 rounded-xl border border-(--color-brand-primary) bg-(--color-brand-primary-light) p-2.5">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-(--color-brand-primary) mb-1.5">
             Selected scene
           </p>
           <div className="flex items-center gap-2.5">
-            <span className="w-12 shrink-0 rounded-lg overflow-hidden border border-(--color-border-default)">
-              <ScenePreview scene={applied} height={40} />
-            </span>
+            {applied ? (
+              <span className="w-12 shrink-0 rounded-lg overflow-hidden border border-(--color-border-default)">
+                <ScenePreview scene={applied} height={40} />
+              </span>
+            ) : (
+              <span className="w-12 h-10 shrink-0 rounded-lg bg-(--color-bg-surface) flex items-center justify-center text-(--color-text-hint)">
+                <TuneOutlinedIcon sx={{ fontSize: 18 }} />
+              </span>
+            )}
             <span className="text-[12px] font-semibold text-(--color-text-primary) truncate">
-              {applied.name}
+              {applied?.name ?? "Custom scene"}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onDetach}
-            className="mt-2 w-full h-7 rounded-lg bg-(--color-bg-surface) text-[11px] font-semibold text-(--color-text-secondary) hover:text-(--color-danger) transition-colors cursor-pointer"
-          >
-            Detach scene
-          </button>
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              onClick={onCustomize}
+              className="h-7 rounded-lg bg-(--color-bg-surface) text-[11px] font-semibold text-(--color-brand-primary) hover:bg-(--color-brand-primary) hover:text-white transition-colors cursor-pointer"
+            >
+              Customize
+            </button>
+            <button
+              type="button"
+              onClick={onDetach}
+              className="h-7 rounded-lg bg-(--color-bg-surface) text-[11px] font-semibold text-(--color-text-secondary) hover:text-(--color-danger) transition-colors cursor-pointer"
+            >
+              Detach scene
+            </button>
+          </div>
         </div>
       )}
 
@@ -126,38 +200,36 @@ function ScenesTab({
         />
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        {SCENE_CATEGORIES.map((c) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => setCategory(c)}
-            className={`h-7 px-2.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
-              category === c
-                ? "bg-(--color-brand-primary-light) text-(--color-brand-primary)"
-                : "text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover)"
-            }`}
-          >
-            {c}
-          </button>
-        ))}
+      <p className="text-[11px] font-semibold tracking-widest uppercase text-(--color-text-hint) mb-2">
+        Scene categories
+      </p>
+      <div className="grid grid-cols-4 gap-1.5 mb-4">
+        {SCENE_CATEGORIES.map((c) => {
+          const Icon = SCENE_CATEGORY_ICONS[c];
+          const active = category === c;
+          return (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setCategory(c)}
+              title={c}
+              className={`flex flex-col items-center justify-center gap-1 h-14 rounded-xl border text-[10px] font-medium transition-colors cursor-pointer ${
+                active
+                  ? "border-(--color-brand-primary) bg-(--color-brand-primary-light) text-(--color-brand-primary)"
+                  : "border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover)"
+              }`}
+            >
+              <Icon sx={{ fontSize: 18 }} />
+              <span className="truncate w-full text-center px-0.5">{c}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <button
-        type="button"
-        onClick={() => onApply(blankScene())}
-        className="w-full flex items-center gap-2.5 p-2.5 mb-3 rounded-xl border border-dashed border-(--color-brand-primary) text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
-      >
-        <span className="w-8 h-8 rounded-lg bg-(--color-brand-primary-light) flex items-center justify-center">
-          <AddOutlinedIcon sx={{ fontSize: 18 }} />
-        </span>
-        <span className="text-left">
-          <span className="block text-[12px] font-semibold">New Blank Scene</span>
-          <span className="block text-[10px] text-(--color-text-hint)">Build from scratch</span>
-        </span>
-      </button>
-
-      <div className="grid grid-cols-2 gap-2.5">
+      <p className="text-[11px] font-semibold tracking-widest uppercase text-(--color-text-hint) mb-2">
+        ShopRoom scenes
+      </p>
+      <div className="grid grid-cols-2 gap-2.5 mb-4">
         {scenes.map((scene) => {
           const isApplied = scene.id === appliedSceneId;
           return (
@@ -196,6 +268,20 @@ function ScenesTab({
           </p>
         )}
       </div>
+
+      <button
+        type="button"
+        onClick={onNewBlank}
+        className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-dashed border-(--color-brand-primary) text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
+      >
+        <span className="w-8 h-8 rounded-lg bg-(--color-brand-primary-light) flex items-center justify-center">
+          <AddOutlinedIcon sx={{ fontSize: 18 }} />
+        </span>
+        <span className="text-left">
+          <span className="block text-[12px] font-semibold">New Blank Scene</span>
+          <span className="block text-[10px] text-(--color-text-hint)">Build from scratch</span>
+        </span>
+      </button>
     </>
   );
 }

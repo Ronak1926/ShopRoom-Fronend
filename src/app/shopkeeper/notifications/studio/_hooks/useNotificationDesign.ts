@@ -25,8 +25,8 @@ import {
   updateNodeById,
   type LayerMove,
 } from "@/features/notifications/tree";
-import type { Scene } from "@/features/notifications/scenes";
-import type { Background, CompositionNode, NotificationDesign } from "@/features/notifications/types";
+import { blankScene, type Scene } from "@/features/notifications/scenes";
+import type { Background, CompositionNode, NodeStyle, NotificationDesign } from "@/features/notifications/types";
 
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
@@ -274,6 +274,73 @@ export function useNotificationDesign() {
     setSelectedId(null);
   }, [commit]);
 
+  /**
+   * "New Blank Scene": wipes the ENTIRE canvas (text, buttons, product image,
+   * decorations — everything), leaving only an empty "scene" group so the Scene
+   * Builder has something to add layers into. Unlike applyScene, this doesn't
+   * preserve any template content — it's a true blank slate.
+   */
+  const startBlankScene = useCallback(() => {
+    const prev = designRef.current;
+    if (!prev) return;
+    const scene = blankScene();
+    const sceneGroup: CompositionNode = {
+      id: "scene",
+      type: "GROUP",
+      name: "Scene",
+      frame: { x: 0, y: 0, width: prev.canvas.width, height: prev.canvas.height, zIndex: 1 },
+      visible: true,
+      locked: false,
+      children: [],
+    };
+    commit({
+      ...prev,
+      canvas: { ...prev.canvas, background: scene.background },
+      elements: [sceneGroup],
+    });
+    setAppliedSceneId(scene.id);
+    setSelectedId(null);
+  }, [commit]);
+
+  /** Inserts a decoration into the scene group's children (creating the group if missing). */
+  const addToScene = useCallback(
+    (node: CompositionNode) => {
+      const prev = designRef.current;
+      if (!prev) return;
+      const hasScene = prev.elements.some((n) => n.id === "scene");
+      const elements = hasScene
+        ? updateNodeById(prev.elements, "scene", (s) => ({ ...s, children: [...(s.children ?? []), node] }))
+        : [
+            {
+              id: "scene",
+              type: "GROUP",
+              name: "Scene",
+              frame: { x: 0, y: 0, width: prev.canvas.width, height: prev.canvas.height, zIndex: 1 },
+              visible: true,
+              locked: false,
+              children: [node],
+            } satisfies CompositionNode,
+            ...prev.elements,
+          ];
+      commit({ ...prev, elements });
+      setSelectedId(node.id);
+    },
+    [commit],
+  );
+
+  /** Patches the scene group's own style (Canvas Tint / Scene Opacity / Scene Blur). */
+  const setSceneStyle = useCallback(
+    (patch: Partial<NodeStyle>) => {
+      const prev = designRef.current;
+      if (!prev) return;
+      commit({
+        ...prev,
+        elements: updateNodeById(prev.elements, "scene", (s) => ({ ...s, style: { ...s.style, ...patch } })),
+      });
+    },
+    [commit],
+  );
+
   const undo = useCallback(() => {
     const prev = designRef.current;
     if (!prev || !history.current.past.length) return;
@@ -329,6 +396,9 @@ export function useNotificationDesign() {
     setBackground,
     applyScene,
     detachScene,
+    startBlankScene,
+    addToScene,
+    setSceneStyle,
     appliedSceneId,
     undo,
     redo,
