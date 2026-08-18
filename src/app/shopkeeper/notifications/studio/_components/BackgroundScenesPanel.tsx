@@ -6,6 +6,9 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import {
   SCENE_CATEGORIES,
   filterScenes,
@@ -26,16 +29,15 @@ interface Props {
   design: NotificationDesign | null;
   appliedSceneId: string | null;
   selectedId: string | null;
-  editingScene: boolean;
   onSelectElement: (id: string) => void;
   onApplyScene: (scene: Scene) => void;
   onDetachScene: () => void;
   onSetBackground: (bg: Background) => void;
-  onStartEditing: () => void;
-  onStopEditing: () => void;
   onInsertIntoScene: (item: LibraryItem) => void;
   onSetSceneStyle: (patch: Partial<NodeStyle>) => void;
   onNewBlankScene: () => void;
+  onOpenBackgroundBuilder: () => void;
+  onToggleLock: (id: string) => void;
 }
 
 export default function BackgroundScenesPanel({
@@ -43,18 +45,22 @@ export default function BackgroundScenesPanel({
   design,
   appliedSceneId,
   selectedId,
-  editingScene,
   onSelectElement,
   onApplyScene,
   onDetachScene,
   onSetBackground,
-  onStartEditing,
-  onStopEditing,
   onInsertIntoScene,
   onSetSceneStyle,
   onNewBlankScene,
+  onOpenBackgroundBuilder,
+  onToggleLock,
 }: Props) {
   const [tab, setTab] = useState<Tab>("scenes");
+  // Whether the "Build Your Own Scene" editor view (Elements/Shapes/
+  // Decorations/Effects tabs + scene settings) replaces the scene browser.
+  // Purely a left-panel concern now — there's no separate scene canvas to
+  // coordinate with.
+  const [editingScene, setEditingScene] = useState(false);
   const sceneGroup = design?.elements.find((n) => n.id === "scene");
   const appliedPreset = SCENES.find((s) => s.id === appliedSceneId);
   const sceneName = appliedPreset?.name ?? sceneGroup?.name ?? "My Scene";
@@ -70,12 +76,14 @@ export default function BackgroundScenesPanel({
           sceneName={sceneName}
           sceneChildren={sceneGroup.children ?? []}
           sceneStyle={sceneGroup.style}
+          sceneLocked={!!sceneGroup.locked}
           selectedId={selectedId}
           onSelectElement={onSelectElement}
           onInsert={onInsertIntoScene}
           onSetSceneStyle={onSetSceneStyle}
+          onToggleSceneLock={() => onToggleLock("scene")}
           onNewBlankScene={onNewBlankScene}
-          onBack={onStopEditing}
+          onBack={() => setEditingScene(false)}
         />
       ) : (
         <div className="flex flex-col h-full overflow-y-auto">
@@ -105,20 +113,32 @@ export default function BackgroundScenesPanel({
               <ScenesTab
                 appliedSceneId={appliedSceneId}
                 hasScene={!!sceneGroup}
+                sceneLocked={!!sceneGroup?.locked}
                 onApply={(s) => {
                   onApplyScene(s);
-                  onStartEditing();
+                  setEditingScene(true);
                 }}
                 onDetach={onDetachScene}
-                onCustomize={onStartEditing}
+                onCustomize={() => setEditingScene(true)}
+                onToggleLock={() => onToggleLock("scene")}
                 onNewBlank={() => {
                   onNewBlankScene();
-                  onStartEditing();
+                  setEditingScene(true);
                 }}
               />
             )}
             {tab === "background" && (
-              <BackgroundTab appliedSceneId={appliedSceneId} onSet={onSetBackground} onDetach={onDetachScene} />
+              <BackgroundTab
+                appliedSceneId={appliedSceneId}
+                hasScene={!!sceneGroup}
+                onSet={onSetBackground}
+                onDetach={onDetachScene}
+                onOpenBackgroundBuilder={onOpenBackgroundBuilder}
+                onOpenSceneEditor={() => {
+                  if (!sceneGroup) onNewBlankScene();
+                  setEditingScene(true);
+                }}
+              />
             )}
             {tab === "uploads" && <UploadsTab />}
           </div>
@@ -133,16 +153,20 @@ export default function BackgroundScenesPanel({
 function ScenesTab({
   appliedSceneId,
   hasScene,
+  sceneLocked,
   onApply,
   onDetach,
   onCustomize,
+  onToggleLock,
   onNewBlank,
 }: {
   appliedSceneId: string | null;
   hasScene: boolean;
+  sceneLocked: boolean;
   onApply: (s: Scene) => void;
   onDetach: () => void;
   onCustomize: () => void;
+  onToggleLock: () => void;
   onNewBlank: () => void;
 }) {
   const [category, setCategory] = useState<SceneCategory>("All");
@@ -187,6 +211,23 @@ function ScenesTab({
               Detach scene
             </button>
           </div>
+          <button
+            type="button"
+            onClick={onToggleLock}
+            title={
+              sceneLocked
+                ? "Unlock background — allow selecting/moving it as a whole again"
+                : "Lock background — so it can't be selected or dragged while you edit individual elements"
+            }
+            className={`mt-1.5 w-full flex items-center justify-center gap-1.5 h-7 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+              sceneLocked
+                ? "bg-(--color-brand-primary) text-white"
+                : "bg-(--color-bg-surface) text-(--color-text-secondary) hover:text-(--color-text-primary)"
+            }`}
+          >
+            {sceneLocked ? <LockOutlinedIcon sx={{ fontSize: 13 }} /> : <LockOpenOutlinedIcon sx={{ fontSize: 13 }} />}
+            {sceneLocked ? "Background locked" : "Lock background"}
+          </button>
         </div>
       )}
 
@@ -290,12 +331,18 @@ function ScenesTab({
 
 function BackgroundTab({
   appliedSceneId,
+  hasScene,
   onSet,
   onDetach,
+  onOpenBackgroundBuilder,
+  onOpenSceneEditor,
 }: {
   appliedSceneId: string | null;
+  hasScene: boolean;
   onSet: (bg: Background) => void;
   onDetach: () => void;
+  onOpenBackgroundBuilder: () => void;
+  onOpenSceneEditor: () => void;
 }) {
   const [type, setType] = useState<"SOLID" | "GRADIENT" | "IMAGE" | "SCENE">("GRADIENT");
   const [solid, setSolid] = useState("#F5F2FF");
@@ -308,6 +355,37 @@ function BackgroundTab({
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={onOpenBackgroundBuilder}
+          className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-(--color-border-default) hover:border-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
+        >
+          <span className="w-8 h-8 rounded-lg bg-(--color-brand-primary-light) flex items-center justify-center shrink-0">
+            <TuneOutlinedIcon sx={{ fontSize: 17, color: "var(--color-brand-primary)" }} />
+          </span>
+          <span className="text-left">
+            <span className="block text-[12px] font-semibold text-(--color-text-primary)">Background Builder</span>
+            <span className="block text-[10px] text-(--color-text-hint)">Solid colours &amp; multi-stop gradients</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenSceneEditor}
+          className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-(--color-border-default) hover:border-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
+        >
+          <span className="w-8 h-8 rounded-lg bg-(--color-brand-primary-light) flex items-center justify-center shrink-0">
+            <AutoAwesomeOutlinedIcon sx={{ fontSize: 17, color: "var(--color-brand-primary)" }} />
+          </span>
+          <span className="text-left">
+            <span className="block text-[12px] font-semibold text-(--color-text-primary)">Build Your Own Scene</span>
+            <span className="block text-[10px] text-(--color-text-hint)">
+              {hasScene ? "Reopen the scene editor" : "Layer illustrations, decorations & effects"}
+            </span>
+          </span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-4 gap-1.5">
         {(["SOLID", "GRADIENT", "IMAGE", "SCENE"] as const).map((t) => (
           <button

@@ -4,6 +4,8 @@ import { useState } from "react";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import LibraryGrid, { AssetThumb } from "./LibraryGrid";
 import { DECORATION_GROUPS, EFFECT_GROUPS, SHAPE_GROUPS, type LibraryItem } from "@/features/notifications/sceneLibrary";
 import type { CompositionNode, NodeStyle } from "@/features/notifications/types";
@@ -25,10 +27,12 @@ interface Props {
   sceneName: string;
   sceneChildren: CompositionNode[];
   sceneStyle?: NodeStyle;
+  sceneLocked: boolean;
   selectedId: string | null;
   onSelectElement: (id: string) => void;
   onInsert: (item: LibraryItem) => void;
   onSetSceneStyle: (patch: Partial<NodeStyle>) => void;
+  onToggleSceneLock: () => void;
   onNewBlankScene: () => void;
   onBack: () => void;
 }
@@ -38,10 +42,12 @@ export default function BuildYourOwnScenePanel({
   sceneName,
   sceneChildren,
   sceneStyle,
+  sceneLocked,
   selectedId,
   onSelectElement,
   onInsert,
   onSetSceneStyle,
+  onToggleSceneLock,
   onNewBlankScene,
   onBack,
 }: Props) {
@@ -95,6 +101,27 @@ export default function BuildYourOwnScenePanel({
           <p className="text-[11px] font-semibold tracking-widest uppercase text-(--color-text-hint)">
             Scene Settings
           </p>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[12px] text-(--color-text-secondary)">
+              Lock background
+              <span className="block text-[10px] text-(--color-text-hint) font-normal">
+                Stops it being selected/dragged as a whole
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={onToggleSceneLock}
+              title={sceneLocked ? "Unlock background" : "Lock background"}
+              className={`shrink-0 flex items-center gap-1.5 h-7 px-2.5 rounded-full border text-[11px] font-semibold transition-colors cursor-pointer ${
+                sceneLocked
+                  ? "border-(--color-brand-primary) bg-(--color-brand-primary-light) text-(--color-brand-primary)"
+                  : "border-(--color-border-default) text-(--color-text-hint) hover:bg-(--color-bg-surface-hover)"
+              }`}
+            >
+              {sceneLocked ? <LockOutlinedIcon sx={{ fontSize: 13 }} /> : <LockOpenOutlinedIcon sx={{ fontSize: 13 }} />}
+              {sceneLocked ? "Locked" : "Unlocked"}
+            </button>
+          </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[12px] text-(--color-text-secondary)">Canvas Tint</span>
             <div className="flex items-center gap-1.5">
@@ -158,7 +185,7 @@ export default function BuildYourOwnScenePanel({
             </span>
             <span className="text-left">
               <span className="block text-[12px] font-semibold">New Blank Scene</span>
-              <span className="block text-[10px] text-(--color-text-hint)">Build from scratch with our scene builder</span>
+              <span className="block text-[10px] text-(--color-text-hint)">Clear everything and build from scratch</span>
             </span>
           </button>
         </div>
@@ -198,7 +225,7 @@ export default function BuildYourOwnScenePanel({
             </div>
           ) : (
             <p className="text-[12px] text-(--color-text-hint)">
-              No layers yet — add elements above or in the Scene Builder.
+              No layers yet — add elements above to build the scene.
             </p>
           )}
         </div>

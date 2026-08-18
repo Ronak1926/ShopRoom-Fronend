@@ -108,6 +108,13 @@ export default function SelectionOverlay({
         height: frame.height * scale,
         boxSizing: "border-box",
         zIndex: 9999,
+        // A plain div with default pointer-events still wins hit-testing and
+        // blocks whatever's underneath even without a click handler, so the
+        // whole overlay must be non-interactive too when locked — otherwise
+        // this wrapper alone (covering the selected frame, which for a
+        // locked scene background is the entire canvas) silently eats every
+        // click meant for a different element.
+        pointerEvents: locked ? "none" : undefined,
       }}
     >
       <div
@@ -115,6 +122,11 @@ export default function SelectionOverlay({
         style={{
           position: "absolute",
           inset: 0,
+          // A locked node (often the full-canvas scene background) still
+          // shows its outline so you can see it's selected, but the box must
+          // not sit there catching clicks — otherwise it silently blocks you
+          // from clicking through to any other element underneath it.
+          pointerEvents: locked ? "none" : "auto",
           cursor: locked ? "not-allowed" : "move",
           outline: `2px solid ${accent}`,
         }}

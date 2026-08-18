@@ -14,7 +14,7 @@ import type {
 } from "@/features/notifications/types";
 import { backgroundCss, buildNodeStyle, flexStyle } from "./nodeStyle";
 import { getIcon } from "@/features/notifications/icons";
-import { SVG_ASSETS } from "@/features/notifications/assets";
+import { CSS_ASSETS, SVG_ASSETS } from "@/features/notifications/assets";
 import { resolveProductImage, resolveVariables } from "@/features/notifications/resolver";
 
 interface Props {
@@ -72,10 +72,10 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect }: NodeProps) {
   if (node.visible === false) return null;
   const base = buildNodeStyle(node, inFlow);
   const isSelected = !!selectedId && selectedId === node.id;
-
-  const isDecoration = node.type === "DECORATION" || node.type === "PARTICLES" || !!node.asset;
-  if (isDecoration) return <DecorationNode node={node} base={base} selected={isSelected} />;
-
+  // Locking only blocks dragging (SelectionOverlay disables its handles for a
+  // locked node) — clicking must still select it, otherwise there's no way to
+  // reach its Properties panel and unlock it again without hunting for it in
+  // the Layers list.
   const selectable = !!onSelect;
   const onClick = selectable
     ? (e: MouseEvent) => {
@@ -83,6 +83,11 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect }: NodeProps) {
         onSelect?.(node.id);
       }
     : undefined;
+
+  const isDecoration = node.type === "DECORATION" || node.type === "PARTICLES" || !!node.asset;
+  if (isDecoration) {
+    return <DecorationNode node={node} base={base} selected={isSelected} selectable={selectable} onClick={onClick} />;
+  }
 
   const children = node.children ?? [];
   if (children.length) {
@@ -166,22 +171,38 @@ function DecorationNode({
   node,
   base,
   selected,
+  selectable,
+  onClick,
 }: {
   node: CompositionNode;
   base: CSSProperties;
   selected: boolean;
+  selectable: boolean;
+  onClick?: (e: MouseEvent) => void;
 }) {
   const aid = node.asset?.assetId ?? "";
   const color = node.style?.color ?? "#FFFFFF";
+  // Atmospheric CSS overlays (glow/vignette/spotlight/…) are soft full-area
+  // fills, not distinct objects — they'd otherwise sit on top of and steal
+  // every click meant for the real cloud/leaf/sparkle underneath them. They
+  // stay click-through on canvas; select them from the Layers list instead.
+  const isOverlay = CSS_ASSETS.has(aid);
+  const click = isOverlay ? undefined : onClick;
+  const interactive = selectable && !isOverlay;
   const common: CSSProperties = {
     ...base,
-    pointerEvents: "none",
+    // Decorations only need to catch clicks in editable contexts (a canvas
+    // with onSelect wired up); static previews keep them pass-through so they
+    // never block the real content sitting on top of them.
+    pointerEvents: selectable && !isOverlay ? "auto" : "none",
+    ...(selectable && !isOverlay ? { cursor: "pointer" } : null),
     ...(selected ? SELECTION : null),
   };
 
   if (aid === "glow" || aid === "product-glow" || aid === "spotlight" || aid === "radial-light") {
     return (
       <div
+        onClick={click}
         style={{ ...common, background: `radial-gradient(circle at 50% 45%, ${color}59 0%, ${color}24 46%, ${color}00 72%)` }}
       />
     );
@@ -189,15 +210,16 @@ function DecorationNode({
   if (aid === "gradient-orb") {
     return (
       <div
+        onClick={click}
         style={{ ...common, borderRadius: "50%", background: `radial-gradient(circle at 35% 30%, ${color}CC 0%, ${color}66 45%, ${color}00 75%)`, filter: "blur(6px)" }}
       />
     );
   }
   if (aid === "vignette") {
-    return <div style={{ ...common, background: "radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(15,23,42,0.32) 100%)" }} />;
+    return <div onClick={click} style={{ ...common, background: "radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(15,23,42,0.32) 100%)" }} />;
   }
   if (aid === "product-shadow" || aid === "soft-shadow") {
-    return <div style={{ ...common, borderRadius: "50%", background: "rgba(15,23,42,0.18)", filter: "blur(9px)" }} />;
+    return <div onClick={click} style={{ ...common, borderRadius: "50%", background: "rgba(15,23,42,0.18)", filter: "blur(9px)" }} />;
   }
   // Shape primitives are plain painted boxes (radius carries the silhouette).
   if (aid.startsWith("shape-")) {
@@ -206,11 +228,25 @@ function DecorationNode({
       : aid === "shape-rounded" ? 16
       : aid === "shape-line" ? 999
       : 0;
-    return <div style={{ ...common, background: color, borderRadius: radius }} />;
+    return <div onClick={click} style={{ ...common, background: color, borderRadius: radius }} />;
   }
   const svg = SVG_ASSETS[aid];
   if (svg) {
-    return <div style={{ ...common, color }} dangerouslySetInnerHTML={{ __html: svg }} />;
+    // Real SVG art is mostly transparent inside its own bounding box (a
+    // sparkle's viewBox dwarfs its tiny star, a leaf sprig has gaps between
+    // leaves, dot grids have gaps between dots). Hit-testing the wrapper's
+    // full rectangle would let those empty gaps swallow clicks meant for
+    // whatever's layered underneath, so pixel-accurate hit-testing is scoped
+    // to what the SVG actually paints instead — the wrapper stays
+    // click-through, and only where an inner shape is painted.
+    const html = interactive ? svg.replace("<svg ", '<svg pointer-events="visiblePainted" ') : svg;
+    return (
+      <div
+        onClick={click}
+        style={{ ...common, pointerEvents: interactive ? "none" : common.pointerEvents, color }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
   }
-  return <div style={common} />;
+  return <div onClick={click} style={common} />;
 }

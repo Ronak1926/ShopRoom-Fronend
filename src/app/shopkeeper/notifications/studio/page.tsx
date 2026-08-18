@@ -17,7 +17,7 @@ import {
 import { createDecoration } from "@/features/notifications/elementFactory";
 import StudioCanvas from "./_components/StudioCanvas";
 import PropertiesPanel from "./_components/PropertiesPanel";
-import SceneBuilderPanel from "./_components/SceneBuilderPanel";
+import BackgroundBuilderPanel from "./_components/BackgroundBuilderPanel";
 import LayersPanel from "./_components/LayersPanel";
 import TimelinePanel from "./_components/TimelinePanel";
 import ResizeHandle from "./_components/ResizeHandle";
@@ -33,13 +33,15 @@ export default function NotificationStudioPage() {
   const [rightWidth, resizeRight] = useResizable(288, 240, 460);
   const [bottomHeight, resizeBottom] = useResizable(224, 150, 440);
   const [layersWidth, resizeLayers] = useResizable(240, 180, 380);
-  const [sceneBuilderWidth, resizeSceneBuilder] = useResizable(520, 420, 720);
+  const [bgBuilderWidth, resizeBgBuilder] = useResizable(320, 280, 440);
 
   const studio = useNotificationDesign();
   const [activeTool, setActiveTool] = useState("add");
-  // The Scene Builder is a focused workspace: opened whenever a scene is
-  // applied (preset or blank), closed via its own × or the panel's Back.
-  const [editingScene, setEditingScene] = useState(false);
+  // The right rail is either the normal element inspector or the Background
+  // Builder. There's no separate Scene Builder workspace — the Mobile
+  // Preview canvas, the Layers panel and the Animation timeline already
+  // cover everything a dedicated scene canvas would duplicate.
+  const [rightPanel, setRightPanel] = useState<"properties" | "background">("properties");
 
   useEffect(() => {
     if (!getCookie("shopkeeper_token")) {
@@ -97,19 +99,15 @@ export default function NotificationStudioPage() {
             design={studio.design}
             appliedSceneId={studio.appliedSceneId}
             selectedId={studio.selectedId}
-            editingScene={editingScene}
             onSelectElement={(id) => studio.setSelectedId(id)}
             onApplyScene={studio.applyScene}
-            onDetachScene={() => {
-              studio.detachScene();
-              setEditingScene(false);
-            }}
+            onDetachScene={studio.detachScene}
             onSetBackground={studio.setBackground}
-            onStartEditing={() => setEditingScene(true)}
-            onStopEditing={() => setEditingScene(false)}
             onInsertIntoScene={handleInsertIntoScene}
             onSetSceneStyle={studio.setSceneStyle}
             onNewBlankScene={studio.startBlankScene}
+            onOpenBackgroundBuilder={() => setRightPanel("background")}
+            onToggleLock={studio.toggleLock}
           />
         );
       case "shapes":
@@ -182,28 +180,18 @@ export default function NotificationStudioPage() {
             </div>
           </div>
 
-          {editingScene ? (
+          {rightPanel === "background" && studio.design && (
             <>
-              <ResizeHandle orientation="vertical" onResize={(d) => resizeSceneBuilder(-d)} />
-              <SceneBuilderPanel
-                width={sceneBuilderWidth}
-                design={studio.design}
-                selectedId={studio.selectedId}
-                onSelect={(id) => studio.setSelectedId(id)}
-                updateElement={studio.updateElement}
-                onBeginInteraction={studio.beginInteraction}
-                onUpdateLive={studio.updateElementLive}
-                onEndInteraction={studio.endInteraction}
-                onDelete={studio.deleteElement}
-                onDuplicate={studio.duplicateElement}
-                onMoveLayer={studio.moveLayer}
-                onToggleLock={studio.toggleLock}
-                addToScene={studio.addToScene}
-                onResetScene={() => studio.updateElement("scene", (n) => ({ ...n, children: [] }))}
-                onClose={() => setEditingScene(false)}
+              <ResizeHandle orientation="vertical" onResize={(d) => resizeBgBuilder(-d)} />
+              <BackgroundBuilderPanel
+                width={bgBuilderWidth}
+                background={studio.design.canvas.background}
+                onSet={studio.setBackground}
+                onClose={() => setRightPanel("properties")}
               />
             </>
-          ) : (
+          )}
+          {rightPanel === "properties" && (
             <>
               <ResizeHandle orientation="vertical" onResize={(d) => resizeRight(-d)} />
               <PropertiesPanel

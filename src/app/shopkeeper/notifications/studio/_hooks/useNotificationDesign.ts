@@ -249,9 +249,15 @@ export function useNotificationDesign() {
       const sceneGroup: CompositionNode = {
         id: "scene",
         type: "GROUP",
+        name: scene.name,
         frame: { x: 0, y: 0, width: prev.canvas.width, height: prev.canvas.height, zIndex: 1 },
         visible: true,
-        locked: false,
+        // Locked by default: the background is one big frame spanning the
+        // whole canvas, so leaving it unlocked means a stray click grabs the
+        // entire scene instead of the individual layer underneath it. The
+        // shopkeeper can unlock it from the Scene Builder header if they
+        // genuinely want to reposition the whole composition.
+        locked: true,
         children: scene.elements,
       };
       commit({
@@ -290,7 +296,7 @@ export function useNotificationDesign() {
       name: "Scene",
       frame: { x: 0, y: 0, width: prev.canvas.width, height: prev.canvas.height, zIndex: 1 },
       visible: true,
-      locked: false,
+      locked: true,
       children: [],
     };
     commit({
@@ -317,7 +323,7 @@ export function useNotificationDesign() {
               name: "Scene",
               frame: { x: 0, y: 0, width: prev.canvas.width, height: prev.canvas.height, zIndex: 1 },
               visible: true,
-              locked: false,
+              locked: true,
               children: [node],
             } satisfies CompositionNode,
             ...prev.elements,

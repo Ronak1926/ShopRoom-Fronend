@@ -13,7 +13,8 @@ import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import type { ElementType } from "react";
 import { flattenNodes, nodeLabel } from "@/features/notifications/tree";
-import type { NotificationDesign } from "@/features/notifications/types";
+import type { CompositionNode, NotificationDesign } from "@/features/notifications/types";
+import { AssetThumb } from "./LibraryGrid";
 
 const TYPE_ICON: Record<string, ElementType> = {
   GROUP: FolderOutlinedIcon,
@@ -63,7 +64,6 @@ export default function LayersPanel({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 flex flex-col gap-0.5">
         {rows.map(({ node, depth }) => {
-          const Icon = TYPE_ICON[node.type] ?? LayersOutlinedIcon;
           const active = selectedId === node.id;
           const hidden = node.visible === false;
           const locked = !!node.locked;
@@ -77,12 +77,7 @@ export default function LayersPanel({
                 active ? "bg-(--color-brand-primary-light)" : "hover:bg-(--color-bg-surface-hover)"
               }`}
             >
-              <Icon
-                sx={{
-                  fontSize: 15,
-                  color: active ? "var(--color-brand-primary)" : "var(--color-text-secondary)",
-                }}
-              />
+              <RowIcon node={node} active={active} />
               <span
                 className={`text-[12px] truncate ${
                   active
@@ -137,4 +132,31 @@ export default function LayersPanel({
       </div>
     </aside>
   );
+}
+
+/**
+ * Decorations show the real asset glyph (the actual cloud/leaf/sparkle art,
+ * tinted to match), not a generic catch-all icon — everything else falls
+ * back to its type icon.
+ */
+function RowIcon({ node, active }: { node: CompositionNode; active: boolean }) {
+  const color = active ? "var(--color-brand-primary)" : "var(--color-text-secondary)";
+  if (node.asset?.assetId) {
+    return (
+      <span className="w-4 h-4 shrink-0 flex items-center justify-center" style={{ color: node.style?.color ?? color }}>
+        <AssetThumb
+          item={{
+            assetId: node.asset.assetId,
+            name: "",
+            width: 16,
+            height: 16,
+            color: node.style?.color,
+            opacity: node.style?.opacity,
+          }}
+        />
+      </span>
+    );
+  }
+  const Icon = TYPE_ICON[node.type] ?? LayersOutlinedIcon;
+  return <Icon sx={{ fontSize: 15, color }} />;
 }
