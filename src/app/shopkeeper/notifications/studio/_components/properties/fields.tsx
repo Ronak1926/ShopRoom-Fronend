@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -119,4 +119,61 @@ export function prettyLabel(v: string): string {
 /** color inputs need #rrggbb; fall back to black for tokens/rgba/undefined. */
 export function toHex(c?: string): string {
   return c && /^#[0-9a-fA-F]{6}$/.test(c) ? c : "#000000";
+}
+
+/** Compact on/off switch — used for optional effect toggles (Shadow, Glow, …). */
+export function Toggle({ checked, onChange, title }: { checked: boolean; onChange: (v: boolean) => void; title?: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      title={title}
+      onClick={() => onChange(!checked)}
+      className={`relative w-9 h-5 shrink-0 rounded-full transition-colors cursor-pointer ${
+        checked ? "bg-(--color-brand-primary)" : "bg-(--color-border-strong)"
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-(--shadow-sm) transition-transform ${
+          checked ? "translate-x-4" : ""
+        }`}
+      />
+    </button>
+  );
+}
+
+/** A row of mutually-exclusive pill buttons (alignment, overflow mode, …). */
+export function SegmentedGroup<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: { value: T; label: string; icon?: ElementType<{ sx?: object }> }[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+      {options.map((o) => {
+        const Icon = o.icon;
+        const active = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            title={o.label}
+            onClick={() => onChange(o.value)}
+            className={`flex items-center justify-center gap-1 h-8 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
+              active
+                ? "border-(--color-brand-primary) bg-(--color-brand-primary-light) text-(--color-brand-primary)"
+                : "border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover)"
+            }`}
+          >
+            {Icon ? <Icon sx={{ fontSize: 15 }} /> : o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }

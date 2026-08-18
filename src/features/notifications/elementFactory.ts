@@ -5,7 +5,8 @@
  */
 
 import type { LibraryItem } from "./sceneLibrary";
-import type { CompositionNode } from "./types";
+import type { TextContentPreset } from "./textPresets";
+import type { CompositionNode, NodeStyle } from "./types";
 
 function uid(type: string): string {
   return `${type.toLowerCase()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -117,4 +118,42 @@ function buildElement(type: string, canvasW: number, canvasH: number): Compositi
     default:
       return { id, type: "TEXT", frame: frame(200, 40), style: { color: "#0F172A", fontSize: 18, textAlign: "center" }, content: { text: "New element" } };
   }
+}
+
+/** Builds a TEXT node from a Text-tool content preset (Heading, Price, …), centred on the canvas. */
+export function createTextFromPreset(preset: TextContentPreset, canvasW: number, canvasH: number): CompositionNode {
+  const id = uid("text");
+  const w = Math.min(preset.width, canvasW - 24);
+  const h = preset.height;
+  const cx = Math.round(canvasW / 2);
+  const cy = Math.round(canvasH / 2);
+  return {
+    id,
+    type: "TEXT",
+    name: preset.label,
+    frame: { x: cx - Math.round(w / 2), y: cy - Math.round(h / 2), width: w, height: h, rotation: 0, zIndex: TOP_Z },
+    style: { ...preset.style },
+    content: { text: preset.text },
+    visible: true,
+    locked: false,
+  };
+}
+
+/** Builds a TEXT node carrying a Text Style preset's look (used when a style preset is applied with nothing selected). */
+export function createTextWithStyle(style: NodeStyle, label: string, canvasW: number, canvasH: number): CompositionNode {
+  const id = uid("text");
+  const w = 220;
+  const h = 40;
+  const cx = Math.round(canvasW / 2);
+  const cy = Math.round(canvasH / 2);
+  return {
+    id,
+    type: "TEXT",
+    name: label,
+    frame: { x: cx - Math.round(w / 2), y: cy - Math.round(h / 2), width: w, height: h, rotation: 0, zIndex: TOP_Z },
+    style: { ...style },
+    content: { text: label },
+    visible: true,
+    locked: false,
+  };
 }

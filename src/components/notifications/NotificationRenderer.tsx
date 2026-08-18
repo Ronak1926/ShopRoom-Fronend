@@ -12,7 +12,7 @@ import type {
   NotificationDesign,
   RenderContext,
 } from "@/features/notifications/types";
-import { backgroundCss, buildNodeStyle, flexStyle } from "./nodeStyle";
+import { backgroundCss, buildNodeStyle, flexStyle, leafOverflowStyle, verticalAlignItems } from "./nodeStyle";
 import { getIcon } from "@/features/notifications/icons";
 import { CSS_ASSETS, SVG_ASSETS } from "@/features/notifications/assets";
 import { resolveProductImage, resolveVariables } from "@/features/notifications/resolver";
@@ -110,9 +110,9 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect }: NodeProps) {
   const style: CSSProperties = {
     ...base,
     display: "flex",
-    alignItems: "center",
+    alignItems: verticalAlignItems(node.style?.verticalAlign),
     justifyContent: ta === "right" ? "flex-end" : ta === "left" ? "flex-start" : "center",
-    overflow: "hidden",
+    ...leafOverflowStyle(node.style),
     gap: 6,
     ...(selectable ? { cursor: "pointer" } : null),
     ...(isSelected ? SELECTION : null),

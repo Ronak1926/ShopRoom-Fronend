@@ -14,6 +14,7 @@ import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined
 import { findNode, nodeLabel, type LayerMove } from "@/features/notifications/tree";
 import type { CompositionNode, NotificationDesign } from "@/features/notifications/types";
 import { ColorField, NumberField, Row, Section, Select, Slider } from "./properties/fields";
+import TextInspector from "./properties/TextInspector";
 
 const ENTRY = ["NONE", "FADE_IN", "SLIDE_UP", "SLIDE_DOWN", "ZOOM_IN", "BOUNCE_IN"] as const;
 const ATTENTION = ["NONE", "PULSE", "GLOW", "FLOAT", "WIGGLE", "SHAKE"] as const;
@@ -61,6 +62,16 @@ export default function PropertiesPanel({
           <TouchAppOutlinedIcon sx={{ fontSize: 30 }} />
           <p className="text-[13px]">Select an element on the canvas or in Layers to edit it.</p>
         </div>
+      ) : node.type === "TEXT" ? (
+        <TextInspector
+          key={node.id}
+          node={node}
+          update={(p) => updateElement(node.id, p)}
+          onDelete={() => onDelete(node.id)}
+          onDuplicate={() => onDuplicate(node.id)}
+          onMoveLayer={(m) => onMoveLayer(node.id, m)}
+          onToggleLock={() => onToggleLock(node.id)}
+        />
       ) : (
         <Inspector
           key={node.id}

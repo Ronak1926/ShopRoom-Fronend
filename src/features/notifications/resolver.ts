@@ -28,6 +28,6 @@ export function resolveProductImage(
  *  placeholder until a real product is attached at send time. */
 export const EDITOR_CONTEXT: RenderContext = {
   product: { name: "Your Product", price: "₹1,299", oldPrice: "₹1,699", discount: "20%", stock: "24", id: "preview", image: "" },
-  shop: { name: "Your Shop" },
+  shop: { name: "Your Shop", url: "shoproom.in/your-shop" },
   customer: { name: "there" },
 };

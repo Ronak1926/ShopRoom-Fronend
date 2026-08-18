@@ -61,10 +61,15 @@ export interface NodeStyle {
   textAlign?: "left" | "center" | "right" | "justify";
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   textDecoration?: "none" | "underline" | "line-through";
+  whiteSpace?: "normal" | "nowrap";
+  verticalAlign?: "top" | "center" | "bottom";
+  overflow?: "visible" | "hidden" | "clip" | "ellipsis";
+  textShadow?: Shadow;
   borderRadius?: number;
   border?: Border;
   padding?: number | { top?: number; right?: number; bottom?: number; left?: number };
   shadow?: Shadow;
+  glow?: { enabled?: boolean; color?: string; blur?: number; opacity?: number };
   blur?: number;
   backdropBlur?: number;
 }

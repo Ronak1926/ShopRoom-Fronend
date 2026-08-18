@@ -8,13 +8,16 @@ import StudioToolbar from "./_components/StudioToolbar";
 import AddElementsPanel from "./_components/AddElementsPanel";
 import BackgroundScenesPanel from "./_components/BackgroundScenesPanel";
 import AssetLibraryPanel from "./_components/AssetLibraryPanel";
+import TextPanel from "./_components/TextPanel";
 import {
   DECORATION_GROUPS,
   EFFECT_GROUPS,
   SHAPE_GROUPS,
   type LibraryItem,
 } from "@/features/notifications/sceneLibrary";
-import { createDecoration } from "@/features/notifications/elementFactory";
+import { createDecoration, createTextFromPreset, createTextWithStyle } from "@/features/notifications/elementFactory";
+import { findNode } from "@/features/notifications/tree";
+import { TEXT_CONTENT_PRESETS, type TextStylePreset } from "@/features/notifications/textPresets";
 import StudioCanvas from "./_components/StudioCanvas";
 import PropertiesPanel from "./_components/PropertiesPanel";
 import BackgroundBuilderPanel from "./_components/BackgroundBuilderPanel";
@@ -90,6 +93,27 @@ export default function NotificationStudioPage() {
     studio.addToScene(createDecoration(item, canvas.width, canvas.height, 200));
   }
 
+  // Text tool: add a real TEXT element from a content preset (Heading, Price, …).
+  function handleAddTextPreset(presetId: string) {
+    const canvas = studio.design?.canvas;
+    const preset = TEXT_CONTENT_PRESETS.find((p) => p.id === presetId);
+    if (!canvas || !preset) return;
+    studio.addElement(createTextFromPreset(preset, canvas.width, canvas.height));
+  }
+
+  // Text tool: a style preset restyles the selected TEXT element, or — with
+  // nothing selected — adds a new one carrying that look.
+  function handleApplyTextStyle(preset: TextStylePreset) {
+    const canvas = studio.design?.canvas;
+    if (!canvas) return;
+    const selected = studio.selectedId && studio.design ? findNode(studio.design.elements, studio.selectedId) : null;
+    if (selected && selected.type === "TEXT") {
+      studio.updateElement(selected.id, (n) => ({ ...n, style: { ...n.style, ...preset.style } }));
+    } else {
+      studio.addElement(createTextWithStyle(preset.style, preset.label, canvas.width, canvas.height));
+    }
+  }
+
   function renderLeftPanel() {
     switch (activeTool) {
       case "background":
@@ -108,6 +132,16 @@ export default function NotificationStudioPage() {
             onNewBlankScene={studio.startBlankScene}
             onOpenBackgroundBuilder={() => setRightPanel("background")}
             onToggleLock={studio.toggleLock}
+          />
+        );
+      case "text":
+        return (
+          <TextPanel
+            width={leftWidth}
+            design={studio.design}
+            selectedId={studio.selectedId}
+            onAddPreset={handleAddTextPreset}
+            onApplyStyle={handleApplyTextStyle}
           />
         );
       case "shapes":

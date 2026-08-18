@@ -1,5 +1,19 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist, Geist_Mono, Manrope } from "next/font/google";
+import {
+  DM_Sans,
+  Fraunces,
+  Geist,
+  Geist_Mono,
+  Inter,
+  Lato,
+  Manrope,
+  Montserrat,
+  Open_Sans,
+  Playfair_Display,
+  Plus_Jakarta_Sans,
+  Poppins,
+  Roboto,
+} from "next/font/google";
 import "./globals.css";
 
 import { Providers } from "../store/Providers";
@@ -24,6 +38,19 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   axes: ["opsz", "SOFT"],
 });
+
+// Notification Studio text-tool font choices (see features/notifications/fonts.ts).
+// Loaded on the root layout — the studio renders font-family from arbitrary
+// JSON data via inline styles, so every option must already be on the page.
+const notifInter = Inter({ variable: "--font-notif-inter", subsets: ["latin"] });
+const notifPoppins = Poppins({ variable: "--font-notif-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800", "900"] });
+const notifRoboto = Roboto({ variable: "--font-notif-roboto", subsets: ["latin"], weight: ["300", "400", "500", "700", "900"] });
+const notifMontserrat = Montserrat({ variable: "--font-notif-montserrat", subsets: ["latin"] });
+const notifOpenSans = Open_Sans({ variable: "--font-notif-open-sans", subsets: ["latin"] });
+const notifLato = Lato({ variable: "--font-notif-lato", subsets: ["latin"], weight: ["300", "400", "700", "900"] });
+const notifPlayfair = Playfair_Display({ variable: "--font-notif-playfair-display", subsets: ["latin"] });
+const notifDmSans = DM_Sans({ variable: "--font-notif-dm-sans", subsets: ["latin"] });
+const notifPlusJakarta = Plus_Jakarta_Sans({ variable: "--font-notif-plus-jakarta-sans", subsets: ["latin"] });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shoproom.in";
 
@@ -106,7 +133,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${fraunces.variable} ${notifInter.variable} ${notifPoppins.variable} ${notifRoboto.variable} ${notifMontserrat.variable} ${notifOpenSans.variable} ${notifLato.variable} ${notifPlayfair.variable} ${notifDmSans.variable} ${notifPlusJakarta.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
