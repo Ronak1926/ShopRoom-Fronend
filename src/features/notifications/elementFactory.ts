@@ -6,6 +6,7 @@
 
 import type { LibraryItem } from "./sceneLibrary";
 import type { TextContentPreset } from "./textPresets";
+import type { BadgeLabelPreset } from "./badgeLabelPresets";
 import type { CompositionNode, NodeStyle } from "./types";
 
 function uid(type: string): string {
@@ -155,5 +156,52 @@ export function createTextWithStyle(style: NodeStyle, label: string, canvasW: nu
     content: { text: label },
     visible: true,
     locked: false,
+  };
+}
+
+/**
+ * Builds a real BADGE or LABEL node from a Badges & Labels preset, centred on
+ * the canvas. No static `name` is set — Layers derives "Badge (30% OFF)" /
+ * "Label (FREE SHIPPING)" live from content.text (see tree.ts nodeLabel).
+ */
+export function createBadgeOrLabelFromPreset(preset: BadgeLabelPreset, canvasW: number, canvasH: number): CompositionNode {
+  const id = uid(preset.kind);
+  const w = Math.min(preset.width, canvasW - 24);
+  const h = preset.height;
+  const cx = Math.round(canvasW / 2);
+  const cy = Math.round(canvasH / 2);
+  return {
+    id,
+    type: preset.kind,
+    frame: { x: cx - Math.round(w / 2), y: cy - Math.round(h / 2), width: w, height: h, rotation: 0, zIndex: TOP_Z },
+    style: { ...preset.style },
+    content: { text: preset.text, icon: preset.icon, iconPosition: preset.iconPosition },
+    visible: true,
+    locked: false,
+  };
+}
+
+/**
+ * Applies a different preset's look to an EXISTING badge/label node (the
+ * inspector's "Change" flow) — same id, same position/animation, so it stays
+ * one element rather than becoming a second one. The frame only resizes when
+ * the new preset's natural size differs meaningfully from the current one
+ * (e.g. swapping a pill for a circular shape badge).
+ */
+export function applyBadgeLabelPreset(node: CompositionNode, preset: BadgeLabelPreset): CompositionNode {
+  const sameFamily = node.type === preset.kind;
+  const w = Math.max(preset.width, 28);
+  const h = preset.height;
+  const resize = !sameFamily || Math.abs(w - node.frame.width) > 40 || Math.abs(h - node.frame.height) > 24;
+  const cx = node.frame.x + node.frame.width / 2;
+  const cy = node.frame.y + node.frame.height / 2;
+  return {
+    ...node,
+    type: preset.kind,
+    frame: resize
+      ? { ...node.frame, x: Math.round(cx - w / 2), y: Math.round(cy - h / 2), width: w, height: h }
+      : node.frame,
+    style: { ...preset.style },
+    content: { ...node.content, text: preset.text, icon: preset.icon, iconPosition: preset.iconPosition },
   };
 }

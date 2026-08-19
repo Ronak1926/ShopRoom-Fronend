@@ -72,6 +72,7 @@ export interface NodeStyle {
   glow?: { enabled?: boolean; color?: string; blur?: number; opacity?: number };
   blur?: number;
   backdropBlur?: number;
+  clipShape?: "pill" | "circle" | "hexagon" | "diamond" | "shield" | "star" | "burst";
 }
 
 export interface Layout {
@@ -90,6 +91,8 @@ export interface ElementContent {
   variable?: string;
   label?: string;
   icon?: string;
+  iconPosition?: "left" | "right" | "only" | "none";
+  iconSize?: number;
   value?: string | number;
 }
 

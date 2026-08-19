@@ -11,6 +11,8 @@ import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
+import LabelOutlinedIcon from "@mui/icons-material/LabelOutlined";
 import type { ElementType } from "react";
 import { flattenNodes, nodeLabel } from "@/features/notifications/tree";
 import type { CompositionNode, NotificationDesign } from "@/features/notifications/types";
@@ -30,6 +32,8 @@ const TYPE_ICON: Record<string, ElementType> = {
   ICON: EmojiEmotionsOutlinedIcon,
   DECORATION: AutoAwesomeOutlinedIcon,
   PARTICLES: AutoAwesomeOutlinedIcon,
+  BADGE: SellOutlinedIcon,
+  LABEL: LabelOutlinedIcon,
 };
 
 interface Props {

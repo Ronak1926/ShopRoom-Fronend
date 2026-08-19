@@ -15,6 +15,7 @@ import { findNode, nodeLabel, type LayerMove } from "@/features/notifications/tr
 import type { CompositionNode, NotificationDesign } from "@/features/notifications/types";
 import { ColorField, NumberField, Row, Section, Select, Slider } from "./properties/fields";
 import TextInspector from "./properties/TextInspector";
+import BadgeLabelInspector from "./properties/BadgeLabelInspector";
 
 const ENTRY = ["NONE", "FADE_IN", "SLIDE_UP", "SLIDE_DOWN", "ZOOM_IN", "BOUNCE_IN"] as const;
 const ATTENTION = ["NONE", "PULSE", "GLOW", "FLOAT", "WIGGLE", "SHAKE"] as const;
@@ -37,6 +38,7 @@ interface Props {
   onDuplicate: (id: string) => void;
   onMoveLayer: (id: string, move: LayerMove) => void;
   onToggleLock: (id: string) => void;
+  onChangeBadgeLabelPreset?: () => void;
 }
 
 export default function PropertiesPanel({
@@ -48,6 +50,7 @@ export default function PropertiesPanel({
   onDuplicate,
   onMoveLayer,
   onToggleLock,
+  onChangeBadgeLabelPreset,
 }: Props) {
   const node = design && selectedId ? findNode(design.elements, selectedId) : null;
 
@@ -71,6 +74,17 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+        />
+      ) : node.type === "BADGE" || node.type === "LABEL" ? (
+        <BadgeLabelInspector
+          key={node.id}
+          node={node}
+          update={(p) => updateElement(node.id, p)}
+          onDelete={() => onDelete(node.id)}
+          onDuplicate={() => onDuplicate(node.id)}
+          onMoveLayer={(m) => onMoveLayer(node.id, m)}
+          onToggleLock={() => onToggleLock(node.id)}
+          onChangePreset={() => onChangeBadgeLabelPreset?.()}
         />
       ) : (
         <Inspector

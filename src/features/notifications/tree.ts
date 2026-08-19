@@ -173,5 +173,8 @@ export function nodeLabel(node: CompositionNode): string {
   if (node.name) return node.name;
   const pretty = node.type.charAt(0) + node.type.slice(1).toLowerCase().replace(/_/g, " ");
   const text = node.content?.text ?? node.content?.label;
-  return text ? `${pretty} · ${text}` : pretty;
+  if (!text) return pretty;
+  // Badges/Labels stay unnamed at creation so this stays in sync with edits —
+  // "Badge (30% OFF)" / "Label (FREE SHIPPING)" rather than going stale.
+  return node.type === "BADGE" || node.type === "LABEL" ? `${pretty} (${text})` : `${pretty} · ${text}`;
 }

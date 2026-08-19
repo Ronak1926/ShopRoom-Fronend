@@ -53,6 +53,49 @@ function withAlpha(color: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function polygonCss(points: [number, number][]): string {
+  return `polygon(${points.map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`).join(", ")})`;
+}
+
+/** N-pointed star/burst outline as percentage-space polygon points. */
+function starPoints(spikes: number, outerR: number, innerR: number): [number, number][] {
+  const pts: [number, number][] = [];
+  const step = Math.PI / spikes;
+  for (let i = 0; i < spikes * 2; i++) {
+    const r = i % 2 === 0 ? outerR : innerR;
+    const angle = -Math.PI / 2 + i * step;
+    pts.push([50 + r * Math.cos(angle), 50 + r * Math.sin(angle)]);
+  }
+  return pts;
+}
+
+const HEXAGON = polygonCss([[25, 0], [75, 0], [100, 50], [75, 100], [25, 100], [0, 50]]);
+const DIAMOND = polygonCss([[50, 0], [100, 50], [50, 100], [0, 50]]);
+const SHIELD = polygonCss([[50, 0], [100, 18], [100, 58], [50, 100], [0, 58], [0, 18]]);
+const STAR = polygonCss(starPoints(5, 50, 20));
+const BURST = polygonCss(starPoints(10, 50, 41));
+
+/** Resolves a badge/label `clipShape` to CSS (clip-path for geometric shapes; a plain border-radius for pill/circle). */
+function shapeCss(shape: NonNullable<NodeStyle["clipShape"]>): { clipPath?: string; borderRadius?: number | string } {
+  switch (shape) {
+    case "circle":
+      return { borderRadius: "50%" };
+    case "hexagon":
+      return { clipPath: HEXAGON };
+    case "diamond":
+      return { clipPath: DIAMOND };
+    case "shield":
+      return { clipPath: SHIELD };
+    case "star":
+      return { clipPath: STAR };
+    case "burst":
+      return { clipPath: BURST };
+    case "pill":
+    default:
+      return { borderRadius: 9999 };
+  }
+}
+
 type Pad = number | { top?: number; right?: number; bottom?: number; left?: number };
 function padValue(p?: Pad): string | undefined {
   if (p == null) return undefined;
@@ -104,6 +147,13 @@ export function buildNodeStyle(node: CompositionNode, inFlow: boolean): CSSPrope
   if (s.backgroundGradient) st.background = gradientCss(s.backgroundGradient);
   else if (s.backgroundColor) st.background = s.backgroundColor;
   if (s.borderRadius != null) st.borderRadius = s.borderRadius;
+  // A shape badge/label's clipShape is the more specific intent, so it wins over
+  // a plain borderRadius when both happen to be present.
+  if (s.clipShape) {
+    const shape = shapeCss(s.clipShape);
+    if (shape.clipPath) st.clipPath = shape.clipPath;
+    st.borderRadius = shape.borderRadius ?? st.borderRadius;
+  }
   // A TEXT node's "Outline" effect strokes the glyphs themselves rather than
   // drawing a box border around the (usually invisible) bounding frame.
   if (s.border && isText) {

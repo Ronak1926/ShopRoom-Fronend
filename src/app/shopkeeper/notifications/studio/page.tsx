@@ -9,15 +9,23 @@ import AddElementsPanel from "./_components/AddElementsPanel";
 import BackgroundScenesPanel from "./_components/BackgroundScenesPanel";
 import AssetLibraryPanel from "./_components/AssetLibraryPanel";
 import TextPanel from "./_components/TextPanel";
+import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
 import {
   DECORATION_GROUPS,
   EFFECT_GROUPS,
   SHAPE_GROUPS,
   type LibraryItem,
 } from "@/features/notifications/sceneLibrary";
-import { createDecoration, createTextFromPreset, createTextWithStyle } from "@/features/notifications/elementFactory";
+import {
+  createDecoration,
+  createTextFromPreset,
+  createTextWithStyle,
+  createBadgeOrLabelFromPreset,
+  applyBadgeLabelPreset,
+} from "@/features/notifications/elementFactory";
 import { findNode } from "@/features/notifications/tree";
-import { TEXT_CONTENT_PRESETS, type TextStylePreset } from "@/features/notifications/textPresets";
+import { TEXT_CONTENT_PRESETS, TEXT_PRESET_LINKS, type TextStylePreset } from "@/features/notifications/textPresets";
+import type { BadgeLabelKind, BadgeLabelPreset } from "@/features/notifications/badgeLabelPresets";
 import StudioCanvas from "./_components/StudioCanvas";
 import PropertiesPanel from "./_components/PropertiesPanel";
 import BackgroundBuilderPanel from "./_components/BackgroundBuilderPanel";
@@ -45,6 +53,13 @@ export default function NotificationStudioPage() {
   // Preview canvas, the Layers panel and the Animation timeline already
   // cover everything a dedicated scene canvas would duplicate.
   const [rightPanel, setRightPanel] = useState<"properties" | "background">("properties");
+  // "Add" tool sub-view: the Badges & Labels editor lives inside Add Elements
+  // (breadcrumb "Add Elements > Badges & Labels"), not a new toolbar rail item.
+  const [addView, setAddView] = useState<"root" | "badges-labels">("root");
+  const [blKind, setBlKind] = useState<BadgeLabelKind>("BADGE");
+  // Set while the inspector's "Change" is swapping an existing badge/label's
+  // preset — the next pick patches this node instead of adding a new one.
+  const [blChangeTargetId, setBlChangeTargetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getCookie("shopkeeper_token")) {
@@ -72,11 +87,53 @@ export default function NotificationStudioPage() {
   }
 
   // Add a new element of the toolbar tile's type, centred on the canvas.
+  // The "Badge" tile opens the dedicated Badges & Labels editor instead of
+  // inserting a generic placeholder (see openBadgesLabels below).
   function handleAdd(tileId: string) {
+    if (tileId === "badge") {
+      openBadgesLabels("BADGE");
+      return;
+    }
     const canvas = studio.design?.canvas;
     if (!canvas) return;
     const type = tileId.toUpperCase().replace(/-/g, "_");
     studio.addElement(createElement(type, canvas.width, canvas.height));
+  }
+
+  // Switches the left panel into Badges & Labels. Passing a changeTargetId
+  // makes the next preset pick replace that element instead of adding a new one.
+  function openBadgesLabels(kind: BadgeLabelKind, changeTargetId: string | null = null) {
+    setActiveTool("add");
+    setAddView("badges-labels");
+    setBlKind(kind);
+    setBlChangeTargetId(changeTargetId);
+    setRightPanel("properties");
+  }
+
+  function handleBackFromBadgesLabels() {
+    setAddView("root");
+    setBlChangeTargetId(null);
+  }
+
+  // Clicking a Badges & Labels preset: either replaces the element currently
+  // being "Changed", or inserts a brand-new real BADGE/LABEL node.
+  function handlePickBadgeLabel(preset: BadgeLabelPreset) {
+    const canvas = studio.design?.canvas;
+    if (!canvas) return;
+    if (blChangeTargetId) {
+      studio.updateElement(blChangeTargetId, (n) => applyBadgeLabelPreset(n, preset));
+      setBlChangeTargetId(null);
+      return;
+    }
+    studio.addElement(createBadgeOrLabelFromPreset(preset, canvas.width, canvas.height));
+  }
+
+  // Inspector's "Change" button: reopen the preset browser scoped to
+  // replacing the currently selected badge/label.
+  function handleChangeBadgeLabelPreset() {
+    const node = studio.selectedId && studio.design ? findNode(studio.design.elements, studio.selectedId) : null;
+    if (!node || (node.type !== "BADGE" && node.type !== "LABEL")) return;
+    openBadgesLabels(node.type, node.id);
   }
 
   // Insert a decoration / shape / effect from an asset library.
@@ -95,6 +152,13 @@ export default function NotificationStudioPage() {
 
   // Text tool: add a real TEXT element from a content preset (Heading, Price, …).
   function handleAddTextPreset(presetId: string) {
+    // "Label" / "Badge Text" are legacy styled-text presets, superseded by
+    // the real Badges & Labels editor — route there instead of inserting text.
+    const link = TEXT_PRESET_LINKS[presetId];
+    if (link) {
+      openBadgesLabels(link);
+      return;
+    }
     const canvas = studio.design?.canvas;
     const preset = TEXT_CONTENT_PRESETS.find((p) => p.id === presetId);
     if (!canvas || !preset) return;
@@ -157,6 +221,18 @@ export default function NotificationStudioPage() {
           <AssetLibraryPanel width={leftWidth} title="Effects" groups={EFFECT_GROUPS} onInsert={handleInsertAsset} />
         );
       default:
+        if (addView === "badges-labels") {
+          return (
+            <BadgesLabelsPanel
+              width={leftWidth}
+              kind={blKind}
+              onKindChange={setBlKind}
+              onBack={handleBackFromBadgesLabels}
+              onPick={handlePickBadgeLabel}
+              changeMode={!!blChangeTargetId}
+            />
+          );
+        }
         return <AddElementsPanel width={leftWidth} onAdd={handleAdd} />;
     }
   }
@@ -237,6 +313,7 @@ export default function NotificationStudioPage() {
                 onDuplicate={studio.duplicateElement}
                 onMoveLayer={studio.moveLayer}
                 onToggleLock={studio.toggleLock}
+                onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
               />
             </>
           )}

@@ -6,6 +6,7 @@
  * every other element, so nothing here bypasses the normal design model.
  */
 
+import type { BadgeLabelKind } from "./badgeLabelPresets";
 import type { NodeStyle } from "./types";
 
 export interface TextContentPreset {
@@ -17,6 +18,18 @@ export interface TextContentPreset {
   height: number;
   style: NodeStyle;
 }
+
+/**
+ * Text-preset ids that no longer insert text — the dedicated Badges & Labels
+ * editor (real shaped BADGE/LABEL nodes, not styled text) supersedes them.
+ * They stay in TEXT_CONTENT_PRESETS so "label"/"badge" still surfaces
+ * something when searched here, but clicking opens that editor instead
+ * (see page.tsx's handleAddTextPreset).
+ */
+export const TEXT_PRESET_LINKS: Partial<Record<string, BadgeLabelKind>> = {
+  label: "LABEL",
+  "badge-text": "BADGE",
+};
 
 // The 10 "TEXT PRESETS" cards — each adds a real TEXT node styled for its
 // typical use. Price/Discount/Stock-like presets pre-fill a dynamic variable
@@ -61,9 +74,12 @@ export const TEXT_CONTENT_PRESETS: TextContentPreset[] = [
     style: { color: "#979AB0", fontSize: 12, fontWeight: 500, textAlign: "left", lineHeight: 1.4 },
   },
   {
+    // Clicking this opens the dedicated Badges & Labels editor instead of
+    // inserting text — see textPresets.ts's LINK_PRESET_IDS and page.tsx's
+    // handleAddTextPreset. Real chip/tag styling lives there now, not here.
     id: "label",
     label: "Label",
-    description: "Label text",
+    description: "Open Badges & Labels",
     text: "Label",
     width: 120,
     height: 18,
@@ -72,7 +88,7 @@ export const TEXT_CONTENT_PRESETS: TextContentPreset[] = [
   {
     id: "badge-text",
     label: "Badge Text",
-    description: "Badge style",
+    description: "Open Badges & Labels",
     text: "New",
     width: 90,
     height: 18,

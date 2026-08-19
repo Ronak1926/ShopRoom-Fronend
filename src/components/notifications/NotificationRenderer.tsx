@@ -153,6 +153,17 @@ function renderLeaf(node: CompositionNode, ctx: RenderContext) {
       const size = Math.min(node.frame.width, node.frame.height);
       return <Icon style={{ fontSize: size }} />;
     }
+    case "BADGE":
+    case "LABEL": {
+      const Icon = getIcon(c.icon);
+      const text = resolveVariables(String(c.text ?? ""), ctx);
+      const iconPos = c.iconPosition ?? (Icon ? "left" : "none");
+      if (!Icon || iconPos === "none") return <span>{text}</span>;
+      const iconEl = <Icon key="icon" style={{ fontSize: c.iconSize ?? (node.style?.fontSize ?? 12) + 2, flexShrink: 0 }} />;
+      if (iconPos === "only") return iconEl;
+      const textEl = text ? <span key="text">{text}</span> : null;
+      return iconPos === "right" ? <>{textEl}{iconEl}</> : <>{iconEl}{textEl}</>;
+    }
     case "CIRCLE":
     case "RECTANGLE":
     case "LINE":
