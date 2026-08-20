@@ -9,6 +9,9 @@ import type {
   Background,
   CompositionNode,
   Gradient,
+  ImageCrop,
+  ImageFilters,
+  ImageOverlay,
   Layout,
   NodeStyle,
   Shadow,
@@ -23,6 +26,12 @@ export function gradientCss(g: Gradient): string {
 }
 
 export function backgroundCss(bg?: Background): string {
+  // A photo background (Images → Product) fills the whole canvas. An optional
+  // colour sits underneath so letterboxed edges aren't transparent.
+  if (bg?.type === "IMAGE" && bg.imageUrl) {
+    const url = bg.imageUrl.replace(/["\\]/g, encodeURIComponent);
+    return `url("${url}") center / cover no-repeat, ${bg.color ?? "#FFFFFF"}`;
+  }
   if (bg?.type === "GRADIENT" && bg.gradient) return gradientCss(bg.gradient);
   if (bg?.color) return bg.color;
   return "#FFFFFF";
@@ -74,12 +83,23 @@ const DIAMOND = polygonCss([[50, 0], [100, 50], [50, 100], [0, 50]]);
 const SHIELD = polygonCss([[50, 0], [100, 18], [100, 58], [50, 100], [0, 58], [0, 18]]);
 const STAR = polygonCss(starPoints(5, 50, 20));
 const BURST = polygonCss(starPoints(10, 50, 41));
+// Hand-authored (not sampled from the decorative "blob" SVG asset — clip-path's
+// path() doesn't rescale to the box the way percentage polygon() does).
+const BLOB = polygonCss([
+  [42, 4], [64, 8], [82, 22], [93, 42], [90, 63], [75, 80],
+  [55, 93], [33, 90], [14, 78], [4, 58], [8, 36], [24, 14],
+]);
 
-/** Resolves a badge/label `clipShape` to CSS (clip-path for geometric shapes; a plain border-radius for pill/circle). */
-function shapeCss(shape: NonNullable<NodeStyle["clipShape"]>): { clipPath?: string; borderRadius?: number | string } {
+/** Resolves a badge/label/image `clipShape` to CSS (clip-path for geometric shapes; a plain border-radius for the round ones). */
+export function shapeCss(shape: NonNullable<NodeStyle["clipShape"]>): { clipPath?: string; borderRadius?: number | string } {
   switch (shape) {
     case "circle":
+    case "ellipse":
       return { borderRadius: "50%" };
+    case "rounded":
+      return { borderRadius: 28 };
+    case "rectangle":
+      return {};
     case "hexagon":
       return { clipPath: HEXAGON };
     case "diamond":
@@ -90,10 +110,49 @@ function shapeCss(shape: NonNullable<NodeStyle["clipShape"]>): { clipPath?: stri
       return { clipPath: STAR };
     case "burst":
       return { clipPath: BURST };
+    case "blob":
+      return { clipPath: BLOB };
     case "pill":
     default:
       return { borderRadius: 9999 };
   }
+}
+
+/**
+ * Non-destructive crop rendering — the `<img>` is enlarged and shifted inside
+ * an `overflow: hidden` box using only the stored crop fractions, so no pixel
+ * measurement of the rendered box is ever needed.
+ */
+export function imageCropStyle(crop: ImageCrop): CSSProperties {
+  return {
+    position: "absolute",
+    left: `${-(crop.x / crop.width) * 100}%`,
+    top: `${-(crop.y / crop.height) * 100}%`,
+    width: `${100 / crop.width}%`,
+    height: `${100 / crop.height}%`,
+    maxWidth: "none",
+  };
+}
+
+export function imageFilterCss(f?: ImageFilters): string | undefined {
+  if (!f) return undefined;
+  const parts: string[] = [];
+  if (f.brightness != null && f.brightness !== 1) parts.push(`brightness(${f.brightness})`);
+  if (f.contrast != null && f.contrast !== 1) parts.push(`contrast(${f.contrast})`);
+  if (f.saturate != null && f.saturate !== 1) parts.push(`saturate(${f.saturate})`);
+  if (f.hueRotate) parts.push(`hue-rotate(${f.hueRotate}deg)`);
+  if (f.grayscale) parts.push(`grayscale(${f.grayscale})`);
+  return parts.length ? parts.join(" ") : undefined;
+}
+
+export function imageOverlayStyle(overlay: ImageOverlay): CSSProperties {
+  return {
+    position: "absolute",
+    inset: 0,
+    background: overlay.gradient ? gradientCss(overlay.gradient) : overlay.color,
+    opacity: overlay.opacity ?? 1,
+    mixBlendMode: overlay.blendMode ?? "normal",
+  };
 }
 
 type Pad = number | { top?: number; right?: number; bottom?: number; left?: number };

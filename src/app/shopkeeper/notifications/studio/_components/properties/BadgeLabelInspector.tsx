@@ -20,8 +20,7 @@ import type { CompositionNode, NodeStyle } from "@/features/notifications/types"
 import { ColorField, NumberField, Row, Section, SegmentedGroup, Select, Slider, Toggle } from "./fields";
 import type { ElementContent } from "@/features/notifications/types";
 import type { ReactNode } from "react";
-
-const ENTRY = ["NONE", "FADE_IN", "SLIDE_UP", "SLIDE_DOWN", "ZOOM_IN", "POP", "BOUNCE"] as const;
+import { ENTRY, ATTENTION, EXIT } from "./animationOptions";
 
 /** Plain helper (not a component) so the dynamically-resolved icon renders safely — mirrors NotificationRenderer's renderLeaf. */
 function renderPreviewIcon(content: ElementContent): ReactNode {
@@ -63,12 +62,15 @@ export default function BadgeLabelInspector({ node, update, onDelete, onDuplicat
   const setStyle = (patch: Partial<NodeStyle>) => update((n) => ({ ...n, style: { ...n.style, ...patch } }));
   const setContent = (patch: Partial<NonNullable<CompositionNode["content"]>>) =>
     update((n) => ({ ...n, content: { ...n.content, ...patch } }));
-  const setAnim = (type: string) =>
+  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
     update((n) => ({
       ...n,
       animation: {
         ...n.animation,
-        entry: type === "NONE" ? undefined : { type, durationMs: n.animation?.entry?.durationMs ?? 500, delayMs: n.animation?.entry?.delayMs ?? 0, easing: n.animation?.entry?.easing ?? "easeOut" },
+        [slot]:
+          type === "NONE"
+            ? undefined
+            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
       },
     }));
 
@@ -238,7 +240,7 @@ export default function BadgeLabelInspector({ node, update, onDelete, onDuplicat
       <Section title="Animation">
         <div className="flex flex-col gap-2.5">
           <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={setAnim} />
+            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
           </Row>
           {node.animation?.entry && (
             <>
@@ -260,6 +262,12 @@ export default function BadgeLabelInspector({ node, update, onDelete, onDuplicat
               </Row>
             </>
           )}
+          <Row label="Attention">
+            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
+          </Row>
+          <Row label="Exit">
+            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
+          </Row>
         </div>
       </Section>
 

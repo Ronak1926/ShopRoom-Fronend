@@ -47,24 +47,5 @@ export const GENERAL_ELEMENTS: ToolItem[] = [
   { id: "rating", label: "Rating", iconKey: "rating" },
 ];
 
-// Timeline animation tracks (bottom-center). offset/width are 0–100 percent
-// across the 0s–4s ruler; tone maps to a token-backed colour in the component.
-export interface TimelineTrack {
-  id: string;
-  label: string;
-  tone: "blue" | "purple" | "green" | "yellow" | "pink";
-  offset: number;
-  width: number;
-}
-
-export const TIMELINE_TRACKS: TimelineTrack[] = [
-  { id: "t1", label: "Fade In", tone: "blue", offset: 0, width: 22 },
-  { id: "t2", label: "Fade In", tone: "blue", offset: 0, width: 40 },
-  { id: "t3", label: "Slide Up", tone: "purple", offset: 18, width: 55 },
-  { id: "t4", label: "Zoom In", tone: "green", offset: 18, width: 40 },
-  { id: "t5", label: "Fade In", tone: "yellow", offset: 30, width: 42 },
-  { id: "t6", label: "Pop", tone: "pink", offset: 12, width: 82 },
-  { id: "t7", label: "Fade In", tone: "blue", offset: 0, width: 55 },
-];
-
-export const RULER_MARKS = ["0s", "1s", "2s", "3s", "4s"];
+// Timeline tracks and ruler marks are now derived from the design's real
+// animated elements — see TimelinePanel.tsx.

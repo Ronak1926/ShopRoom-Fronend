@@ -7,7 +7,7 @@
 import type { LibraryItem } from "./sceneLibrary";
 import type { TextContentPreset } from "./textPresets";
 import type { BadgeLabelPreset } from "./badgeLabelPresets";
-import type { CompositionNode, NodeStyle } from "./types";
+import type { AssetRef, CompositionNode, NodeStyle } from "./types";
 
 function uid(type: string): string {
   return `${type.toLowerCase()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -119,6 +119,51 @@ function buildElement(type: string, canvasW: number, canvasH: number): Compositi
     default:
       return { id, type: "TEXT", frame: frame(200, 40), style: { color: "#0F172A", fontSize: 18, textAlign: "center" }, content: { text: "New element" } };
   }
+}
+
+/**
+ * Builds a real IMAGE node from an uploaded/stock photo URL, centred on the
+ * canvas and sized from its natural aspect ratio (clamped so it never
+ * dwarfs the canvas). Used by the Images panel's Uploads/Stock/Recent tabs.
+ */
+export function createImageElement(
+  url: string,
+  canvasW: number,
+  canvasH: number,
+  extra?: { name?: string; naturalWidth?: number; naturalHeight?: number; attribution?: AssetRef["attribution"] },
+): CompositionNode {
+  const id = uid("image");
+  const naturalW = extra?.naturalWidth;
+  const naturalH = extra?.naturalHeight;
+
+  let w = 160;
+  let h = 160;
+  if (naturalW && naturalH) {
+    const maxDim = Math.min(canvasW * 0.6, canvasH * 0.4, 260);
+    const aspect = naturalW / naturalH;
+    if (aspect >= 1) {
+      w = maxDim;
+      h = maxDim / aspect;
+    } else {
+      h = maxDim;
+      w = maxDim * aspect;
+    }
+  }
+  w = Math.round(w);
+  h = Math.round(h);
+
+  const cx = Math.round(canvasW / 2);
+  const cy = Math.round(canvasH / 2);
+  return {
+    id,
+    type: "IMAGE",
+    name: extra?.name ?? "Image",
+    frame: { x: cx - Math.round(w / 2), y: cy - Math.round(h / 2), width: w, height: h, rotation: 0, zIndex: TOP_Z },
+    image: { fit: "cover", position: "center", opacity: 1 },
+    asset: { type: "IMAGE", url, naturalWidth: naturalW, naturalHeight: naturalH, attribution: extra?.attribution },
+    visible: true,
+    locked: false,
+  };
 }
 
 /** Builds a TEXT node from a Text-tool content preset (Heading, Price, …), centred on the canvas. */

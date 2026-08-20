@@ -16,6 +16,8 @@ import { backgroundCss, buildNodeStyle, flexStyle, leafOverflowStyle, verticalAl
 import { getIcon } from "@/features/notifications/icons";
 import { CSS_ASSETS, SVG_ASSETS } from "@/features/notifications/assets";
 import { resolveProductImage, resolveVariables } from "@/features/notifications/resolver";
+import StaticImageNode from "./StaticImageNode";
+import AnimatedNode from "./AnimatedNode";
 
 interface Props {
   design: NotificationDesign;
@@ -23,6 +25,8 @@ interface Props {
   scale?: number;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  /** Drives real entry/attention/exit playback (Timeline's Play button). */
+  isPlaying?: boolean;
 }
 
 export default function NotificationRenderer({
@@ -31,6 +35,7 @@ export default function NotificationRenderer({
   scale = 1,
   selectedId,
   onSelect,
+  isPlaying,
 }: Props) {
   const { width, height, background } = design.canvas;
   return (
@@ -48,7 +53,7 @@ export default function NotificationRenderer({
         onClick={() => onSelect?.("")}
       >
         {design.elements.map((n) => (
-          <RenderNode key={n.id} node={n} inFlow={false} ctx={context} selectedId={selectedId} onSelect={onSelect} />
+          <RenderNode key={n.id} node={n} inFlow={false} ctx={context} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} />
         ))}
       </div>
     </div>
@@ -61,6 +66,11 @@ interface NodeProps {
   ctx: RenderContext;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  isPlaying?: boolean;
+}
+
+function hasAnimation(node: CompositionNode): boolean {
+  return !!(node.animation?.entry || node.animation?.attention || node.animation?.exit);
 }
 
 const SELECTION: CSSProperties = {
@@ -68,7 +78,7 @@ const SELECTION: CSSProperties = {
   outlineOffset: "1px",
 };
 
-function RenderNode({ node, inFlow, ctx, selectedId, onSelect }: NodeProps) {
+function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying }: NodeProps) {
   if (node.visible === false) return null;
   const base = buildNodeStyle(node, inFlow);
   const isSelected = !!selectedId && selectedId === node.id;
@@ -84,7 +94,11 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect }: NodeProps) {
       }
     : undefined;
 
-  const isDecoration = node.type === "DECORATION" || node.type === "PARTICLES" || !!node.asset;
+  // A static image carries an asset too, but it's a real photo (asset.url), not
+  // decorative SVG art referenced by assetId — it must reach renderLeaf's
+  // IMAGE case rather than DecorationNode, which would paint an empty box.
+  const isStaticImage = node.asset?.type === "IMAGE" && !!node.asset.url;
+  const isDecoration = !isStaticImage && (node.type === "DECORATION" || node.type === "PARTICLES" || !!node.asset);
   if (isDecoration) {
     return <DecorationNode node={node} base={base} selected={isSelected} selectable={selectable} onClick={onClick} />;
   }
@@ -97,29 +111,45 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect }: NodeProps) {
       ...(selectable ? { cursor: "pointer" } : null),
       ...(isSelected ? SELECTION : null),
     };
+    const kids = children.map((c) => (
+      <RenderNode key={c.id} node={c} inFlow={!!node.layout?.direction} ctx={ctx} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} />
+    ));
     return (
       <div style={style} onClick={onClick}>
-        {children.map((c) => (
-          <RenderNode key={c.id} node={c} inFlow={!!node.layout?.direction} ctx={ctx} selectedId={selectedId} onSelect={onSelect} />
-        ))}
+        {hasAnimation(node) ? (
+          <AnimatedNode animation={node.animation} isPlaying={!!isPlaying} contentStyle={node.layout?.direction ? flexStyle(node.layout) : undefined}>
+            {kids}
+          </AnimatedNode>
+        ) : (
+          kids
+        )}
       </div>
     );
   }
 
   const ta = node.style?.textAlign ?? "center";
-  const style: CSSProperties = {
-    ...base,
+  const leafContentStyle: CSSProperties = {
     display: "flex",
     alignItems: verticalAlignItems(node.style?.verticalAlign),
     justifyContent: ta === "right" ? "flex-end" : ta === "left" ? "flex-start" : "center",
-    ...leafOverflowStyle(node.style),
     gap: 6,
+  };
+  const style: CSSProperties = {
+    ...base,
+    ...leafContentStyle,
+    ...leafOverflowStyle(node.style),
     ...(selectable ? { cursor: "pointer" } : null),
     ...(isSelected ? SELECTION : null),
   };
   return (
     <div style={style} onClick={onClick}>
-      {renderLeaf(node, ctx)}
+      {hasAnimation(node) ? (
+        <AnimatedNode animation={node.animation} isPlaying={!!isPlaying} contentStyle={leafContentStyle}>
+          {renderLeaf(node, ctx)}
+        </AnimatedNode>
+      ) : (
+        renderLeaf(node, ctx)
+      )}
     </div>
   );
 }
@@ -129,6 +159,12 @@ function renderLeaf(node: CompositionNode, ctx: RenderContext) {
   switch (node.type) {
     case "PRODUCT_IMAGE":
     case "IMAGE": {
+      // A literal uploaded/stock image takes precedence over the dynamic
+      // per-send product-photo binding — the two are mutually exclusive uses
+      // of the same node types (see StaticImageNode's doc comment).
+      if (node.asset?.type === "IMAGE" && node.asset.url) {
+        return <StaticImageNode node={node} />;
+      }
       const variable = c.variable ?? (c.source === "DYNAMIC" ? c.text : undefined);
       const src = resolveProductImage(variable, ctx);
       if (src) {

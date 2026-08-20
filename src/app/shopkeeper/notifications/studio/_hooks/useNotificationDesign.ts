@@ -224,6 +224,42 @@ export function useNotificationDesign() {
     [commit],
   );
 
+  /**
+   * Removes every element, keeping the canvas background — the "photo only"
+   * notification (Background → Uploads). Goes through commit, so it's a
+   * single undo step and autosaves like any other edit.
+   */
+  const clearElements = useCallback(() => {
+    const prev = designRef.current;
+    if (!prev) return;
+    commit({ ...prev, elements: [] });
+    setSelectedId(null);
+  }, [commit]);
+
+  /**
+   * Sets a photo as the canvas background. A photo IS the whole background
+   * composition, so the scene group and every decoration are dropped in the
+   * same commit — otherwise the template's leaves/pedestal/glow would sit on
+   * top of the photo and look cluttered. Text, badges, labels and buttons are
+   * kept, since those still read fine over a picture.
+   */
+  const setPhotoBackground = useCallback(
+    (imageUrl: string) => {
+      const prev = designRef.current;
+      if (!prev) return;
+      commit({
+        ...prev,
+        canvas: { ...prev.canvas, background: { type: "IMAGE", imageUrl } },
+        elements: prev.elements.filter(
+          (n) => n.id !== "scene" && n.type !== "DECORATION" && n.type !== "PARTICLES",
+        ),
+      });
+      setAppliedSceneId(null);
+      setSelectedId(null);
+    },
+    [commit],
+  );
+
   // Sets only the canvas background (Background tab: solid / gradient / etc.).
   const setBackground = useCallback(
     (background: Background) => {
@@ -399,6 +435,8 @@ export function useNotificationDesign() {
     duplicateElement,
     moveLayer,
     toggleLock,
+    clearElements,
+    setPhotoBackground,
     setBackground,
     applyScene,
     detachScene,

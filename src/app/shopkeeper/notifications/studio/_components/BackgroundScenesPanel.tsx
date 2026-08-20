@@ -9,6 +9,7 @@ import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import {
   SCENE_CATEGORIES,
   filterScenes,
@@ -19,6 +20,7 @@ import {
 import { SCENE_CATEGORY_ICONS } from "./sceneCategoryIcons";
 import ScenePreview from "./ScenePreview";
 import BuildYourOwnScenePanel from "./BuildYourOwnScenePanel";
+import BackgroundUploadsTab from "./BackgroundUploadsTab";
 import type { LibraryItem } from "@/features/notifications/sceneLibrary";
 import type { Background, NodeStyle, NotificationDesign } from "@/features/notifications/types";
 
@@ -38,6 +40,10 @@ interface Props {
   onNewBlankScene: () => void;
   onOpenBackgroundBuilder: () => void;
   onToggleLock: (id: string) => void;
+  /** Uploads tab — wipes every element for a photo-only notification. */
+  onClearElements: () => void;
+  /** Sets a photo background, dropping the scene/decorations in the same step. */
+  onSetPhotoBackground: (url: string) => void;
 }
 
 export default function BackgroundScenesPanel({
@@ -54,6 +60,8 @@ export default function BackgroundScenesPanel({
   onNewBlankScene,
   onOpenBackgroundBuilder,
   onToggleLock,
+  onClearElements,
+  onSetPhotoBackground,
 }: Props) {
   const [tab, setTab] = useState<Tab>("scenes");
   // Whether the "Build Your Own Scene" editor view (Elements/Shapes/
@@ -64,6 +72,12 @@ export default function BackgroundScenesPanel({
   const sceneGroup = design?.elements.find((n) => n.id === "scene");
   const appliedPreset = SCENES.find((s) => s.id === appliedSceneId);
   const sceneName = appliedPreset?.name ?? sceneGroup?.name ?? "My Scene";
+  // A photo background IS the whole background composition — layering a scene's
+  // leaves/pedestal/glow on top of it just looks cluttered, so scenes are
+  // locked out until the photo is removed. Text/badges/labels stay available.
+  const bg = design?.canvas.background;
+  const photoBackgroundUrl = bg?.type === "IMAGE" ? bg.imageUrl : undefined;
+  const scenesLocked = !!photoBackgroundUrl;
 
   return (
     <aside
@@ -109,7 +123,10 @@ export default function BackgroundScenesPanel({
           </div>
 
           <div className="p-4">
-            {tab === "scenes" && (
+            {tab === "scenes" && scenesLocked && (
+              <ScenesLockedNotice onRemovePhoto={() => onSetBackground({ type: "SOLID", color: "#FFFFFF" })} />
+            )}
+            {tab === "scenes" && !scenesLocked && (
               <ScenesTab
                 appliedSceneId={appliedSceneId}
                 hasScene={!!sceneGroup}
@@ -138,13 +155,46 @@ export default function BackgroundScenesPanel({
                   if (!sceneGroup) onNewBlankScene();
                   setEditingScene(true);
                 }}
+                onOpenUploads={() => setTab("uploads")}
+                scenesLocked={scenesLocked}
               />
             )}
-            {tab === "uploads" && <UploadsTab />}
+            {tab === "uploads" && (
+              <BackgroundUploadsTab
+                currentImageUrl={
+                  design?.canvas.background?.type === "IMAGE" ? design.canvas.background.imageUrl : undefined
+                }
+                hasElements={!!design?.elements.length}
+                onSetImage={onSetPhotoBackground}
+                onClearImage={() => onSetBackground({ type: "SOLID", color: "#FFFFFF" })}
+                onClearElements={onClearElements}
+              />
+            )}
           </div>
         </div>
       )}
     </aside>
+  );
+}
+
+/** Shown instead of the scene browser while a photo background is in use. */
+function ScenesLockedNotice({ onRemovePhoto }: { onRemovePhoto: () => void }) {
+  return (
+    <div className="flex flex-col items-center text-center gap-2 rounded-xl border border-(--color-border-default) bg-(--color-bg-page) py-8 px-4">
+      <ImageOutlinedIcon sx={{ fontSize: 26, color: "var(--color-brand-primary)" }} />
+      <p className="text-[12px] font-semibold text-(--color-text-primary)">Photo background in use</p>
+      <p className="text-[11px] leading-relaxed text-(--color-text-secondary)">
+        Scenes replace the background with their own artwork, so they&apos;re unavailable while a photo is set. You can
+        still add text, badges and labels on top.
+      </p>
+      <button
+        type="button"
+        onClick={onRemovePhoto}
+        className="mt-1 h-8 px-3 rounded-lg border border-(--color-border-default) text-[11px] font-semibold text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
+      >
+        Remove photo to use scenes
+      </button>
+    </div>
   );
 }
 
@@ -336,6 +386,8 @@ function BackgroundTab({
   onDetach,
   onOpenBackgroundBuilder,
   onOpenSceneEditor,
+  onOpenUploads,
+  scenesLocked,
 }: {
   appliedSceneId: string | null;
   hasScene: boolean;
@@ -343,6 +395,8 @@ function BackgroundTab({
   onDetach: () => void;
   onOpenBackgroundBuilder: () => void;
   onOpenSceneEditor: () => void;
+  onOpenUploads: () => void;
+  scenesLocked: boolean;
 }) {
   const [type, setType] = useState<"SOLID" | "GRADIENT" | "IMAGE" | "SCENE">("GRADIENT");
   const [solid, setSolid] = useState("#F5F2FF");
@@ -372,7 +426,9 @@ function BackgroundTab({
         <button
           type="button"
           onClick={onOpenSceneEditor}
-          className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-(--color-border-default) hover:border-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
+          disabled={scenesLocked}
+          title={scenesLocked ? "Remove the photo background to build a scene" : undefined}
+          className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-(--color-border-default) hover:border-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:border-(--color-border-default) disabled:hover:bg-transparent"
         >
           <span className="w-8 h-8 rounded-lg bg-(--color-brand-primary-light) flex items-center justify-center shrink-0">
             <AutoAwesomeOutlinedIcon sx={{ fontSize: 17, color: "var(--color-brand-primary)" }} />
@@ -380,7 +436,11 @@ function BackgroundTab({
           <span className="text-left">
             <span className="block text-[12px] font-semibold text-(--color-text-primary)">Build Your Own Scene</span>
             <span className="block text-[10px] text-(--color-text-hint)">
-              {hasScene ? "Reopen the scene editor" : "Layer illustrations, decorations & effects"}
+              {scenesLocked
+                ? "Unavailable while a photo background is set"
+                : hasScene
+                  ? "Reopen the scene editor"
+                  : "Layer illustrations, decorations & effects"}
             </span>
           </span>
         </button>
@@ -391,12 +451,14 @@ function BackgroundTab({
           <button
             key={t}
             type="button"
+            disabled={t === "SCENE" && scenesLocked}
+            title={t === "SCENE" && scenesLocked ? "Remove the photo background to use scenes" : undefined}
             onClick={() => {
               setType(t);
               if (t === "SOLID") onSet({ type: "SOLID", color: solid });
               else if (t === "GRADIENT") applyGradient();
             }}
-            className={`h-8 rounded-lg border text-[11px] font-medium capitalize transition-colors cursor-pointer ${
+            className={`h-8 rounded-lg border text-[11px] font-medium capitalize transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
               type === t
                 ? "border-(--color-brand-primary) bg-(--color-brand-primary-light) text-(--color-brand-primary)"
                 : "border-(--color-border-default) text-(--color-text-secondary) hover:bg-(--color-bg-surface-hover)"
@@ -427,12 +489,15 @@ function BackgroundTab({
       )}
 
       {type === "IMAGE" && (
-        <div className="rounded-xl border-2 border-dashed border-(--color-border-strong) py-8 px-4 text-center text-(--color-text-hint)">
+        <button
+          type="button"
+          onClick={onOpenUploads}
+          className="w-full rounded-xl border-2 border-dashed border-(--color-border-strong) py-8 px-4 text-center text-(--color-text-hint) hover:border-(--color-brand-primary) hover:bg-(--color-brand-primary-light) hover:text-(--color-brand-primary) transition-colors cursor-pointer"
+        >
           <UploadFileOutlinedIcon sx={{ fontSize: 24 }} />
-          <p className="text-[12px] mt-1.5">
-            Background images upload via Cloudinary — see the Uploads tab.
-          </p>
-        </div>
+          <span className="block text-[12px] font-semibold mt-1.5">Upload a background image</span>
+          <span className="block text-[10px] mt-0.5">Opens the Uploads tab</span>
+        </button>
       )}
 
       {type === "SCENE" && (
@@ -473,16 +538,3 @@ function ColorRow({ label, value, onChange }: { label: string; value: string; on
   );
 }
 
-// ── Uploads (Cloudinary pipeline lands in the next increment) ────────────────────
-
-function UploadsTab() {
-  return (
-    <div className="flex flex-col items-center text-center gap-2 rounded-xl border-2 border-dashed border-(--color-border-strong) py-10 px-4 text-(--color-text-hint)">
-      <UploadFileOutlinedIcon sx={{ fontSize: 26 }} />
-      <p className="text-[12px]">
-        Custom uploads (PNG · JPG · WEBP) route through Cloudinary and drop in as editable scene
-        layers — wiring up next.
-      </p>
-    </div>
-  );
-}

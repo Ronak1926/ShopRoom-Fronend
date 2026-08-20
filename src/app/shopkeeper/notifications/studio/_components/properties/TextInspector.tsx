@@ -25,11 +25,7 @@ import { FONT_WEIGHT_OPTIONS, TEXT_VARIABLES } from "@/features/notifications/te
 import { NumberField, Row, Section, SegmentedGroup, Select, Slider } from "./fields";
 import { TextColorPicker } from "./TextColorPicker";
 import TextEffectsSection from "./TextEffectsSection";
-
-const ENTRY = ["NONE", "FADE_IN", "SLIDE_UP", "SLIDE_DOWN", "SLIDE_LEFT", "SLIDE_RIGHT", "ZOOM_IN", "ZOOM_OUT", "POP", "BOUNCE"] as const;
-const ATTENTION = ["NONE", "PULSE", "GLOW", "FLOAT", "WIGGLE", "SHAKE"] as const;
-const EXIT = ["NONE", "FADE_OUT", "SLIDE_DOWN", "ZOOM_OUT"] as const;
-const EASINGS = ["easeOut", "easeIn", "easeInOut", "linear"] as const;
+import { ENTRY, ATTENTION, EXIT, EASINGS } from "./animationOptions";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
   { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },

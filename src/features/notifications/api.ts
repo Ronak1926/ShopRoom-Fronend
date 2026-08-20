@@ -101,3 +101,74 @@ export async function cloneTemplate(templateId: string): Promise<DesignRecord> {
   );
   return data.data;
 }
+
+// ── Image assets ─────────────────────────────────────────────────────────────
+
+export interface AssetSummary {
+  id: string;
+  secureUrl: string;
+  width: number | null;
+  height: number | null;
+  createdAt: string;
+}
+
+export async function uploadAsset(
+  imageDataUri: string,
+  meta?: { width?: number; height?: number; sizeBytes?: number },
+  onProgress?: (percent: number) => void,
+): Promise<AssetSummary> {
+  const { data } = await apiClient.post<Envelope<AssetSummary>>(
+    "/api/notifications/assets",
+    { image: imageDataUri, ...meta },
+    {
+      ...authConfig(),
+      onUploadProgress: onProgress
+        ? (e) => onProgress(e.total ? Math.round((e.loaded / e.total) * 100) : 0)
+        : undefined,
+    },
+  );
+  return data.data;
+}
+
+export async function listAssets(): Promise<AssetSummary[]> {
+  const { data } = await apiClient.get<Envelope<AssetSummary[]>>(
+    "/api/notifications/assets",
+    authConfig(),
+  );
+  return data.data;
+}
+
+// ── Stock images ─────────────────────────────────────────────────────────────
+
+export interface StockImageResult {
+  id: string;
+  provider: "PEXELS" | "UNSPLASH";
+  thumbUrl: string;
+  fullUrl: string;
+  width: number;
+  height: number;
+  photographer: string;
+  photographerUrl?: string;
+  sourceUrl?: string;
+}
+
+export interface StockImageSearchResult {
+  items: StockImageResult[];
+  page: number;
+  hasMore: boolean;
+  /** Providers with an API key set — empty means stock search isn't set up yet. */
+  configured: ("PEXELS" | "UNSPLASH")[];
+}
+
+export async function searchStockImages(params: {
+  query: string;
+  category?: string;
+  provider?: "PEXELS" | "UNSPLASH";
+  page?: number;
+}): Promise<StockImageSearchResult> {
+  const { data } = await apiClient.get<Envelope<StockImageSearchResult>>(
+    "/api/notifications/stock-images",
+    { ...authConfig(), params },
+  );
+  return data.data;
+}

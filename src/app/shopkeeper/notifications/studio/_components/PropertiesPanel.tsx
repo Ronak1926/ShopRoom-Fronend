@@ -16,11 +16,8 @@ import type { CompositionNode, NotificationDesign } from "@/features/notificatio
 import { ColorField, NumberField, Row, Section, Select, Slider } from "./properties/fields";
 import TextInspector from "./properties/TextInspector";
 import BadgeLabelInspector from "./properties/BadgeLabelInspector";
-
-const ENTRY = ["NONE", "FADE_IN", "SLIDE_UP", "SLIDE_DOWN", "ZOOM_IN", "BOUNCE_IN"] as const;
-const ATTENTION = ["NONE", "PULSE", "GLOW", "FLOAT", "WIGGLE", "SHAKE"] as const;
-const EXIT = ["NONE", "FADE_OUT", "SLIDE_DOWN", "ZOOM_OUT"] as const;
-const EASINGS = ["easeOut", "easeIn", "easeInOut", "linear"] as const;
+import ImageInspector from "./properties/ImageInspector";
+import { ENTRY, ATTENTION, EXIT, EASINGS } from "./properties/animationOptions";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
   { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },
@@ -39,6 +36,7 @@ interface Props {
   onMoveLayer: (id: string, move: LayerMove) => void;
   onToggleLock: (id: string) => void;
   onChangeBadgeLabelPreset?: () => void;
+  onReplaceImage?: (id: string) => void;
 }
 
 export default function PropertiesPanel({
@@ -51,6 +49,7 @@ export default function PropertiesPanel({
   onMoveLayer,
   onToggleLock,
   onChangeBadgeLabelPreset,
+  onReplaceImage,
 }: Props) {
   const node = design && selectedId ? findNode(design.elements, selectedId) : null;
 
@@ -85,6 +84,17 @@ export default function PropertiesPanel({
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
           onChangePreset={() => onChangeBadgeLabelPreset?.()}
+        />
+      ) : node.type === "IMAGE" || (node.type === "PRODUCT_IMAGE" && !!node.asset?.url) ? (
+        <ImageInspector
+          key={node.id}
+          node={node}
+          update={(p) => updateElement(node.id, p)}
+          onDelete={() => onDelete(node.id)}
+          onDuplicate={() => onDuplicate(node.id)}
+          onMoveLayer={(m) => onMoveLayer(node.id, m)}
+          onToggleLock={() => onToggleLock(node.id)}
+          onReplace={() => onReplaceImage?.(node.id)}
         />
       ) : (
         <Inspector

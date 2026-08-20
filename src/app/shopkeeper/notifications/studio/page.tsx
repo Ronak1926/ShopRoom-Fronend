@@ -10,6 +10,8 @@ import BackgroundScenesPanel from "./_components/BackgroundScenesPanel";
 import AssetLibraryPanel from "./_components/AssetLibraryPanel";
 import TextPanel from "./_components/TextPanel";
 import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
+import ImagesPanel from "./_components/ImagesPanel";
+import type { ImageTile } from "./_components/images/ImageGrid";
 import {
   DECORATION_GROUPS,
   EFFECT_GROUPS,
@@ -18,12 +20,14 @@ import {
 } from "@/features/notifications/sceneLibrary";
 import {
   createDecoration,
+  createImageElement,
   createTextFromPreset,
   createTextWithStyle,
   createBadgeOrLabelFromPreset,
   applyBadgeLabelPreset,
 } from "@/features/notifications/elementFactory";
-import { findNode } from "@/features/notifications/tree";
+import { findNode, flattenNodes, nodeLabel } from "@/features/notifications/tree";
+import { pushRecentlyUsedImage } from "@/features/notifications/recentlyUsedImages";
 import { TEXT_CONTENT_PRESETS, TEXT_PRESET_LINKS, type TextStylePreset } from "@/features/notifications/textPresets";
 import type { BadgeLabelKind, BadgeLabelPreset } from "@/features/notifications/badgeLabelPresets";
 import StudioCanvas from "./_components/StudioCanvas";
@@ -34,6 +38,7 @@ import TimelinePanel from "./_components/TimelinePanel";
 import ResizeHandle from "./_components/ResizeHandle";
 import { useResizable } from "./_hooks/useResizable";
 import { useNotificationDesign } from "./_hooks/useNotificationDesign";
+import { usePlaybackClock } from "./_hooks/usePlaybackClock";
 import { createElement } from "@/features/notifications/elementFactory";
 import { getCookie } from "../../../../utils/cookieUtils";
 
@@ -60,6 +65,14 @@ export default function NotificationStudioPage() {
   // Set while the inspector's "Change" is swapping an existing badge/label's
   // preset — the next pick patches this node instead of adding a new one.
   const [blChangeTargetId, setBlChangeTargetId] = useState<string | null>(null);
+  // Set while ImageInspector's "Replace" is swapping an existing image's
+  // source — the next Add-to-Canvas patches this node's asset instead of
+  // inserting a new one (same precedent as blChangeTargetId above).
+  const [imageReplaceTargetId, setImageReplaceTargetId] = useState<string | null>(null);
+  // Timeline playback — drives real entry/attention/exit animation on the
+  // canvas and the Timeline's playhead. Auto-stops when it reaches the end.
+  const [isPlaying, setIsPlaying] = useState(false);
+  const playbackTime = usePlaybackClock(studio.design?.timeline?.durationMs ?? 4000, isPlaying, () => setIsPlaying(false));
 
   useEffect(() => {
     if (!getCookie("shopkeeper_token")) {
@@ -136,6 +149,76 @@ export default function NotificationStudioPage() {
     openBadgesLabels(node.type, node.id);
   }
 
+  // Play/replay the animation preview. Restarting mid-playback needs the flag
+  // to drop to false first, otherwise nothing re-triggers.
+  function handlePlay() {
+    setIsPlaying(false);
+    requestAnimationFrame(() => setIsPlaying(true));
+  }
+
+  /**
+   * Images panel "Add to Canvas". Three cases, in priority order:
+   *  1. Replace flow active → swap that node's photo in place.
+   *  2. An empty PRODUCT_IMAGE placeholder exists → drop the photo into that
+   *     slot so it lands on the pedestal at the template's intended position,
+   *     size, z-order and animation instead of floating mid-canvas.
+   *  3. Otherwise → insert a new free-floating IMAGE element.
+   */
+  function handleAddImage(tile: ImageTile) {
+    const canvas = studio.design?.canvas;
+    if (!canvas) return;
+
+    const assetPatch = {
+      type: "IMAGE" as const,
+      url: tile.fullUrl,
+      naturalWidth: tile.width,
+      naturalHeight: tile.height,
+      attribution: tile.attribution,
+    };
+
+    if (imageReplaceTargetId) {
+      studio.updateElement(imageReplaceTargetId, (n) => ({
+        ...n,
+        asset: assetPatch,
+        image: { ...n.image, crop: undefined },
+      }));
+      setImageReplaceTargetId(null);
+    } else {
+      const slot = studio.design
+        ? flattenNodes(studio.design.elements)
+            .map((f) => f.node)
+            .find((n) => n.type === "PRODUCT_IMAGE" && !n.asset?.url)
+        : undefined;
+
+      if (slot) {
+        studio.updateElement(slot.id, (n) => ({
+          ...n,
+          asset: assetPatch,
+          // "contain" keeps the whole product visible inside the slot; a cover
+          // crop would clip a shoe/bag against the pedestal.
+          image: { ...n.image, fit: n.image?.fit ?? "contain", crop: undefined },
+        }));
+        studio.setSelectedId(slot.id);
+      } else {
+        studio.addElement(
+          createImageElement(tile.fullUrl, canvas.width, canvas.height, {
+            naturalWidth: tile.width,
+            naturalHeight: tile.height,
+            attribution: tile.attribution,
+          }),
+        );
+      }
+    }
+    pushRecentlyUsedImage({ url: tile.fullUrl, name: tile.credit, attribution: tile.attribution });
+  }
+
+  // ImageInspector's "Replace" button: reopen the Images panel scoped to
+  // replacing the currently selected image.
+  function openImagesForReplace(nodeId: string) {
+    setActiveTool("images");
+    setImageReplaceTargetId(nodeId);
+  }
+
   // Insert a decoration / shape / effect from an asset library.
   function handleInsertAsset(item: LibraryItem) {
     const canvas = studio.design?.canvas;
@@ -196,6 +279,8 @@ export default function NotificationStudioPage() {
             onNewBlankScene={studio.startBlankScene}
             onOpenBackgroundBuilder={() => setRightPanel("background")}
             onToggleLock={studio.toggleLock}
+            onClearElements={studio.clearElements}
+            onSetPhotoBackground={studio.setPhotoBackground}
           />
         );
       case "text":
@@ -208,6 +293,17 @@ export default function NotificationStudioPage() {
             onApplyStyle={handleApplyTextStyle}
           />
         );
+      case "images": {
+        const replaceTarget = imageReplaceTargetId && studio.design ? findNode(studio.design.elements, imageReplaceTargetId) : null;
+        return (
+          <ImagesPanel
+            width={leftWidth}
+            replaceTargetName={replaceTarget ? nodeLabel(replaceTarget) : null}
+            onAdd={handleAddImage}
+            onCancelReplace={() => setImageReplaceTargetId(null)}
+          />
+        );
+      }
       case "shapes":
         return (
           <AssetLibraryPanel width={leftWidth} title="Shapes" groups={SHAPE_GROUPS} onInsert={handleInsertAsset} />
@@ -269,6 +365,7 @@ export default function NotificationStudioPage() {
                 onBeginInteraction={studio.beginInteraction}
                 onUpdateLive={studio.updateElementLive}
                 onEndInteraction={studio.endInteraction}
+                isPlaying={isPlaying}
               />
             </div>
 
@@ -286,7 +383,12 @@ export default function NotificationStudioPage() {
                 onToggleLock={studio.toggleLock}
               />
               <ResizeHandle orientation="vertical" onResize={resizeLayers} />
-              <TimelinePanel />
+              <TimelinePanel
+                design={studio.design}
+                playbackTime={playbackTime}
+                isPlaying={isPlaying}
+                onPlay={handlePlay}
+              />
             </div>
           </div>
 
@@ -314,6 +416,7 @@ export default function NotificationStudioPage() {
                 onMoveLayer={studio.moveLayer}
                 onToggleLock={studio.toggleLock}
                 onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
+                onReplaceImage={openImagesForReplace}
               />
             </>
           )}

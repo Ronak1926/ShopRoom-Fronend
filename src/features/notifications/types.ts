@@ -72,7 +72,9 @@ export interface NodeStyle {
   glow?: { enabled?: boolean; color?: string; blur?: number; opacity?: number };
   blur?: number;
   backdropBlur?: number;
-  clipShape?: "pill" | "circle" | "hexagon" | "diamond" | "shield" | "star" | "burst";
+  clipShape?:
+    | "pill" | "circle" | "hexagon" | "diamond" | "shield" | "star" | "burst"
+    | "rectangle" | "rounded" | "ellipse" | "blob";
 }
 
 export interface Layout {
@@ -96,17 +98,52 @@ export interface ElementContent {
   value?: string | number;
 }
 
+export interface ImageCrop {
+  /** Fractions (0–1) of the image's natural size — the visible sub-rect. */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface ImageFilters {
+  /** CSS filter multipliers/degrees. Neutral values: 1, 1, 1, 0, 0. */
+  brightness?: number;
+  contrast?: number;
+  saturate?: number;
+  hueRotate?: number;
+  grayscale?: number;
+}
+
+export interface ImageOverlay {
+  color?: string;
+  gradient?: Gradient;
+  opacity?: number;
+  blendMode?: "normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten";
+}
+
 export interface ImageConfig {
   fit?: "cover" | "contain" | "fill" | "none";
   position?: "center" | "top" | "bottom" | "left" | "right";
   opacity?: number;
   borderRadius?: number;
+  /** Non-destructive crop rect — when set, takes precedence over fit/position. */
+  crop?: ImageCrop;
+  filters?: ImageFilters;
+  overlay?: ImageOverlay;
 }
 
 export interface AssetRef {
   type?: "SVG" | "IMAGE" | "LOTTIE";
   assetId?: string;
   url?: string;
+  naturalWidth?: number;
+  naturalHeight?: number;
+  attribution?: {
+    photographer?: string;
+    photographerUrl?: string;
+    provider?: "PEXELS" | "UNSPLASH";
+  };
 }
 
 export interface ElementAction {
@@ -156,6 +193,8 @@ export interface NotificationDesign {
   designTokens?: Record<string, unknown>;
   canvas: { width: number; height: number; background: Background };
   elements: CompositionNode[];
+  /** Total playback duration (ms) for the Timeline's Play/scrub control. */
+  timeline?: { durationMs: number };
   metadata: { createdAt: string; updatedAt: string; source: string };
 }
 
