@@ -2,6 +2,11 @@
  * features/notifications/icons.tsx — Safe MUI icon registry. The design JSON
  * stores an icon NAME (content.icon); the renderer maps it to the corresponding
  * @mui/icons-material component. No JSX/SVG is ever stored in the database.
+ *
+ * ⚠ Adding an icon here also requires adding it to ICON_NAMES in
+ * ShopRoom-Backend/src/schemas/notification.schema.ts — the backend validates
+ * content.icon against that list, so a name present here but missing there is
+ * rejected on save.
  */
 
 import type { ElementType } from "react";
@@ -60,6 +65,60 @@ import Build from "@mui/icons-material/Build";
 import RocketLaunch from "@mui/icons-material/RocketLaunch";
 import School from "@mui/icons-material/School";
 import EditNote from "@mui/icons-material/EditNote";
+// ── Icons tool library (see features/notifications/iconLibrary.ts) ────────────
+import Person from "@mui/icons-material/Person";
+import Settings from "@mui/icons-material/Settings";
+import Bookmark from "@mui/icons-material/Bookmark";
+import Close from "@mui/icons-material/Close";
+import Info from "@mui/icons-material/Info";
+import Help from "@mui/icons-material/Help";
+import Delete from "@mui/icons-material/Delete";
+import Lock from "@mui/icons-material/Lock";
+import LockOpen from "@mui/icons-material/LockOpen";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Mail from "@mui/icons-material/Mail";
+import Phone from "@mui/icons-material/Phone";
+import LocationOn from "@mui/icons-material/LocationOn";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
+import Language from "@mui/icons-material/Language";
+import Facebook from "@mui/icons-material/Facebook";
+import Instagram from "@mui/icons-material/Instagram";
+import Twitter from "@mui/icons-material/Twitter";
+import YouTube from "@mui/icons-material/YouTube";
+import LinkedIn from "@mui/icons-material/LinkedIn";
+import WhatsApp from "@mui/icons-material/WhatsApp";
+import Telegram from "@mui/icons-material/Telegram";
+import Pinterest from "@mui/icons-material/Pinterest";
+import Reddit from "@mui/icons-material/Reddit";
+import ShoppingBag from "@mui/icons-material/ShoppingBag";
+import Discount from "@mui/icons-material/Discount";
+import CreditCard from "@mui/icons-material/CreditCard";
+import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
+import RemoveShoppingCart from "@mui/icons-material/RemoveShoppingCart";
+import LocalMall from "@mui/icons-material/LocalMall";
+import Redeem from "@mui/icons-material/Redeem";
+import Receipt from "@mui/icons-material/Receipt";
+import Percent from "@mui/icons-material/Percent";
+import QrCode from "@mui/icons-material/QrCode";
+import Menu from "@mui/icons-material/Menu";
+import Add from "@mui/icons-material/Add";
+import Remove from "@mui/icons-material/Remove";
+import GridView from "@mui/icons-material/GridView";
+import Search from "@mui/icons-material/Search";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import Refresh from "@mui/icons-material/Refresh";
+import Share from "@mui/icons-material/Share";
+import Edit from "@mui/icons-material/Edit";
+import FilterList from "@mui/icons-material/FilterList";
+import PlayArrow from "@mui/icons-material/PlayArrow";
+import Pause from "@mui/icons-material/Pause";
+import VolumeUp from "@mui/icons-material/VolumeUp";
+import Analytics from "@mui/icons-material/Analytics";
 
 export const ICON_REGISTRY: Record<string, ElementType> = {
   AutoAwesome, Inventory2, Replay, HourglassBottom, Sell, FlashOn, LocalOffer,
@@ -72,6 +131,15 @@ export const ICON_REGISTRY: Record<string, ElementType> = {
   TrendingUp, FiberNew, Diamond, Shield, RadioButtonUnchecked, Warning, Devices,
   Checkroom, Home, SportsSoccer, Toys, AcUnit, WbSunny, Autorenew, Download,
   Build, RocketLaunch, School, EditNote,
+  // Icons tool library — General / Social / Ecommerce / UI sets.
+  Person, Settings, Bookmark, Close, Info, Help, Delete, Lock, LockOpen,
+  Visibility, VisibilityOff, Mail, Phone, LocationOn, CalendarMonth, Language,
+  Facebook, Instagram, Twitter, YouTube, LinkedIn, WhatsApp, Telegram, Pinterest, Reddit,
+  ShoppingBag, Discount, CreditCard, AccountBalanceWallet, RemoveShoppingCart,
+  LocalMall, Redeem, Receipt, Percent, QrCode,
+  Menu, Add, Remove, GridView, Search, ArrowBack, ArrowUpward, ArrowDownward,
+  ChevronRight, MoreHoriz, Refresh, Share, Edit, FilterList,
+  PlayArrow, Pause, VolumeUp, Analytics,
 };
 
 export function getIcon(name?: string): ElementType | null {

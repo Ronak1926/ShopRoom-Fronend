@@ -17,6 +17,8 @@ import { ColorField, NumberField, Row, Section, Select, Slider } from "./propert
 import TextInspector from "./properties/TextInspector";
 import BadgeLabelInspector from "./properties/BadgeLabelInspector";
 import ImageInspector from "./properties/ImageInspector";
+import ButtonInspector from "./properties/ButtonInspector";
+import IconInspector from "./properties/IconInspector";
 import { ENTRY, ATTENTION, EXIT, EASINGS } from "./properties/animationOptions";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
@@ -37,6 +39,8 @@ interface Props {
   onToggleLock: (id: string) => void;
   onChangeBadgeLabelPreset?: () => void;
   onReplaceImage?: (id: string) => void;
+  onChangeButtonPreset?: () => void;
+  onChangeIcon?: (id: string) => void;
 }
 
 export default function PropertiesPanel({
@@ -50,6 +54,8 @@ export default function PropertiesPanel({
   onToggleLock,
   onChangeBadgeLabelPreset,
   onReplaceImage,
+  onChangeButtonPreset,
+  onChangeIcon,
 }: Props) {
   const node = design && selectedId ? findNode(design.elements, selectedId) : null;
 
@@ -84,6 +90,28 @@ export default function PropertiesPanel({
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
           onChangePreset={() => onChangeBadgeLabelPreset?.()}
+        />
+      ) : node.type === "ICON" ? (
+        <IconInspector
+          key={node.id}
+          node={node}
+          update={(p) => updateElement(node.id, p)}
+          onDelete={() => onDelete(node.id)}
+          onDuplicate={() => onDuplicate(node.id)}
+          onMoveLayer={(m) => onMoveLayer(node.id, m)}
+          onToggleLock={() => onToggleLock(node.id)}
+          onChangeIcon={() => onChangeIcon?.(node.id)}
+        />
+      ) : node.type === "BUTTON" ? (
+        <ButtonInspector
+          key={node.id}
+          node={node}
+          update={(p) => updateElement(node.id, p)}
+          onDelete={() => onDelete(node.id)}
+          onDuplicate={() => onDuplicate(node.id)}
+          onMoveLayer={(m) => onMoveLayer(node.id, m)}
+          onToggleLock={() => onToggleLock(node.id)}
+          onChangePreset={() => onChangeButtonPreset?.()}
         />
       ) : node.type === "IMAGE" || (node.type === "PRODUCT_IMAGE" && !!node.asset?.url) ? (
         <ImageInspector

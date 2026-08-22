@@ -11,6 +11,10 @@ import AssetLibraryPanel from "./_components/AssetLibraryPanel";
 import TextPanel from "./_components/TextPanel";
 import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
 import ImagesPanel from "./_components/ImagesPanel";
+import ButtonsPanel from "./_components/ButtonsPanel";
+import IconsPanel from "./_components/IconsPanel";
+import type { ButtonPreset } from "@/features/notifications/buttonPresets";
+import { iconLabel } from "@/features/notifications/iconLibrary";
 import type { ImageTile } from "./_components/images/ImageGrid";
 import {
   DECORATION_GROUPS,
@@ -25,6 +29,9 @@ import {
   createTextWithStyle,
   createBadgeOrLabelFromPreset,
   applyBadgeLabelPreset,
+  createButtonFromPreset,
+  applyButtonPreset,
+  createIconElement,
 } from "@/features/notifications/elementFactory";
 import { findNode, flattenNodes, nodeLabel } from "@/features/notifications/tree";
 import { pushRecentlyUsedImage } from "@/features/notifications/recentlyUsedImages";
@@ -69,6 +76,12 @@ export default function NotificationStudioPage() {
   // source — the next Add-to-Canvas patches this node's asset instead of
   // inserting a new one (same precedent as blChangeTargetId above).
   const [imageReplaceTargetId, setImageReplaceTargetId] = useState<string | null>(null);
+  // Set while ButtonInspector's "Change style" is restyling an existing button
+  // — the next preset pick patches that node instead of adding a new one.
+  const [buttonChangeTargetId, setButtonChangeTargetId] = useState<string | null>(null);
+  // Set while IconInspector's "Change Icon" is swapping an existing icon —
+  // the next pick patches that node instead of adding a new one.
+  const [iconChangeTargetId, setIconChangeTargetId] = useState<string | null>(null);
   // Timeline playback — drives real entry/attention/exit animation on the
   // canvas and the Timeline's playhead. Auto-stops when it reaches the end.
   const [isPlaying, setIsPlaying] = useState(false);
@@ -219,6 +232,51 @@ export default function NotificationStudioPage() {
     setImageReplaceTargetId(nodeId);
   }
 
+  // Buttons panel: either restyles the button currently being "Changed", or
+  // inserts a brand-new real BUTTON node.
+  function handlePickButton(preset: ButtonPreset) {
+    const canvas = studio.design?.canvas;
+    if (!canvas) return;
+    if (buttonChangeTargetId) {
+      studio.updateElement(buttonChangeTargetId, (n) => applyButtonPreset(n, preset));
+      setButtonChangeTargetId(null);
+      return;
+    }
+    studio.addElement(createButtonFromPreset(preset, canvas.width, canvas.height));
+  }
+
+  // ButtonInspector's "Change style": reopen the Buttons panel scoped to
+  // restyling the currently selected button.
+  function handleChangeButtonPreset() {
+    const node = studio.selectedId && studio.design ? findNode(studio.design.elements, studio.selectedId) : null;
+    if (!node || node.type !== "BUTTON") return;
+    setActiveTool("buttons");
+    setButtonChangeTargetId(node.id);
+  }
+
+  // Icons panel: either swaps the icon currently being "Changed", or inserts a
+  // brand-new real ICON node.
+  function handlePickIcon(iconName: string) {
+    const canvas = studio.design?.canvas;
+    if (!canvas) return;
+    if (iconChangeTargetId) {
+      studio.updateElement(iconChangeTargetId, (n) => ({
+        ...n,
+        content: { ...n.content, icon: iconName },
+      }));
+      setIconChangeTargetId(null);
+      return;
+    }
+    studio.addElement(createIconElement(iconName, iconLabel(iconName), canvas.width, canvas.height));
+  }
+
+  // IconInspector's "Change Icon": reopen the Icons panel scoped to swapping
+  // the currently selected icon.
+  function handleChangeIcon(nodeId: string) {
+    setActiveTool("icons");
+    setIconChangeTargetId(nodeId);
+  }
+
   // Insert a decoration / shape / effect from an asset library.
   function handleInsertAsset(item: LibraryItem) {
     const canvas = studio.design?.canvas;
@@ -304,6 +362,26 @@ export default function NotificationStudioPage() {
           />
         );
       }
+      case "buttons":
+        return (
+          <ButtonsPanel
+            width={leftWidth}
+            design={studio.design}
+            selectedId={studio.selectedId}
+            onPick={handlePickButton}
+            changeMode={!!buttonChangeTargetId}
+          />
+        );
+      case "icons":
+        return (
+          <IconsPanel
+            width={leftWidth}
+            design={studio.design}
+            selectedId={studio.selectedId}
+            onPick={handlePickIcon}
+            changeMode={!!iconChangeTargetId}
+          />
+        );
       case "shapes":
         return (
           <AssetLibraryPanel width={leftWidth} title="Shapes" groups={SHAPE_GROUPS} onInsert={handleInsertAsset} />
@@ -417,6 +495,8 @@ export default function NotificationStudioPage() {
                 onToggleLock={studio.toggleLock}
                 onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
                 onReplaceImage={openImagesForReplace}
+                onChangeButtonPreset={handleChangeButtonPreset}
+                onChangeIcon={handleChangeIcon}
               />
             </>
           )}

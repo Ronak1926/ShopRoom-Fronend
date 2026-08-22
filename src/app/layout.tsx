@@ -135,7 +135,13 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${fraunces.variable} ${notifInter.variable} ${notifPoppins.variable} ${notifRoboto.variable} ${notifMontserrat.variable} ${notifOpenSans.variable} ${notifLato.variable} ${notifPlayfair.variable} ${notifDmSans.variable} ${notifPlusJakarta.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      {/*
+        Browser extensions (ColorZilla's cz-shortcut-listen, Grammarly, LastPass…)
+        inject attributes onto <body> before React hydrates, which React reports
+        as a hydration mismatch. This suppresses only THIS element's own
+        attribute diff — mismatches inside the app still surface normally.
+      */}
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

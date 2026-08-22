@@ -7,6 +7,7 @@
 import type { LibraryItem } from "./sceneLibrary";
 import type { TextContentPreset } from "./textPresets";
 import type { BadgeLabelPreset } from "./badgeLabelPresets";
+import type { ButtonPreset } from "./buttonPresets";
 import type { AssetRef, CompositionNode, NodeStyle } from "./types";
 
 function uid(type: string): string {
@@ -223,6 +224,109 @@ export function createBadgeOrLabelFromPreset(preset: BadgeLabelPreset, canvasW: 
     content: { text: preset.text, icon: preset.icon, iconPosition: preset.iconPosition },
     visible: true,
     locked: false,
+  };
+}
+
+/**
+ * Builds a real ICON node from the Icons library, centred on the canvas. The
+ * icon NAME is stored (never JSX/SVG) and resolved by the renderer through
+ * ICON_REGISTRY — same contract badges and buttons already use.
+ */
+export function createIconElement(
+  iconName: string,
+  label: string,
+  canvasW: number,
+  canvasH: number,
+): CompositionNode {
+  const size = 40;
+  const cx = Math.round(canvasW / 2);
+  const cy = Math.round(canvasH / 2);
+  return {
+    id: uid("icon"),
+    type: "ICON",
+    name: label,
+    frame: {
+      x: cx - Math.round(size / 2),
+      y: cy - Math.round(size / 2),
+      width: size,
+      height: size,
+      rotation: 0,
+      zIndex: TOP_Z,
+    },
+    style: { color: "#5B47D4", opacity: 1 },
+    content: { icon: iconName },
+    visible: true,
+    locked: false,
+  };
+}
+
+/**
+ * Builds a real BUTTON node from a Buttons preset, centred on the canvas. The
+ * node keeps the same shape the renderer already expects: a flex-row container
+ * whose children are the label TEXT and (optionally) an ICON.
+ */
+export function createButtonFromPreset(preset: ButtonPreset, canvasW: number, canvasH: number): CompositionNode {
+  const id = uid("button");
+  const w = Math.min(preset.width, canvasW - 24);
+  const h = preset.height;
+  const cx = Math.round(canvasW / 2);
+  const cy = Math.round(canvasH / 2);
+  return {
+    id,
+    type: "BUTTON",
+    name: preset.label,
+    frame: { x: cx - Math.round(w / 2), y: cy - Math.round(h / 2), width: w, height: h, rotation: 0, zIndex: TOP_Z },
+    layout: { direction: "row", align: "center", justify: "center", gap: 8 },
+    style: { ...preset.style },
+    interaction: { onClick: { type: "NONE" } },
+    children: buttonChildren(preset),
+    visible: true,
+    locked: false,
+  };
+}
+
+/** Label + icon children for a button preset, ordered by iconPosition. */
+function buttonChildren(preset: ButtonPreset): CompositionNode[] {
+  const pos = preset.iconPosition ?? "none";
+  const fontSize = preset.textStyle.fontSize ?? 14;
+  const label: CompositionNode = {
+    id: uid("btntx"),
+    type: "TEXT",
+    frame: { x: 0, y: 0, width: Math.max(40, preset.width - 48), height: fontSize + 6 },
+    style: { ...preset.textStyle },
+    content: { label: preset.text },
+    visible: true,
+    locked: false,
+  };
+  if (!preset.icon || pos === "none") return [label];
+
+  const icon: CompositionNode = {
+    id: uid("btnic"),
+    type: "ICON",
+    frame: { x: 0, y: 0, width: fontSize + 4, height: fontSize + 4 },
+    style: { color: preset.textStyle.color },
+    content: { icon: preset.icon },
+    visible: true,
+    locked: false,
+  };
+  if (pos === "only") return [icon];
+  return pos === "left" ? [icon, label] : [label, icon];
+}
+
+/**
+ * Applies a different preset's look to an EXISTING button node (the inspector's
+ * "Change style" flow) — same id, position and animation, so it stays one
+ * element. The label text the shopkeeper already typed is preserved.
+ */
+export function applyButtonPreset(node: CompositionNode, preset: ButtonPreset): CompositionNode {
+  const existingLabel = node.children?.find((c) => c.type === "TEXT")?.content?.label;
+  const children = buttonChildren(existingLabel ? { ...preset, text: existingLabel } : preset);
+  return {
+    ...node,
+    style: { ...preset.style },
+    layout: node.layout ?? { direction: "row", align: "center", justify: "center", gap: 8 },
+    frame: { ...node.frame, height: preset.height },
+    children,
   };
 }
 
