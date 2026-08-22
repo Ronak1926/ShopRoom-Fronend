@@ -25,7 +25,7 @@ import { FONT_WEIGHT_OPTIONS, TEXT_VARIABLES } from "@/features/notifications/te
 import { NumberField, Row, Section, SegmentedGroup, Select, Slider } from "./fields";
 import { TextColorPicker } from "./TextColorPicker";
 import TextEffectsSection from "./TextEffectsSection";
-import { ENTRY, ATTENTION, EXIT, EASINGS } from "./animationOptions";
+import AnimationSection from "./AnimationSection";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
   { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },
@@ -41,10 +41,12 @@ interface Props {
   onDuplicate: () => void;
   onMoveLayer: (m: LayerMove) => void;
   onToggleLock: () => void;
+  /** Plays just this element's animation on the canvas. */
+  onPreview?: (id: string) => void;
 }
 
 /** Rich TEXT-specific inspector shown in the right rail when a TEXT node is selected. */
-export default function TextInspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock }: Props) {
+export default function TextInspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock, onPreview }: Props) {
   const f = node.frame;
   const style = node.style ?? {};
   const hidden = node.visible === false;
@@ -54,17 +56,6 @@ export default function TextInspector({ node, update, onDelete, onDuplicate, onM
   const setFrame = (k: "x" | "y" | "width" | "height" | "rotation", v: number) =>
     update((n) => ({ ...n, frame: { ...n.frame, [k]: v } }));
   const setStyle = (patch: Partial<NodeStyle>) => update((n) => ({ ...n, style: { ...n.style, ...patch } }));
-  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
-    update((n) => ({
-      ...n,
-      animation: {
-        ...n.animation,
-        [slot]:
-          type === "NONE"
-            ? undefined
-            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
-      },
-    }));
 
   function insertVariable(token: string) {
     const ta = contentRef.current;
@@ -301,46 +292,7 @@ export default function TextInspector({ node, update, onDelete, onDuplicate, onM
         </div>
       </Section>
 
-      <Section title="Animation">
-        <div className="flex flex-col gap-2.5">
-          <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
-          </Row>
-          <Row label="Attention">
-            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
-          </Row>
-          <Row label="Exit">
-            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
-          </Row>
-          {node.animation?.entry && (
-            <>
-              <Row label="Duration">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.durationMs ?? 500}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, durationMs: v } } }))}
-                />
-              </Row>
-              <Row label="Delay">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.delayMs ?? 0}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, delayMs: v } } }))}
-                />
-              </Row>
-              <Row label="Easing">
-                <Select
-                  value={node.animation.entry.easing ?? "easeOut"}
-                  options={EASINGS}
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, easing: v } } }))}
-                />
-              </Row>
-            </>
-          )}
-        </div>
-      </Section>
+      <AnimationSection node={node} update={update} onPreview={onPreview} />
     </>
   );
 }

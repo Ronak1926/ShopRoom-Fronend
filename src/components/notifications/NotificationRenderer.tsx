@@ -25,8 +25,10 @@ interface Props {
   scale?: number;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  /** Drives real entry/attention/exit playback (Timeline's Play button). */
+  /** Drives real entry/emphasis/exit playback (Timeline's Play button). */
   isPlaying?: boolean;
+  /** When set, only this node animates — the inspector's per-element preview. */
+  previewId?: string | null;
 }
 
 export default function NotificationRenderer({
@@ -36,6 +38,7 @@ export default function NotificationRenderer({
   selectedId,
   onSelect,
   isPlaying,
+  previewId,
 }: Props) {
   const { width, height, background } = design.canvas;
   return (
@@ -53,7 +56,7 @@ export default function NotificationRenderer({
         onClick={() => onSelect?.("")}
       >
         {design.elements.map((n) => (
-          <RenderNode key={n.id} node={n} inFlow={false} ctx={context} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} />
+          <RenderNode key={n.id} node={n} inFlow={false} ctx={context} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} previewId={previewId} />
         ))}
       </div>
     </div>
@@ -67,6 +70,7 @@ interface NodeProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   isPlaying?: boolean;
+  previewId?: string | null;
 }
 
 function hasAnimation(node: CompositionNode): boolean {
@@ -78,7 +82,9 @@ const SELECTION: CSSProperties = {
   outlineOffset: "1px",
 };
 
-function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying }: NodeProps) {
+function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying, previewId }: NodeProps) {
+  // Timeline Play animates everything; the inspector's preview animates one.
+  const animating = !!isPlaying || previewId === node.id;
   if (node.visible === false) return null;
   const base = buildNodeStyle(node, inFlow);
   const isSelected = !!selectedId && selectedId === node.id;
@@ -112,12 +118,12 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying }: Node
       ...(isSelected ? SELECTION : null),
     };
     const kids = children.map((c) => (
-      <RenderNode key={c.id} node={c} inFlow={!!node.layout?.direction} ctx={ctx} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} />
+      <RenderNode key={c.id} node={c} inFlow={!!node.layout?.direction} ctx={ctx} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} previewId={previewId} />
     ));
     return (
       <div style={style} onClick={onClick}>
         {hasAnimation(node) ? (
-          <AnimatedNode animation={node.animation} isPlaying={!!isPlaying} contentStyle={node.layout?.direction ? flexStyle(node.layout) : undefined}>
+          <AnimatedNode animation={node.animation} isPlaying={animating} contentStyle={node.layout?.direction ? flexStyle(node.layout) : undefined}>
             {kids}
           </AnimatedNode>
         ) : (
@@ -144,7 +150,7 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying }: Node
   return (
     <div style={style} onClick={onClick}>
       {hasAnimation(node) ? (
-        <AnimatedNode animation={node.animation} isPlaying={!!isPlaying} contentStyle={leafContentStyle}>
+        <AnimatedNode animation={node.animation} isPlaying={animating} contentStyle={leafContentStyle}>
           {renderLeaf(node, ctx)}
         </AnimatedNode>
       ) : (

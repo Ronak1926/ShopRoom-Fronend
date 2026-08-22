@@ -154,11 +154,17 @@ export interface ElementAction {
 
 export interface AnimStep {
   type: string;
+  /** Omitted when equal to the default (500ms) — see compactStep. */
   durationMs?: number;
   delayMs?: number;
   easing?: string;
   intensity?: number;
+  /** Loop count; "infinite" loops for the rest of playback. Default 1. */
   repeat?: number | "infinite";
+  /** Travel direction for directional animations (slides, float). */
+  direction?: "up" | "down" | "left" | "right" | "center";
+  /** How the element rests outside the animation window. Default "forwards". */
+  fillMode?: "forwards" | "backwards" | "both" | "none";
 }
 export interface Animation {
   entry?: AnimStep;

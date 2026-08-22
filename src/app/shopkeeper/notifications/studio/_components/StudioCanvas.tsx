@@ -26,6 +26,7 @@ interface Props {
   onUpdateLive: (id: string, patch: (n: CompositionNode) => CompositionNode) => void;
   onEndInteraction: () => void;
   isPlaying?: boolean;
+  previewId?: string | null;
 }
 
 function applyResize(o: Frame, h: ResizeHandleId, dx: number, dy: number): Partial<Frame> {
@@ -53,6 +54,7 @@ export default function StudioCanvas({
   onUpdateLive,
   onEndInteraction,
   isPlaying,
+  previewId,
 }: Props) {
   const [view, setView] = useState<"mobile" | "desktop">("mobile");
   const [zoom, setZoom] = useState(1);
@@ -152,6 +154,7 @@ export default function StudioCanvas({
                 selectedId={selectedId}
                 onSelect={onSelect}
                 isPlaying={isPlaying}
+                previewId={previewId}
               />
               {selectedNode && offset && (
                 <SelectionOverlay

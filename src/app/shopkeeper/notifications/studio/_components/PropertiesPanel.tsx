@@ -13,13 +13,13 @@ import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
 import { findNode, nodeLabel, type LayerMove } from "@/features/notifications/tree";
 import type { CompositionNode, NotificationDesign } from "@/features/notifications/types";
-import { ColorField, NumberField, Row, Section, Select, Slider } from "./properties/fields";
+import { ColorField, NumberField, Row, Section, Slider } from "./properties/fields";
 import TextInspector from "./properties/TextInspector";
 import BadgeLabelInspector from "./properties/BadgeLabelInspector";
 import ImageInspector from "./properties/ImageInspector";
 import ButtonInspector from "./properties/ButtonInspector";
 import IconInspector from "./properties/IconInspector";
-import { ENTRY, ATTENTION, EXIT, EASINGS } from "./properties/animationOptions";
+import AnimationSection from "./properties/AnimationSection";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
   { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },
@@ -41,6 +41,8 @@ interface Props {
   onReplaceImage?: (id: string) => void;
   onChangeButtonPreset?: () => void;
   onChangeIcon?: (id: string) => void;
+  /** Plays just the selected element's animation on the canvas. */
+  onPreviewAnimation?: (id: string) => void;
 }
 
 export default function PropertiesPanel({
@@ -56,6 +58,7 @@ export default function PropertiesPanel({
   onReplaceImage,
   onChangeButtonPreset,
   onChangeIcon,
+  onPreviewAnimation,
 }: Props) {
   const node = design && selectedId ? findNode(design.elements, selectedId) : null;
 
@@ -79,6 +82,7 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+          onPreview={onPreviewAnimation}
         />
       ) : node.type === "BADGE" || node.type === "LABEL" ? (
         <BadgeLabelInspector
@@ -89,6 +93,7 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+          onPreview={onPreviewAnimation}
           onChangePreset={() => onChangeBadgeLabelPreset?.()}
         />
       ) : node.type === "ICON" ? (
@@ -100,6 +105,7 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+          onPreview={onPreviewAnimation}
           onChangeIcon={() => onChangeIcon?.(node.id)}
         />
       ) : node.type === "BUTTON" ? (
@@ -111,6 +117,7 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+          onPreview={onPreviewAnimation}
           onChangePreset={() => onChangeButtonPreset?.()}
         />
       ) : node.type === "IMAGE" || (node.type === "PRODUCT_IMAGE" && !!node.asset?.url) ? (
@@ -122,6 +129,7 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+          onPreview={onPreviewAnimation}
           onReplace={() => onReplaceImage?.(node.id)}
         />
       ) : (
@@ -133,6 +141,7 @@ export default function PropertiesPanel({
           onDuplicate={() => onDuplicate(node.id)}
           onMoveLayer={(m) => onMoveLayer(node.id, m)}
           onToggleLock={() => onToggleLock(node.id)}
+          onPreview={onPreviewAnimation}
         />
       )}
     </aside>
@@ -140,6 +149,7 @@ export default function PropertiesPanel({
 }
 
 interface InspectorProps {
+  onPreview?: (id: string) => void;
   node: CompositionNode;
   update: (patch: (n: CompositionNode) => CompositionNode) => void;
   onDelete: () => void;
@@ -148,7 +158,7 @@ interface InspectorProps {
   onToggleLock: () => void;
 }
 
-function Inspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock }: InspectorProps) {
+function Inspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock, onPreview }: InspectorProps) {
   const f = node.frame;
   const style = node.style ?? {};
   const hasText = typeof node.content?.text === "string";
@@ -159,17 +169,6 @@ function Inspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleL
     update((n) => ({ ...n, frame: { ...n.frame, [k]: v } }));
   const setStyle = (patch: Partial<NonNullable<CompositionNode["style"]>>) =>
     update((n) => ({ ...n, style: { ...n.style, ...patch } }));
-  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
-    update((n) => ({
-      ...n,
-      animation: {
-        ...n.animation,
-        [slot]:
-          type === "NONE"
-            ? undefined
-            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
-      },
-    }));
 
   return (
     <>
@@ -284,38 +283,7 @@ function Inspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleL
         </div>
       </Section>
 
-      <Section title="Animation">
-        <div className="flex flex-col gap-2.5">
-          <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
-          </Row>
-          <Row label="Attention">
-            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
-          </Row>
-          <Row label="Exit">
-            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
-          </Row>
-          {node.animation?.entry && (
-            <>
-              <Row label="Duration">
-                <NumberField label="" value={node.animation.entry.durationMs ?? 500} suffix="ms" onChange={(v) =>
-                  update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, durationMs: v } } }))
-                } />
-              </Row>
-              <Row label="Delay">
-                <NumberField label="" value={node.animation.entry.delayMs ?? 0} suffix="ms" onChange={(v) =>
-                  update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, delayMs: v } } }))
-                } />
-              </Row>
-              <Row label="Easing">
-                <Select value={node.animation.entry.easing ?? "easeOut"} options={EASINGS} onChange={(v) =>
-                  update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, easing: v } } }))
-                } />
-              </Row>
-            </>
-          )}
-        </div>
-      </Section>
+      <AnimationSection node={node} update={update} onPreview={onPreview} />
     </>
   );
 }

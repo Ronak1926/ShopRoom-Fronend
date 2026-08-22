@@ -20,9 +20,9 @@ import { getIcon } from "@/features/notifications/icons";
 import { iconLabel } from "@/features/notifications/iconLibrary";
 import { nodeLabel, type LayerMove } from "@/features/notifications/tree";
 import type { CompositionNode, NodeStyle } from "@/features/notifications/types";
-import { NumberField, Row, Section, Select, Slider } from "./fields";
+import { NumberField, Row, Section, Slider } from "./fields";
 import { TextColorPicker } from "./TextColorPicker";
-import { ENTRY, ATTENTION, EXIT } from "./animationOptions";
+import AnimationSection from "./AnimationSection";
 
 /** Plain helper (not a component) so the dynamically-resolved icon renders safely — mirrors BadgeLabelInspector's renderPreviewIcon. */
 function renderSelectedIcon(name: string | undefined, fontSize: number) {
@@ -44,6 +44,8 @@ interface Props {
   onDuplicate: () => void;
   onMoveLayer: (m: LayerMove) => void;
   onToggleLock: () => void;
+  /** Plays just this element's animation on the canvas. */
+  onPreview?: (id: string) => void;
   onChangeIcon: () => void;
 }
 
@@ -54,6 +56,7 @@ export default function IconInspector({
   onDuplicate,
   onMoveLayer,
   onToggleLock,
+  onPreview,
   onChangeIcon,
 }: Props) {
   const f = node.frame;
@@ -78,18 +81,6 @@ export default function IconInspector({
   const setSize = (v: number) => update((n) => ({ ...n, frame: { ...n.frame, width: v, height: v } }));
   const flipH = () => update((n) => ({ ...n, frame: { ...n.frame, scaleX: (n.frame.scaleX ?? 1) * -1 } }));
   const flipV = () => update((n) => ({ ...n, frame: { ...n.frame, scaleY: (n.frame.scaleY ?? 1) * -1 } }));
-
-  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
-    update((n) => ({
-      ...n,
-      animation: {
-        ...n.animation,
-        [slot]:
-          type === "NONE"
-            ? undefined
-            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
-      },
-    }));
 
   return (
     <>
@@ -236,39 +227,7 @@ export default function IconInspector({
         </div>
       </Section>
 
-      <Section title="Animation">
-        <div className="flex flex-col gap-2.5">
-          <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
-          </Row>
-          <Row label="Attention">
-            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
-          </Row>
-          <Row label="Exit">
-            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
-          </Row>
-          {node.animation?.entry && (
-            <>
-              <Row label="Duration">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.durationMs ?? 500}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, durationMs: v } } }))}
-                />
-              </Row>
-              <Row label="Delay">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.delayMs ?? 0}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, delayMs: v } } }))}
-                />
-              </Row>
-            </>
-          )}
-        </div>
-      </Section>
+      <AnimationSection node={node} update={update} onPreview={onPreview} />
 
       <Section title="Layers">
         <div className="grid grid-cols-2 gap-1.5">

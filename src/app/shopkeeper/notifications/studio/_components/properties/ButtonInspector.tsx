@@ -15,7 +15,7 @@ import { nodeLabel, type LayerMove } from "@/features/notifications/tree";
 import { BUTTON_ACTIONS, BUTTON_ICON_OPTIONS } from "@/features/notifications/buttonPresets";
 import type { CompositionNode, NodeStyle } from "@/features/notifications/types";
 import { ColorField, NumberField, Row, Section, SegmentedGroup, Select, Slider, Toggle } from "./fields";
-import { ENTRY, ATTENTION, EXIT } from "./animationOptions";
+import AnimationSection from "./AnimationSection";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
   { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },
@@ -31,6 +31,8 @@ interface Props {
   onDuplicate: () => void;
   onMoveLayer: (m: LayerMove) => void;
   onToggleLock: () => void;
+  /** Plays just this element's animation on the canvas. */
+  onPreview?: (id: string) => void;
   onChangePreset: () => void;
 }
 
@@ -42,6 +44,7 @@ export default function ButtonInspector({
   onDuplicate,
   onMoveLayer,
   onToggleLock,
+  onPreview,
   onChangePreset,
 }: Props) {
   const f = node.frame;
@@ -97,18 +100,6 @@ export default function ButtonInspector({
     update((n) => ({
       ...n,
       interaction: { ...n.interaction, onClick: { type: n.interaction?.onClick?.type ?? "OPEN_URL", url } },
-    }));
-
-  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
-    update((n) => ({
-      ...n,
-      animation: {
-        ...n.animation,
-        [slot]:
-          type === "NONE"
-            ? undefined
-            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
-      },
     }));
 
   return (
@@ -288,19 +279,7 @@ export default function ButtonInspector({
         </div>
       </Section>
 
-      <Section title="Animation">
-        <div className="flex flex-col gap-2.5">
-          <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
-          </Row>
-          <Row label="Attention">
-            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
-          </Row>
-          <Row label="Exit">
-            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
-          </Row>
-        </div>
-      </Section>
+      <AnimationSection node={node} update={update} onPreview={onPreview} />
 
       <Section title="Layering">
         <div className="grid grid-cols-2 gap-1.5">

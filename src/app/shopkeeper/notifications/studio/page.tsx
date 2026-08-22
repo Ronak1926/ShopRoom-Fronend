@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../dashboard/_components/Sidebar";
 import StudioTopBar from "./_components/StudioTopBar";
@@ -14,6 +14,8 @@ import ImagesPanel from "./_components/ImagesPanel";
 import ButtonsPanel from "./_components/ButtonsPanel";
 import IconsPanel from "./_components/IconsPanel";
 import ShapesPanel from "./_components/ShapesPanel";
+import AnimationPanel from "./_components/AnimationPanel";
+import { animationLengthMs, compactStep, type AnimSlot } from "@/features/notifications/animationPresets";
 import type { ButtonPreset } from "@/features/notifications/buttonPresets";
 import { iconLabel } from "@/features/notifications/iconLibrary";
 import type { ImageTile } from "./_components/images/ImageGrid";
@@ -85,6 +87,12 @@ export default function NotificationStudioPage() {
   // Timeline playback — drives real entry/attention/exit animation on the
   // canvas and the Timeline's playhead. Auto-stops when it reaches the end.
   const [isPlaying, setIsPlaying] = useState(false);
+  // Single-element animation preview (Animation panel / inspector Play button),
+  // independent of the Timeline's play-everything.
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Never leave an element parked mid-animation if the studio unmounts.
+  useEffect(() => () => { if (previewTimer.current) clearTimeout(previewTimer.current); }, []);
   const playbackTime = usePlaybackClock(studio.design?.timeline?.durationMs ?? 4000, isPlaying, () => setIsPlaying(false));
 
   useEffect(() => {
@@ -167,6 +175,44 @@ export default function NotificationStudioPage() {
   function handlePlay() {
     setIsPlaying(false);
     requestAnimationFrame(() => setIsPlaying(true));
+  }
+
+  /**
+   * Animation panel: applies a preset to the selected element's slot. Written
+   * through compactStep so only non-default fields land in the design JSON —
+   * a plain Fade In persists as { type: "FADE_IN" }.
+   */
+  function handleApplyAnimation(slot: AnimSlot, type: string) {
+    const id = studio.selectedId;
+    if (!id) return;
+    studio.updateElement(id, (n) => ({
+      ...n,
+      animation: {
+        ...n.animation,
+        [slot]: type === "NONE" ? undefined : compactStep({ ...n.animation?.[slot], type }),
+      },
+    }));
+    previewElement(id);
+  }
+
+  /**
+   * Plays one element's animation on the canvas, then returns it to rest.
+   * The reset is essential: without it a looping emphasis runs forever and an
+   * exit animation leaves the element parked in its exit position, both of
+   * which look like the element's position permanently changed.
+   */
+  function previewElement(id: string) {
+    if (previewTimer.current) clearTimeout(previewTimer.current);
+    const node = studio.design ? findNode(studio.design.elements, id) : null;
+    const length = animationLengthMs(node?.animation);
+    if (!length) {
+      setPreviewId(null);
+      return;
+    }
+    setPreviewId(null);
+    requestAnimationFrame(() => setPreviewId(id));
+    // +120ms so the final frame is visible before snapping back to rest.
+    previewTimer.current = setTimeout(() => setPreviewId(null), Math.min(length, 8000) + 120);
   }
 
   /**
@@ -390,6 +436,15 @@ export default function NotificationStudioPage() {
         );
       case "animation":
         return (
+          <AnimationPanel
+            width={leftWidth}
+            design={studio.design}
+            selectedId={studio.selectedId}
+            onApply={handleApplyAnimation}
+          />
+        );
+      case "effects":
+        return (
           <AssetLibraryPanel width={leftWidth} title="Effects" groups={EFFECT_GROUPS} onInsert={handleInsertAsset} />
         );
       default:
@@ -442,6 +497,7 @@ export default function NotificationStudioPage() {
                 onUpdateLive={studio.updateElementLive}
                 onEndInteraction={studio.endInteraction}
                 isPlaying={isPlaying}
+                previewId={previewId}
               />
             </div>
 
@@ -495,6 +551,7 @@ export default function NotificationStudioPage() {
                 onReplaceImage={openImagesForReplace}
                 onChangeButtonPreset={handleChangeButtonPreset}
                 onChangeIcon={handleChangeIcon}
+                onPreviewAnimation={previewElement}
               />
             </>
           )}

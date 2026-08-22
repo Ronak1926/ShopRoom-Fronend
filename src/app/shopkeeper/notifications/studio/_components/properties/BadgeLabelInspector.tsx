@@ -17,10 +17,10 @@ import { nodeLabel, type LayerMove } from "@/features/notifications/tree";
 import { BADGE_LABEL_ICON_OPTIONS } from "@/features/notifications/badgeLabelPresets";
 import { FONT_WEIGHT_OPTIONS } from "@/features/notifications/textPresets";
 import type { CompositionNode, NodeStyle } from "@/features/notifications/types";
-import { ColorField, NumberField, Row, Section, SegmentedGroup, Select, Slider, Toggle } from "./fields";
+import { ColorField, NumberField, Row, Section, SegmentedGroup, Slider, Toggle } from "./fields";
 import type { ElementContent } from "@/features/notifications/types";
 import type { ReactNode } from "react";
-import { ENTRY, ATTENTION, EXIT } from "./animationOptions";
+import AnimationSection from "./AnimationSection";
 
 /** Plain helper (not a component) so the dynamically-resolved icon renders safely — mirrors NotificationRenderer's renderLeaf. */
 function renderPreviewIcon(content: ElementContent): ReactNode {
@@ -43,11 +43,13 @@ interface Props {
   onDuplicate: () => void;
   onMoveLayer: (m: LayerMove) => void;
   onToggleLock: () => void;
+  /** Plays just this element's animation on the canvas. */
+  onPreview?: (id: string) => void;
   onChangePreset: () => void;
 }
 
 /** Shared inspector for BADGE and LABEL nodes — same property set, per spec §8. */
-export default function BadgeLabelInspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock, onChangePreset }: Props) {
+export default function BadgeLabelInspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock, onChangePreset, onPreview }: Props) {
   const f = node.frame;
   const style = node.style ?? {};
   const content = node.content ?? {};
@@ -62,17 +64,6 @@ export default function BadgeLabelInspector({ node, update, onDelete, onDuplicat
   const setStyle = (patch: Partial<NodeStyle>) => update((n) => ({ ...n, style: { ...n.style, ...patch } }));
   const setContent = (patch: Partial<NonNullable<CompositionNode["content"]>>) =>
     update((n) => ({ ...n, content: { ...n.content, ...patch } }));
-  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
-    update((n) => ({
-      ...n,
-      animation: {
-        ...n.animation,
-        [slot]:
-          type === "NONE"
-            ? undefined
-            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
-      },
-    }));
 
   const previewBox = buildNodeStyle({ ...node, frame: { ...f, width: 40, height: 40 } }, true);
 
@@ -237,39 +228,7 @@ export default function BadgeLabelInspector({ node, update, onDelete, onDuplicat
         </div>
       </Section>
 
-      <Section title="Animation">
-        <div className="flex flex-col gap-2.5">
-          <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
-          </Row>
-          {node.animation?.entry && (
-            <>
-              <Row label="Duration">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.durationMs ?? 500}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, durationMs: v } } }))}
-                />
-              </Row>
-              <Row label="Delay">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.delayMs ?? 0}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, delayMs: v } } }))}
-                />
-              </Row>
-            </>
-          )}
-          <Row label="Attention">
-            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
-          </Row>
-          <Row label="Exit">
-            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
-          </Row>
-        </div>
-      </Section>
+      <AnimationSection node={node} update={update} onPreview={onPreview} />
 
       <Section title="Position & Size">
         <div className="grid grid-cols-2 gap-2">

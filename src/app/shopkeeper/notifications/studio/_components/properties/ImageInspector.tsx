@@ -22,8 +22,8 @@ import { nodeLabel, type LayerMove } from "@/features/notifications/tree";
 import type { CompositionNode, NodeStyle, ImageConfig } from "@/features/notifications/types";
 import { ColorField, NumberField, Row, Section, SegmentedGroup, Select, Slider, Toggle } from "./fields";
 import { TextColorPicker } from "./TextColorPicker";
-import { ENTRY, ATTENTION, EXIT } from "./animationOptions";
 import ImageCropModal from "./ImageCropModal";
+import AnimationSection from "./AnimationSection";
 
 const LAYER_BUTTONS: { move: LayerMove; label: string; icon: typeof ArrowUpwardOutlinedIcon }[] = [
   { move: "forward", label: "Forward", icon: ArrowUpwardOutlinedIcon },
@@ -65,11 +65,13 @@ interface Props {
   onDuplicate: () => void;
   onMoveLayer: (m: LayerMove) => void;
   onToggleLock: () => void;
+  /** Plays just this element's animation on the canvas. */
+  onPreview?: (id: string) => void;
   onReplace: () => void;
 }
 
 /** Right-panel inspector for a real IMAGE canvas element (uploaded/stock/recent). */
-export default function ImageInspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock, onReplace }: Props) {
+export default function ImageInspector({ node, update, onDelete, onDuplicate, onMoveLayer, onToggleLock, onReplace, onPreview }: Props) {
   const f = node.frame;
   const style = node.style ?? {};
   const image: ImageConfig = node.image ?? {};
@@ -98,17 +100,6 @@ export default function ImageInspector({ node, update, onDelete, onDuplicate, on
   const setStyle = (patch: Partial<NodeStyle>) => update((n) => ({ ...n, style: { ...n.style, ...patch } }));
   const flipH = () => update((n) => ({ ...n, frame: { ...n.frame, scaleX: (n.frame.scaleX ?? 1) * -1 } }));
   const flipV = () => update((n) => ({ ...n, frame: { ...n.frame, scaleY: (n.frame.scaleY ?? 1) * -1 } }));
-  const setAnim = (slot: "entry" | "attention" | "exit", type: string) =>
-    update((n) => ({
-      ...n,
-      animation: {
-        ...n.animation,
-        [slot]:
-          type === "NONE"
-            ? undefined
-            : { type, durationMs: n.animation?.[slot]?.durationMs ?? 500, delayMs: n.animation?.[slot]?.delayMs ?? 0, easing: n.animation?.[slot]?.easing ?? "easeOut" },
-      },
-    }));
 
   return (
     <>
@@ -414,39 +405,7 @@ export default function ImageInspector({ node, update, onDelete, onDuplicate, on
         </div>
       </Section>
 
-      <Section title="Animation">
-        <div className="flex flex-col gap-2.5">
-          <Row label="Entry">
-            <Select value={node.animation?.entry?.type ?? "NONE"} options={ENTRY} onChange={(v) => setAnim("entry", v)} />
-          </Row>
-          <Row label="Attention">
-            <Select value={node.animation?.attention?.type ?? "NONE"} options={ATTENTION} onChange={(v) => setAnim("attention", v)} />
-          </Row>
-          <Row label="Exit">
-            <Select value={node.animation?.exit?.type ?? "NONE"} options={EXIT} onChange={(v) => setAnim("exit", v)} />
-          </Row>
-          {node.animation?.entry && (
-            <>
-              <Row label="Duration">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.durationMs ?? 500}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, durationMs: v } } }))}
-                />
-              </Row>
-              <Row label="Delay">
-                <NumberField
-                  label=""
-                  value={node.animation.entry.delayMs ?? 0}
-                  suffix="ms"
-                  onChange={(v) => update((n) => ({ ...n, animation: { ...n.animation, entry: { ...n.animation!.entry!, delayMs: v } } }))}
-                />
-              </Row>
-            </>
-          )}
-        </div>
-      </Section>
+      <AnimationSection node={node} update={update} onPreview={onPreview} />
 
       {cropOpen && asset?.url && (
         <ImageCropModal
