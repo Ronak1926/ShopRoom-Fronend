@@ -69,6 +69,34 @@ export const SVG_ASSETS: Record<string, string> = {
   "arc": `<svg viewBox="0 0 120 70" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 64a54 54 0 0 1 108 0" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg>`,
   "bubble": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="44" fill="currentColor" opacity=".5"/><circle cx="50" cy="50" r="44" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/><ellipse cx="35" cy="33" rx="13" ry="9" fill="#fff" opacity=".55" transform="rotate(-28 35 33)"/></svg>`,
 
+  // ── Geometric shapes (Shapes tool) ─────────────────────────────────────────
+  "diamond": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 0 100 50 50 100 0 50Z" fill="currentColor"/></svg>`,
+  "pentagon": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 2 97 36 79 92H21L3 36Z" fill="currentColor"/></svg>`,
+  "hexagon": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 3H75L100 50 75 97H25L0 50Z" fill="currentColor"/></svg>`,
+  "octagon": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 2H70L98 30V70L70 98H30L2 70V30Z" fill="currentColor"/></svg>`,
+  "parallelogram": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M26 4H100L74 96H0Z" fill="currentColor"/></svg>`,
+  "trapezoid": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H76L98 94H2Z" fill="currentColor"/></svg>`,
+  "semicircle": `<svg viewBox="0 0 100 60" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 58A50 50 0 0 1 100 58Z" fill="currentColor"/></svg>`,
+  "quarter-circle": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 98V2A96 96 0 0 1 98 98Z" fill="currentColor"/></svg>`,
+  "cross": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M36 2H64V36H98V64H64V98H36V64H2V36H36Z" fill="currentColor"/></svg>`,
+  "squircle": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 2C86 2 98 14 98 50S86 98 50 98 2 86 2 50 14 2 50 2Z" fill="currentColor"/></svg>`,
+
+  // ── Organic / decorative shapes ────────────────────────────────────────────
+  "heart": `<svg viewBox="0 0 100 92" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M50 90C50 90 4 62 4 31 4 14 16 4 29 4c9 0 17 5 21 12 4-7 12-12 21-12 13 0 25 10 25 27 0 31-46 59-46 59Z" fill="currentColor"/></svg>`,
+  "teardrop": `<svg viewBox="0 0 100 110" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M50 2c26 36 46 56 46 72a46 46 0 0 1-92 0C4 58 24 38 50 2Z" fill="currentColor"/></svg>`,
+  "crescent": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M50 2a48 48 0 1 0 34 82A40 40 0 1 1 50 2Z" fill="currentColor"/></svg>`,
+  "shield-shape": `<svg viewBox="0 0 100 106" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M50 2 95 20v38c0 26-45 46-45 46S5 84 5 58V20Z" fill="currentColor"/></svg>`,
+  "speech-bubble": `<svg viewBox="0 0 120 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 4h88a12 12 0 0 1 12 12v48a12 12 0 0 1-12 12H50L24 96V76h-8A12 12 0 0 1 4 64V16A12 12 0 0 1 16 4Z" fill="currentColor"/></svg>`,
+  "ticket": `<svg viewBox="0 0 140 70" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6h128v18a11 11 0 0 0 0 22v18H6V46a11 11 0 0 0 0-22Z" fill="currentColor"/></svg>`,
+  "cylinder": `<svg viewBox="0 0 100 120" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20h92v80a46 20 0 0 1-92 0Z" fill="currentColor"/><ellipse cx="50" cy="20" rx="46" ry="18" fill="currentColor"/><ellipse cx="50" cy="20" rx="46" ry="18" fill="#fff" opacity=".22"/></svg>`,
+
+  // ── Lines & arrows ─────────────────────────────────────────────────────────
+  "arrow-block": `<svg viewBox="0 0 120 80" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 26h68V4l52 36-52 36V54H0Z" fill="currentColor"/></svg>`,
+  "chevron": `<svg viewBox="0 0 100 60" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4 50 34 94 4v22L50 56 6 26Z" fill="currentColor"/></svg>`,
+  "zigzag": `<svg viewBox="0 0 240 50" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 38 44 12l40 26 40-26 40 26 40-26 32 20" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "dashed-line": `<svg viewBox="0 0 240 12" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6H238" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-dasharray="16 14"/></svg>`,
+  "frame": `<svg viewBox="0 0 120 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="110" height="90" rx="10" fill="none" stroke="currentColor" stroke-width="6"/></svg>`,
+
   // ── Particles ──────────────────────────────────────────────────────────────
   "sparkle": `<svg viewBox="0 0 120 120" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor"><path d="M60 4C67 44 76 53 116 60 76 67 67 76 60 116 53 76 44 67 4 60 44 53 53 44 60 4Z"/><path d="M22 12c2.6 13 5.6 16 18.6 18.6C27.6 33 24.6 36 22 49 19.4 36 16.4 33 3.4 30.6 16.4 28 19.4 25 22 12Z" opacity=".7" transform="translate(72,66) scale(.5)"/></g></svg>`,
   "star": `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M50 5 61 39 97 39 68 61 79 95 50 74 21 95 32 61 3 39 39 39Z" fill="currentColor"/><path d="M50 22 56 42 76 42 60 54 66 74 50 62 34 74 40 54 24 42 44 42Z" fill="#fff" opacity=".22"/></svg>`,

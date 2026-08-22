@@ -13,13 +13,13 @@ import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
 import ImagesPanel from "./_components/ImagesPanel";
 import ButtonsPanel from "./_components/ButtonsPanel";
 import IconsPanel from "./_components/IconsPanel";
+import ShapesPanel from "./_components/ShapesPanel";
 import type { ButtonPreset } from "@/features/notifications/buttonPresets";
 import { iconLabel } from "@/features/notifications/iconLibrary";
 import type { ImageTile } from "./_components/images/ImageGrid";
 import {
   DECORATION_GROUPS,
   EFFECT_GROUPS,
-  SHAPE_GROUPS,
   type LibraryItem,
 } from "@/features/notifications/sceneLibrary";
 import {
@@ -383,9 +383,7 @@ export default function NotificationStudioPage() {
           />
         );
       case "shapes":
-        return (
-          <AssetLibraryPanel width={leftWidth} title="Shapes" groups={SHAPE_GROUPS} onInsert={handleInsertAsset} />
-        );
+        return <ShapesPanel width={leftWidth} onInsert={handleInsertAsset} />;
       case "elements":
         return (
           <AssetLibraryPanel width={leftWidth} title="Decorations" groups={DECORATION_GROUPS} onInsert={handleInsertAsset} />
