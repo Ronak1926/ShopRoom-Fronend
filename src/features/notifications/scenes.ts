@@ -87,6 +87,19 @@ const sparkles = (color: string): CompositionNode[] => [
   deco("Sparkle 3", "sparkle", 250, 92, 11, 11, { color: "#FFFFFF", opacity: 0.75, z: 110 }),
 ];
 
+
+/** The notification banner scenes are composed for. */
+const CANVAS_W = 400;
+const CANVAS_H = 200;
+
+/**
+ * Full-canvas edge darkening. It MUST cover the canvas exactly — a vignette
+ * narrower than the canvas darkens only part of it and leaves a hard vertical
+ * seam where it stops, which reads as a shadow across one side of the banner.
+ */
+const vignette = (opacity: number): CompositionNode =>
+  deco("Vignette", "vignette", 0, 0, CANVAS_W, CANVAS_H, { opacity, z: 120 });
+
 // ── ShopRoom scenes ──────────────────────────────────────────────────────────
 
 export const SCENES: Scene[] = [
@@ -108,7 +121,7 @@ export const SCENES: Scene[] = [
       ...stage("#5B47D4"),
       deco("Dots", "dots", 272, 214, 48, 48, { color: "#FFFFFF", opacity: 0.4, z: 100 }),
       ...sparkles("#5B47D4"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.35, z: 120 }),
+      vignette(0.35),
     ],
   },
   {
@@ -126,7 +139,7 @@ export const SCENES: Scene[] = [
       ...stage("#2563EB"),
       deco("Particles", "particles", 20, 120, 150, 150, { color: "#2563EB", opacity: 0.4, z: 100 }),
       ...sparkles("#2563EB"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.28, z: 120 }),
+      vignette(0.28),
     ],
   },
   {
@@ -145,7 +158,7 @@ export const SCENES: Scene[] = [
       ...stage("#0F9D6B"),
       deco("Particles", "particles", 180, 96, 130, 130, { color: "#0F9D6B", opacity: 0.35, z: 100 }),
       ...sparkles("#0F9D6B"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.3, z: 120 }),
+      vignette(0.3),
     ],
   },
   {
@@ -164,7 +177,7 @@ export const SCENES: Scene[] = [
       deco("Flower Right", "flower", 282, 244, 50, 50, { color: "#F472B6", opacity: 0.7, z: 26 }),
       ...stage("#EC4899"),
       ...sparkles("#EC4899"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.28, z: 120 }),
+      vignette(0.28),
     ],
   },
   {
@@ -182,7 +195,7 @@ export const SCENES: Scene[] = [
       ...stage("#7C3AED"),
       deco("Dots", "dots", 22, 424, 60, 60, { color: "#7C3AED", opacity: 0.28, z: 100 }),
       ...sparkles("#A855F7"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.4, z: 120 }),
+      vignette(0.4),
     ],
   },
   {
@@ -199,7 +212,7 @@ export const SCENES: Scene[] = [
       deco("Mist", "mist", 120, 470, 220, 60, { color: "#FFFFFF", opacity: 0.5, z: 28 }),
       ...stage("#6366F1"),
       ...sparkles("#6366F1"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.24, z: 120 }),
+      vignette(0.24),
     ],
   },
   {
@@ -217,7 +230,7 @@ export const SCENES: Scene[] = [
       deco("Confetti Low", "confetti", -24, 388, 140, 140, { opacity: 0.8, z: 100 }),
       ...stage("#DC2626"),
       ...sparkles("#F59E0B"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.3, z: 120 }),
+      vignette(0.3),
     ],
   },
   {
@@ -233,7 +246,7 @@ export const SCENES: Scene[] = [
       deco("Dots", "dots", 20, 388, 56, 56, { color: "#5B47D4", opacity: 0.16, z: 14 }),
       ...stage("#5B47D4"),
       deco("Sparkle 1", "sparkle", 250, 150, 14, 14, { color: "#5B47D4", opacity: 0.6, z: 110 }),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.2, z: 120 }),
+      vignette(0.2),
     ],
   },
   {
@@ -251,7 +264,7 @@ export const SCENES: Scene[] = [
       deco("Wave", "wave", -20, 214, 240, 50, { color: "#FFFFFF", opacity: 0.35, z: 14 }),
       ...stage("#7C3AED"),
       ...sparkles("#EC4899"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.35, z: 120 }),
+      vignette(0.35),
     ],
   },
   {
@@ -269,7 +282,7 @@ export const SCENES: Scene[] = [
       deco("Flower", "flower", 278, 424, 52, 52, { color: "#FBBF24", opacity: 0.7, z: 26 }),
       ...stage("#0F9D6B"),
       ...sparkles("#F59E0B"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.26, z: 120 }),
+      vignette(0.26),
     ],
   },
   {
@@ -288,7 +301,7 @@ export const SCENES: Scene[] = [
       ...stage("#7C3AED"),
       deco("Star", "star", 250, 116, 22, 22, { color: "#FBBF24", opacity: 0.95, z: 110 }),
       ...sparkles("#EC4899"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.3, z: 120 }),
+      vignette(0.3),
     ],
   },
   {
@@ -305,7 +318,7 @@ export const SCENES: Scene[] = [
       ...stage("#5B47D4"),
       deco("Dots", "dots", 254, 250, 56, 56, { color: "#5B47D4", opacity: 0.3, z: 100 }),
       ...sparkles("#5B47D4"),
-      deco("Vignette", "vignette", 0, 0, 320, 560, { opacity: 0.42, z: 120 }),
+      vignette(0.42),
     ],
   },
 ];

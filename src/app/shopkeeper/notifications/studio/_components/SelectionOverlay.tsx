@@ -17,6 +17,9 @@ interface Props {
   onResize: (handle: ResizeHandleId, dx: number, dy: number) => void;
   onRotate: (deg: number) => void;
   onEnd: () => void;
+  /** Corner radius for the selection box — matches the canvas when the
+   *  selected element spans it, so it doesn't square off a rounded banner. */
+  radius?: number;
 }
 
 const HANDLES: { h: ResizeHandleId; cx: number; cy: number; cursor: string }[] = [
@@ -45,6 +48,7 @@ export default function SelectionOverlay({
   onResize,
   onRotate,
   onEnd,
+  radius = 0,
 }: Props) {
   const beginDrag = useCallback(
     (e: ReactPointerEvent, apply: (dx: number, dy: number) => void) => {
@@ -129,6 +133,7 @@ export default function SelectionOverlay({
           pointerEvents: locked ? "none" : "auto",
           cursor: locked ? "not-allowed" : "move",
           outline: `2px solid ${accent}`,
+          borderRadius: radius || undefined,
         }}
       />
       {!locked && (
