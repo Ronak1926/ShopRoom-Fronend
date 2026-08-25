@@ -233,11 +233,11 @@ function ScenesTab({
           </p>
           <div className="flex items-center gap-2.5">
             {applied ? (
-              <span className="w-12 shrink-0 rounded-lg overflow-hidden border border-(--color-border-default)">
-                <ScenePreview scene={applied} height={40} />
+              <span className="w-16 shrink-0 rounded-lg overflow-hidden border border-(--color-border-default)">
+                <ScenePreview scene={applied} />
               </span>
             ) : (
-              <span className="w-12 h-10 shrink-0 rounded-lg bg-(--color-bg-surface) flex items-center justify-center text-(--color-text-hint)">
+              <span className="w-16 h-8 shrink-0 rounded-lg bg-(--color-bg-surface) flex items-center justify-center text-(--color-text-hint)">
                 <TuneOutlinedIcon sx={{ fontSize: 18 }} />
               </span>
             )}
@@ -335,7 +335,7 @@ function ScenesTab({
                   : "border-(--color-border-default) hover:border-(--color-brand-primary)"
               }`}
             >
-              <ScenePreview scene={scene} height={78} />
+              <ScenePreview scene={scene} />
               {isApplied && (
                 <CheckCircleIcon
                   sx={{ fontSize: 18, color: "var(--color-brand-primary)" }}

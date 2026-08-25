@@ -173,7 +173,10 @@ export const EFFECT_GROUPS: LibraryGroup[] = [
     label: "Depth",
     items: [
       { assetId: "soft-shadow", name: "Soft Shadow", width: 140, height: 40 },
-      { assetId: "vignette", name: "Vignette", width: 320, height: 560, opacity: 0.55 },
+      // Full-bleed on purpose: a vignette smaller than the 400×200 banner
+      // darkens only part of it and leaves a hard seam where it stops, which
+      // reads as a shadow cast across one side of the notification.
+      { assetId: "vignette", name: "Vignette", width: 400, height: 200, opacity: 0.55 },
     ],
   },
 ];
