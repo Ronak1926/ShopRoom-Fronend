@@ -4,18 +4,10 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { backgroundCss, gradientCss } from "@/components/notifications/nodeStyle";
+import BackgroundPresetGrid from "./BackgroundPresetGrid";
 import type { Background, GradientStop } from "@/features/notifications/types";
 
 type Mode = "SOLID" | "LINEAR" | "RADIAL";
-
-const PRESETS: { label: string; stops: [string, string] }[] = [
-  { label: "Violet", stops: ["#E4DCFB", "#F7F4FF"] },
-  { label: "Sky", stops: ["#CFE2FD", "#F8FBFF"] },
-  { label: "Mint", stops: ["#CDEEDD", "#F8FDFB"] },
-  { label: "Blush", stops: ["#FBD8E4", "#FFF9FB"] },
-  { label: "Amber", stops: ["#FDECC8", "#FFFBF2"] },
-  { label: "Slate", stops: ["#E2E8F0", "#F8FAFC"] },
-];
 
 interface Props {
   width: number;
@@ -191,21 +183,9 @@ export default function BackgroundBuilderPanel({ width, background, onSet, onClo
           </>
         )}
 
-        <div className="flex flex-col gap-2">
-          <p className="text-[11px] font-semibold tracking-widest uppercase text-(--color-text-hint)">Presets</p>
-          <div className="grid grid-cols-3 gap-2">
-            {PRESETS.map((p) => (
-              <button
-                key={p.label}
-                type="button"
-                title={p.label}
-                onClick={() => onSet({ type: "GRADIENT", gradient: { type: "LINEAR", angle, stops: [{ offset: 0, color: p.stops[0] }, { offset: 1, color: p.stops[1] }] } })}
-                className="h-12 rounded-lg border border-(--color-border-default) hover:border-(--color-brand-primary) transition-colors cursor-pointer"
-                style={{ background: `linear-gradient(160deg, ${p.stops[0]}, ${p.stops[1]})` }}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Same catalog the Background tab offers — picking one here loads it
+            into the stop editor above, ready to tweak. */}
+        <BackgroundPresetGrid current={background} onSet={onSet} />
       </div>
     </aside>
   );

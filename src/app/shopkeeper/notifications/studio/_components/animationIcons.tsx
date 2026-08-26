@@ -19,6 +19,20 @@ import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlin
 import SyncOutlinedIcon from "@mui/icons-material/SyncOutlined";
 import BlurOnOutlinedIcon from "@mui/icons-material/BlurOnOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VerticalAlignBottomOutlinedIcon from "@mui/icons-material/VerticalAlignBottomOutlined";
+import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
+import FormatItalicOutlinedIcon from "@mui/icons-material/FormatItalicOutlined";
+import UnfoldMoreOutlinedIcon from "@mui/icons-material/UnfoldMoreOutlined";
+import UnfoldLessOutlinedIcon from "@mui/icons-material/UnfoldLessOutlined";
+import CompareArrowsOutlinedIcon from "@mui/icons-material/CompareArrowsOutlined";
+import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
+import KeyboardDoubleArrowUpOutlinedIcon from "@mui/icons-material/KeyboardDoubleArrowUpOutlined";
+import ViewInArOutlinedIcon from "@mui/icons-material/ViewInArOutlined";
+import FlashOnOutlinedIcon from "@mui/icons-material/FlashOnOutlined";
+import GestureOutlinedIcon from "@mui/icons-material/GestureOutlined";
+import SwipeOutlinedIcon from "@mui/icons-material/SwipeOutlined";
+import TransformOutlinedIcon from "@mui/icons-material/TransformOutlined";
+import ThreeSixtyOutlinedIcon from "@mui/icons-material/ThreeSixtyOutlined";
 
 /**
  * Icon key → MUI component for the Animation panel's preset cards. UI-only:
@@ -44,5 +58,19 @@ export const ANIM_ICONS: Record<string, ElementType> = {
   elastic: VibrationOutlinedIcon,
   heart: FavoriteBorderOutlinedIcon,
   spin: SyncOutlinedIcon,
+  spinY: ThreeSixtyOutlinedIcon,
   blur: BlurOnOutlinedIcon,
+  drop: VerticalAlignBottomOutlinedIcon,
+  roll: RotateLeftOutlinedIcon,
+  skew: FormatItalicOutlinedIcon,
+  unfold: UnfoldMoreOutlinedIcon,
+  fold: UnfoldLessOutlinedIcon,
+  split: CompareArrowsOutlinedIcon,
+  tilt: ViewInArOutlinedIcon,
+  back: KeyboardDoubleArrowUpOutlinedIcon,
+  circle: CircleOutlinedIcon,
+  flash: FlashOnOutlinedIcon,
+  jello: GestureOutlinedIcon,
+  wobble: SwipeOutlinedIcon,
+  rubber: TransformOutlinedIcon,
 };

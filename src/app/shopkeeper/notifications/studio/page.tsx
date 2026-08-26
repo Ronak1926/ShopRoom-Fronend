@@ -383,6 +383,8 @@ export default function NotificationStudioPage() {
             onNewBlankScene={studio.startBlankScene}
             onOpenBackgroundBuilder={() => setRightPanel("background")}
             onToggleLock={studio.toggleLock}
+            copyTone={studio.copyTone}
+            onSetCopyTone={studio.setCopyTone}
             onClearElements={studio.clearElements}
             onSetPhotoBackground={studio.setPhotoBackground}
           />

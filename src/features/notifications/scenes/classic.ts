@@ -1,131 +1,18 @@
 /**
- * features/notifications/scenes.ts — ShopRoom scene catalog (data, not React).
- *
- * A "scene" is the editable background composition of a notification: a canvas
- * background plus layered DECORATION nodes. Each scene is composed in depth
- * bands — atmosphere (z0–9) → far foliage (z10–19) → near foliage (z20–29) →
- * product environment (z30–49) → foreground sparkle/vignette (z100+) — so the
- * result reads like an illustration, not a flat tint. Applying a scene inserts
- * these as normal composition nodes, so every object stays editable.
+ * features/notifications/scenes/classic.ts — The original twelve ShopRoom
+ * scenes, unchanged. Kept verbatim (same ids, same geometry) so any design
+ * already using one keeps rendering exactly as it was saved.
  */
 
-import type { Background, CompositionNode } from "./types";
+import type { Scene } from "./types";
+import { atmosphere, deco, grad, sparkles, stage, vignette } from "./helpers";
 
-export const SCENE_CATEGORIES = [
-  "All", "Nature", "Clouds", "Abstract", "Sale", "Minimal", "Glow", "Premium",
-] as const;
-export type SceneCategory = (typeof SCENE_CATEGORIES)[number];
-
-export interface Scene {
-  id: string;
-  name: string;
-  category: Exclude<SceneCategory, "All">;
-  background: Background;
-  elements: CompositionNode[];
-}
-
-// ── helpers ──────────────────────────────────────────────────────────────────
-
-interface DecoOpts { color?: string; opacity?: number; z?: number; rotation?: number; blur?: number }
-/** `name` doubles as the Layers label (e.g. "Leaf Left"). */
-function deco(
-  name: string,
-  assetId: string,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  o: DecoOpts = {},
-): CompositionNode {
-  return {
-    id: `scn-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-    type: "DECORATION",
-    name,
-    asset: { type: "SVG", assetId },
-    frame: { x, y, width: w, height: h, rotation: o.rotation ?? 0, zIndex: o.z ?? 10 },
-    style: {
-      ...(o.color ? { color: o.color } : {}),
-      ...(o.opacity != null ? { opacity: o.opacity } : {}),
-      ...(o.blur != null ? { blur: o.blur } : {}),
-    },
-    visible: true,
-    locked: false,
-  };
-}
-
-function grad(from: string, mid: string, to: string, angle = 172): Background {
-  return {
-    type: "GRADIENT",
-    gradient: {
-      type: "LINEAR",
-      angle,
-      stops: [{ offset: 0, color: from }, { offset: 0.55, color: mid }, { offset: 1, color: to }],
-    },
-  };
-}
-
-/** The notification banner scenes are composed for — Android's 2:1 big picture. */
-const CANVAS_W = 400;
-const CANVAS_H = 200;
-
-/**
- * Centre of the right-hand product zone every ShopRoom template leaves free.
- * Scene artwork frames the product and the left-hand text column; it never
- * takes them over.
- */
-const VISUAL_CX = 306;
-
-/**
- * Atmosphere shared by every scene: two soft glows for depth.
- *
- * Every decoration in this file is placed so its CENTRE lands inside the
- * canvas. Art may bleed past an edge — that bleed is what makes it read as a
- * frame — but a layer whose centre falls outside can't be seen or grabbed on
- * the banner while still being listed in Layers, so clicking its row put the
- * selection handles out in empty space next to the artboard.
- */
-function atmosphere(a: string, b: string): CompositionNode[] {
-  return [
-    deco("Glow Top", "glow", -58, -74, 210, 210, { color: a, opacity: 0.55, z: 2 }),
-    deco("Glow Bottom", "glow", 232, 62, 210, 210, { color: b, opacity: 0.4, z: 2 }),
-  ];
-}
-
-/**
- * Product environment: soft light, contact shadow and a 3D podium. `baseY` is
- * tuned so the podium's top edge meets the bottom of the template's product
- * image slot (which ends at y=144) — the product stands on it rather than
- * floating above it.
- */
-function stage(color: string, cx = VISUAL_CX, baseY = 164): CompositionNode[] {
-  return [
-    deco("Product Glow", "product-glow", cx - 62, baseY - 104, 124, 124, { color, opacity: 0.45, z: 30 }),
-    deco("Product Shadow", "product-shadow", cx - 38, baseY - 4, 76, 16, { z: 32, opacity: 0.5 }),
-    deco("Pedestal", "pedestal", cx - 52, baseY - 14, 104, 32, { color, opacity: 0.92, z: 34 }),
-  ];
-}
-
-const sparkles = (color: string): CompositionNode[] => [
-  deco("Sparkle 1", "sparkle", 232, 26, 16, 16, { color: "#FFFFFF", opacity: 0.95, z: 110 }),
-  deco("Sparkle 2", "sparkle", 366, 142, 13, 13, { color, opacity: 0.85, z: 110 }),
-  deco("Sparkle 3", "sparkle", 356, 40, 10, 10, { color: "#FFFFFF", opacity: 0.75, z: 110 }),
-];
-
-/**
- * Full-canvas edge darkening. It MUST cover the canvas exactly — a vignette
- * narrower than the canvas darkens only part of it and leaves a hard vertical
- * seam where it stops, which reads as a shadow across one side of the banner.
- */
-const vignette = (opacity: number): CompositionNode =>
-  deco("Vignette", "vignette", 0, 0, CANVAS_W, CANVAS_H, { opacity, z: 120 });
-
-// ── ShopRoom scenes ──────────────────────────────────────────────────────────
-
-export const SCENES: Scene[] = [
+export const CLASSIC_SCENES: Scene[] = [
   {
     id: "botanical-soft",
     name: "Botanical Soft",
     category: "Nature",
+    accent: "#5B47D4",
     background: grad("#E5DCFC", "#F1EBFF", "#FBF9FF"),
     elements: [
       ...atmosphere("#8B76F0", "#C4B5FD"),
@@ -147,6 +34,7 @@ export const SCENES: Scene[] = [
     id: "cloudy-breeze",
     name: "Cloudy Breeze",
     category: "Clouds",
+    accent: "#2563EB",
     background: grad("#CFE2FD", "#E8F1FE", "#F8FBFF"),
     elements: [
       ...atmosphere("#3B82F6", "#93C5FD"),
@@ -165,6 +53,7 @@ export const SCENES: Scene[] = [
     id: "leafy-fresh",
     name: "Leafy Fresh",
     category: "Nature",
+    accent: "#0F9D6B",
     background: grad("#CDEEDD", "#E8F8F0", "#F8FDFB"),
     elements: [
       ...atmosphere("#0F9D6B", "#6EE7B7"),
@@ -184,6 +73,7 @@ export const SCENES: Scene[] = [
     id: "spring-garden",
     name: "Spring Garden",
     category: "Nature",
+    accent: "#EC4899",
     background: grad("#FBD8E4", "#FDECF2", "#FFF9FB"),
     elements: [
       ...atmosphere("#EC4899", "#F9A8D4"),
@@ -203,6 +93,7 @@ export const SCENES: Scene[] = [
     id: "premium-glow",
     name: "Premium Glow",
     category: "Premium",
+    accent: "#7C3AED",
     background: grad("#DFD0FB", "#EFE6FE", "#FAF6FF"),
     elements: [
       ...atmosphere("#7C3AED", "#C4B5FD"),
@@ -221,6 +112,7 @@ export const SCENES: Scene[] = [
     id: "soft-clouds",
     name: "Soft Clouds",
     category: "Clouds",
+    accent: "#6366F1",
     background: grad("#E3E9FE", "#F0F3FF", "#FBFCFF"),
     elements: [
       ...atmosphere("#6366F1", "#C7D2FE"),
@@ -238,6 +130,7 @@ export const SCENES: Scene[] = [
     id: "sale-energy",
     name: "Sale Energy",
     category: "Sale",
+    accent: "#DC2626",
     background: grad("#FBD0CB", "#FEE6E2", "#FFF7F5"),
     elements: [
       ...atmosphere("#DC2626", "#FCA5A5"),
@@ -256,6 +149,7 @@ export const SCENES: Scene[] = [
     id: "elegant-minimal",
     name: "Elegant Minimal",
     category: "Minimal",
+    accent: "#5B47D4",
     background: grad("#ECEDF4", "#F6F7FB", "#FDFDFF"),
     elements: [
       deco("Glow", "glow", 96, -20, 210, 210, { color: "#5B47D4", opacity: 0.22, z: 2 }),
@@ -272,6 +166,7 @@ export const SCENES: Scene[] = [
     id: "aurora-bloom",
     name: "Aurora Bloom",
     category: "Abstract",
+    accent: "#7C3AED",
     background: grad("#E4D6FB", "#F6E4F2", "#FEF6FB"),
     elements: [
       deco("Aurora Violet", "glow", -66, -66, 230, 230, { color: "#7C3AED", opacity: 0.5, z: 2 }),
@@ -290,6 +185,7 @@ export const SCENES: Scene[] = [
     id: "fresh-morning",
     name: "Fresh Morning",
     category: "Nature",
+    accent: "#0F9D6B",
     background: grad("#DCF2E4", "#EFF9F2", "#FBFEFC"),
     elements: [
       ...atmosphere("#F59E0B", "#6EE7B7"),
@@ -308,6 +204,7 @@ export const SCENES: Scene[] = [
     id: "celebration",
     name: "Celebration",
     category: "Abstract",
+    accent: "#7C3AED",
     background: grad("#E6DEFC", "#F6E6F5", "#FEF7FC"),
     elements: [
       ...atmosphere("#7C3AED", "#F472B6"),
@@ -327,6 +224,7 @@ export const SCENES: Scene[] = [
     id: "product-stage",
     name: "Product Stage",
     category: "Premium",
+    accent: "#5B47D4",
     background: grad("#E2DCF8", "#F1EDFC", "#FBFAFF"),
     elements: [
       deco("Glow", "glow", 208, 0, 210, 210, { color: "#5B47D4", opacity: 0.45, z: 2 }),
@@ -341,26 +239,3 @@ export const SCENES: Scene[] = [
     ],
   },
 ];
-
-export function scenesByCategory(cat: SceneCategory): Scene[] {
-  return cat === "All" ? SCENES : SCENES.filter((s) => s.category === cat);
-}
-
-/** Category + free-text filter used by the Scenes library. */
-export function filterScenes(cat: SceneCategory, query: string): Scene[] {
-  const q = query.trim().toLowerCase();
-  return scenesByCategory(cat).filter(
-    (s) => !q || s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q),
-  );
-}
-
-/** A blank scene — the starting point for "New Blank Scene". */
-export function blankScene(): Scene {
-  return {
-    id: "custom-scene",
-    name: "My Scene",
-    category: "Minimal",
-    background: { type: "SOLID", color: "#FFFFFF" },
-    elements: [],
-  };
-}

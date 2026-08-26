@@ -19,12 +19,25 @@ import {
 } from "@/features/notifications/scenes";
 import { SCENE_CATEGORY_ICONS } from "./sceneCategoryIcons";
 import ScenePreview from "./ScenePreview";
+import BackgroundPresetGrid from "./BackgroundPresetGrid";
 import BuildYourOwnScenePanel from "./BuildYourOwnScenePanel";
 import BackgroundUploadsTab from "./BackgroundUploadsTab";
 import type { LibraryItem } from "@/features/notifications/sceneLibrary";
+import type { CopyTone } from "@/features/notifications/sceneTheme";
 import type { Background, NodeStyle, NotificationDesign } from "@/features/notifications/types";
 
 type Tab = "background" | "scenes" | "uploads";
+
+/**
+ * Auto measures the artwork actually sitting behind the copy and picks the
+ * higher-contrast option, which is right on almost every scene. Light and Dark
+ * are there for the cases where the shopkeeper wants a specific look anyway.
+ */
+const COPY_TONES: { id: CopyTone; label: string; hint: string }[] = [
+  { id: "auto", label: "Auto", hint: "Pick whichever reads better on this scene" },
+  { id: "dark", label: "Dark", hint: "Force dark text — best on light scenes" },
+  { id: "light", label: "Light", hint: "Force white text — best on dark scenes" },
+];
 
 interface Props {
   width: number;
@@ -40,6 +53,8 @@ interface Props {
   onNewBlankScene: () => void;
   onOpenBackgroundBuilder: () => void;
   onToggleLock: (id: string) => void;
+  copyTone: CopyTone;
+  onSetCopyTone: (tone: CopyTone) => void;
   /** Uploads tab — wipes every element for a photo-only notification. */
   onClearElements: () => void;
   /** Sets a photo background, dropping the scene/decorations in the same step. */
@@ -62,8 +77,13 @@ export default function BackgroundScenesPanel({
   onToggleLock,
   onClearElements,
   onSetPhotoBackground,
+  copyTone,
+  onSetCopyTone,
 }: Props) {
-  const [tab, setTab] = useState<Tab>("scenes");
+  // Opens on Background, not Scenes: the rail button is labelled "Background"
+  // and that tab holds the preset gallery, so landing on Scenes hid the
+  // backgrounds behind a tab nobody thought to click.
+  const [tab, setTab] = useState<Tab>("background");
   // Whether the "Build Your Own Scene" editor view (Elements/Shapes/
   // Decorations/Effects tabs + scene settings) replaces the scene browser.
   // Purely a left-panel concern now — there's no separate scene canvas to
@@ -138,6 +158,8 @@ export default function BackgroundScenesPanel({
                 onDetach={onDetachScene}
                 onCustomize={() => setEditingScene(true)}
                 onToggleLock={() => onToggleLock("scene")}
+                copyTone={copyTone}
+                onSetCopyTone={onSetCopyTone}
                 onNewBlank={() => {
                   onNewBlankScene();
                   setEditingScene(true);
@@ -148,6 +170,7 @@ export default function BackgroundScenesPanel({
               <BackgroundTab
                 appliedSceneId={appliedSceneId}
                 hasScene={!!sceneGroup}
+                current={bg}
                 onSet={onSetBackground}
                 onDetach={onDetachScene}
                 onOpenBackgroundBuilder={onOpenBackgroundBuilder}
@@ -208,6 +231,8 @@ function ScenesTab({
   onDetach,
   onCustomize,
   onToggleLock,
+  copyTone,
+  onSetCopyTone,
   onNewBlank,
 }: {
   appliedSceneId: string | null;
@@ -217,6 +242,8 @@ function ScenesTab({
   onDetach: () => void;
   onCustomize: () => void;
   onToggleLock: () => void;
+  copyTone: CopyTone;
+  onSetCopyTone: (t: CopyTone) => void;
   onNewBlank: () => void;
 }) {
   const [category, setCategory] = useState<SceneCategory>("All");
@@ -278,6 +305,27 @@ function ScenesTab({
             {sceneLocked ? <LockOutlinedIcon sx={{ fontSize: 13 }} /> : <LockOpenOutlinedIcon sx={{ fontSize: 13 }} />}
             {sceneLocked ? "Background locked" : "Lock background"}
           </button>
+
+          <p className="mt-2 mb-1 text-[10px] font-semibold uppercase tracking-wide text-(--color-brand-primary)">
+            Copy colour
+          </p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {COPY_TONES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                title={t.hint}
+                onClick={() => onSetCopyTone(t.id)}
+                className={`h-7 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                  copyTone === t.id
+                    ? "bg-(--color-brand-primary) text-white"
+                    : "bg-(--color-bg-surface) text-(--color-text-secondary) hover:text-(--color-text-primary)"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -382,6 +430,7 @@ function ScenesTab({
 function BackgroundTab({
   appliedSceneId,
   hasScene,
+  current,
   onSet,
   onDetach,
   onOpenBackgroundBuilder,
@@ -391,6 +440,7 @@ function BackgroundTab({
 }: {
   appliedSceneId: string | null;
   hasScene: boolean;
+  current?: Background;
   onSet: (bg: Background) => void;
   onDetach: () => void;
   onOpenBackgroundBuilder: () => void;
@@ -446,6 +496,11 @@ function BackgroundTab({
         </button>
       </div>
 
+      <BackgroundPresetGrid current={current} onSet={onSet} />
+
+      <p className="text-[11px] font-semibold tracking-widest uppercase text-(--color-text-hint) -mb-2">
+        Custom
+      </p>
       <div className="grid grid-cols-4 gap-1.5">
         {(["SOLID", "GRADIENT", "IMAGE", "SCENE"] as const).map((t) => (
           <button

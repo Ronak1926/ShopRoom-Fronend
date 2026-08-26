@@ -25,7 +25,14 @@ import {
   updateNodeById,
   type LayerMove,
 } from "@/features/notifications/tree";
-import { blankScene, type Scene } from "@/features/notifications/scenes";
+import { blankScene, SCENES, type Scene } from "@/features/notifications/scenes";
+import {
+  accentOfSceneGroup,
+  paletteFor,
+  retintForScene,
+  tokensFor,
+  type CopyTone,
+} from "@/features/notifications/sceneTheme";
 import type { Background, CompositionNode, NodeStyle, NotificationDesign } from "@/features/notifications/types";
 
 
@@ -39,6 +46,7 @@ export function useNotificationDesign() {
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [appliedSceneId, setAppliedSceneId] = useState<string | null>(null);
+  const [copyTone, setCopyToneState] = useState<CopyTone>("auto");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [histTick, setHistTick] = useState(0);
@@ -282,6 +290,11 @@ export function useNotificationDesign() {
       // stage — so drop every existing decoration. Otherwise the template's
       // pedestal/glow would stack under the scene's own one.
       const kept = prev.elements.filter((n) => n.id !== "scene" && n.type !== "DECORATION");
+      // ...and it owns the palette too. Without this the heading, badge and CTA
+      // keep the colours the template shipped with, so a violet "Shop Now"
+      // button ends up sitting on a sage or slate banner looking unrelated.
+      const palette = paletteFor(scene, copyTone);
+      const themed = retintForScene(kept, palette);
       const sceneGroup: CompositionNode = {
         id: "scene",
         type: "GROUP",
@@ -298,13 +311,48 @@ export function useNotificationDesign() {
       };
       commit({
         ...prev,
+        designTokens: { ...prev.designTokens, colors: tokensFor(palette) },
         canvas: { ...prev.canvas, background: scene.background },
-        elements: [sceneGroup, ...kept],
+        elements: [sceneGroup, ...themed],
       });
       setAppliedSceneId(scene.id);
       setSelectedId(null);
     },
-    [commit],
+    [commit, copyTone],
+  );
+
+  /**
+   * Forces the copy light or dark, or hands the choice back to the contrast
+   * measurement. Re-themes the existing content in place — the scene artwork
+   * and every position, size and animation are left alone.
+   */
+  const setCopyTone = useCallback(
+    (tone: CopyTone) => {
+      setCopyToneState(tone);
+      const prev = designRef.current;
+      if (!prev) return;
+      const group = prev.elements.find((n) => n.id === "scene");
+      if (!group) return;
+      // A customised scene no longer matches a preset, so the accent is read
+      // back off the live artwork rather than looked up.
+      const preset = SCENES.find((s) => s.id === appliedSceneId);
+      const palette = paletteFor(
+        {
+          accent: preset?.accent ?? accentOfSceneGroup(group.children),
+          background: prev.canvas.background,
+          elements: group.children ?? [],
+        },
+        tone,
+      );
+      commit({
+        ...prev,
+        designTokens: { ...prev.designTokens, colors: tokensFor(palette) },
+        elements: prev.elements.map((n) =>
+          n.id === "scene" ? n : retintForScene([n], palette)[0],
+        ),
+      });
+    },
+    [appliedSceneId, commit],
   );
 
   /** Removes the scene group, leaving template content untouched. */
@@ -444,6 +492,8 @@ export function useNotificationDesign() {
     addToScene,
     setSceneStyle,
     appliedSceneId,
+    copyTone,
+    setCopyTone,
     undo,
     redo,
     canUndo: history.current.past.length > 0,
