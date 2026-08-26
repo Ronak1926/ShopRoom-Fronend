@@ -82,8 +82,9 @@ export function useNotificationDesign() {
             localStorage.removeItem(STORAGE_KEY);
           }
         }
-        const templates = await listTemplates();
-        const tpl = templates.find((t) => t.slug === "new-arrival-classic") ?? templates[0];
+        // Only the default starter is needed here, so ask for one page.
+        const { items } = await listTemplates({ q: "New Arrival Classic", limit: 5 });
+        const tpl = items.find((t) => t.slug === "new-arrival-classic") ?? items[0];
         const rec = tpl
           ? await cloneTemplate(tpl.id)
           : await createBlankDesign("Untitled notification", "CUSTOM");

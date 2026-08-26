@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { ElementType } from "react";
+import type { ElementType, ReactNode } from "react";
 import Sidebar from "../../dashboard/_components/Sidebar";
 import TopBar from "../../dashboard/_components/TopBar";
 import { getCookie } from "../../../../utils/cookieUtils";
@@ -11,14 +11,24 @@ interface Props {
   title: string;
   description: string;
   icon: ElementType;
+  /** Page body. Without it the shell renders the "not built yet" placeholder. */
+  children?: ReactNode;
+  /** Optional strip of stat/feature chips beside the page title. */
+  headerAside?: ReactNode;
 }
 
 /**
  * Shared shell for the Notifications sub-pages (Send / Scheduled / History /
  * Templates / Preferences). The Studio editor has its own full-screen shell.
- * These pages are intentional empty states until their features are built.
+ * Pages that have not been built yet pass no children and get a placeholder.
  */
-export default function NotificationsShell({ title, description, icon: Icon }: Props) {
+export default function NotificationsShell({
+  title,
+  description,
+  icon: Icon,
+  children,
+  headerAside,
+}: Props) {
   const router = useRouter();
 
   useEffect(() => {
@@ -40,13 +50,19 @@ export default function NotificationsShell({ title, description, icon: Icon }: P
         <TopBar />
 
         <main className="flex-1 p-7 overflow-y-auto">
-          <h1 className="text-[28px] font-bold text-(--color-text-primary) mb-1">
-            {title}
-          </h1>
-          <p className="text-[14px] text-(--color-text-secondary) mb-8">
-            {description}
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-6 mb-8">
+            <div>
+              <h1 className="text-[28px] font-bold text-(--color-text-primary) mb-1">
+                {title}
+              </h1>
+              <p className="text-[14px] text-(--color-text-secondary)">{description}</p>
+            </div>
+            {headerAside}
+          </div>
 
+          {children}
+
+          {!children && (
           <div className="flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-(--color-border-strong) bg-(--color-bg-surface) py-20 px-6">
             <span className="w-14 h-14 rounded-2xl bg-(--color-brand-primary-light) flex items-center justify-center text-(--color-brand-primary) mb-4">
               <Icon sx={{ fontSize: 28 }} />
@@ -67,6 +83,7 @@ export default function NotificationsShell({ title, description, icon: Icon }: P
               Open Notification Studio
             </button>
           </div>
+          )}
         </main>
       </div>
     </div>

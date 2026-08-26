@@ -21,6 +21,12 @@ export interface TemplateSummary {
   slug: string;
   name: string;
   categoryId: string;
+  /**
+   * The full design. Carried in the listing on purpose — thumbnailUrl is never
+   * populated, so cards render live through the same renderer the canvas uses
+   * rather than a stored screenshot that could drift.
+   */
+  designJson: NotificationDesign;
   thumbnailUrl: string | null;
   requiredPlan: string | null;
   schemaVersion: number;
@@ -30,18 +36,36 @@ export interface DesignSummary {
   id: string;
   name: string;
   status: string;
+  categoryId: string | null;
   version: number;
   isArchived: boolean;
   updatedAt: string;
+  /** Included so a saved design renders a live card, same as a template. */
+  designJson: NotificationDesign;
+}
+
+export interface DesignPage {
+  items: DesignSummary[];
+  total: number;
+}
+
+export interface ListDesignsParams {
+  status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  archived?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 // ── Designs ──────────────────────────────────────────────────────────────────
 
-export async function listDesigns(): Promise<{ items: DesignSummary[]; total: number }> {
-  const { data } = await apiClient.get<Envelope<{ items: DesignSummary[]; total: number }>>(
-    "/api/notifications/designs",
-    authConfig(),
-  );
+export async function listDesigns(params: ListDesignsParams = {}): Promise<DesignPage> {
+  const { data } = await apiClient.get<Envelope<DesignPage>>("/api/notifications/designs", {
+    ...authConfig(),
+    params: {
+      ...params,
+      ...(params.archived === undefined ? {} : { archived: String(params.archived) }),
+    },
+  });
   return data.data;
 }
 
@@ -74,6 +98,17 @@ export async function autosaveDesign(
   return data.data;
 }
 
+/**
+ * Removes a design from the shopkeeper's lists.
+ *
+ * Archives rather than hard-deletes: the Studio autosaves continuously, so a
+ * draft can hold real work that was never explicitly saved. The row stays
+ * behind `isArchived` and POST /designs/:id/restore brings it back.
+ */
+export async function archiveDesign(id: string): Promise<void> {
+  await apiClient.post(`/api/notifications/designs/${id}/archive`, {}, authConfig());
+}
+
 export async function saveVersion(id: string): Promise<{ id: string; version: number }> {
   const { data } = await apiClient.post<Envelope<{ id: string; version: number }>>(
     `/api/notifications/designs/${id}/versions`,
@@ -85,9 +120,40 @@ export async function saveVersion(id: string): Promise<{ id: string; version: nu
 
 // ── Templates ────────────────────────────────────────────────────────────────
 
-export async function listTemplates(): Promise<TemplateSummary[]> {
-  const { data } = await apiClient.get<Envelope<TemplateSummary[]>>(
-    "/api/notifications/templates",
+export interface TemplatePage {
+  items: TemplateSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ListTemplatesParams {
+  categoryId?: string;
+  q?: string;
+  sort?: "popular" | "newest" | "name";
+  page?: number;
+  limit?: number;
+}
+
+export async function listTemplates(params: ListTemplatesParams = {}): Promise<TemplatePage> {
+  const { data } = await apiClient.get<Envelope<TemplatePage>>("/api/notifications/templates", {
+    ...authConfig(),
+    params,
+  });
+  return data.data;
+}
+
+export interface NotificationCategory {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string | null;
+}
+
+export async function listCategories(): Promise<NotificationCategory[]> {
+  const { data } = await apiClient.get<Envelope<NotificationCategory[]>>(
+    "/api/notifications/categories",
     authConfig(),
   );
   return data.data;
