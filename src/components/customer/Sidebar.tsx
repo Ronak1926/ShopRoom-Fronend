@@ -32,7 +32,7 @@ export default function Sidebar({ activeNav, onNavChange }: Props) {
 
   return (
     <aside
-      className={`flex flex-col overflow-hidden bg-(--color-bg-surface) transition-[width] duration-200 shrink-0 ${
+      className={`flex flex-col overflow-hidden bg-(--color-bg-surface) transition-[width,min-width] duration-200 ease-in-out shrink-0 ${
         collapsed ? "w-16 min-w-16" : "w-56 min-w-56"
       }`}
       style={{ borderRight: "1px solid var(--color-border-default)" }}

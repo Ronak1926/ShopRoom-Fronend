@@ -17,6 +17,7 @@ import {
   type NotificationCategory,
   type TemplateSummary,
 } from "@/features/notifications/api";
+import Dropdown from "@/components/ui/Dropdown";
 import TemplateCard from "./TemplateCard";
 import DesignCard from "./DesignCard";
 import TemplateGridSkeleton from "./TemplateGridSkeleton";
@@ -46,7 +47,8 @@ const STUDIO_DESIGN_KEY = "studio_design_id";
 const PAGE_SIZE = 12;
 /** Fetch the next page once the card this far through the list comes into view. */
 const PREFETCH_AT = 0.7;
-const GRID = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4";
+const GRID =
+  "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4";
 
 export default function TemplatesBrowser() {
   const router = useRouter();
@@ -60,7 +62,6 @@ export default function TemplatesBrowser() {
 
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 
   const [designs, setDesigns] = useState<DesignSummary[]>([]);
@@ -73,10 +74,26 @@ export default function TemplatesBrowser() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState<TemplateSummary | null>(null);
 
-  // Held as state, not a ref, so the observer effect re-runs when the element
-  // at the 70% mark moves after a page is appended.
+  /**
+   * A dedicated element after the grid, not a ref that hops between cards.
+   *
+   * Hanging the sentinel off "the card at 70%" meant it moved on every append:
+   * React detached the old ref (calling the setter with null) and attached the
+   * new one, and if the null landed last there was no element to observe and
+   * loading stopped for good. A sentinel that always exists cannot do that, and
+   * being below every card it is always reachable by scrolling.
+   */
   const [nearEndEl, setNearEndEl] = useState<HTMLDivElement | null>(null);
-  const inFlight = useRef(false);
+  const gridEl = useRef<HTMLDivElement | null>(null);
+
+  const catalogItems = tab === "catalog" ? templates : favouriteItems;
+  const itemCount = catalogItems.length;
+  /** True while the sentinel card is on screen — see the two observer effects. */
+  const [atEnd, setAtEnd] = useState(false);
+  /** Newest request wins; older ones return without writing state. */
+  const requestTicket = useRef(0);
+  /** Highest page already asked for, so one page is never fetched twice. */
+  const requestedPage = useRef(1);
 
   const categoryName = useCallback(
     (id: string | null) => categories.find((c) => c.id === id)?.name,
@@ -97,11 +114,30 @@ export default function TemplatesBrowser() {
    * Imperative on purpose: called from a debounce timer, the scroll observer
    * and click handlers — never synchronously from an effect body, which would
    * make the loading flags cascade renders.
+   *
+   * A plain in-flight boolean used to guard this, which silently dropped any
+   * request that overlapped another: scrolling during a filter fetch lost the
+   * page, and changing a filter mid-append lost the reset. Instead every call
+   * takes a ticket, and only the newest one is allowed to write state — so an
+   * overlapping request supersedes rather than being thrown away.
    */
   const loadCatalog = useCallback(
-    async (opts: { page: number; sort: Sort; categoryId: string | null; q: string; append: boolean }) => {
-      if (inFlight.current) return;
-      inFlight.current = true;
+    async (opts: {
+      page: number;
+      sort: Sort;
+      categoryId: string | null;
+      q: string;
+      append: boolean;
+    }) => {
+      // Appends are idempotent per page: two observer fires for the same page
+      // must not both hit the network. A reset clears the high-water mark.
+      if (opts.append) {
+        if (opts.page <= requestedPage.current) return;
+        requestedPage.current = opts.page;
+      } else {
+        requestedPage.current = 1;
+      }
+      const ticket = ++requestTicket.current;
       if (opts.append) setLoadingMore(true);
       else setLoading(true);
       try {
@@ -112,6 +148,9 @@ export default function TemplatesBrowser() {
           ...(opts.categoryId ? { categoryId: opts.categoryId } : {}),
           ...(opts.q ? { q: opts.q } : {}),
         });
+        // A newer request started while this one was in the air, so its
+        // results are the ones that belong on screen.
+        if (ticket !== requestTicket.current) return;
         setTemplates((prev) => {
           if (!opts.append) return res.items;
           // A page boundary can repeat a row if the catalog shifts mid-scroll;
@@ -119,18 +158,21 @@ export default function TemplatesBrowser() {
           const seen = new Set(prev.map((t) => t.id));
           return [...prev, ...res.items.filter((t) => !seen.has(t.id))];
         });
-        setTotal(res.total);
         setPage(res.page);
         setHasMore(res.page < res.totalPages);
         setError(null);
       } catch {
+        if (ticket !== requestTicket.current) return;
         if (!opts.append) setTemplates([]);
+        // Let the same page be retried after a failure.
+        if (opts.append) requestedPage.current = opts.page - 1;
         setHasMore(false);
         setError("Could not load templates. Please try again.");
       } finally {
-        inFlight.current = false;
-        setLoading(false);
-        setLoadingMore(false);
+        if (ticket === requestTicket.current) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
     },
     [],
@@ -188,7 +230,13 @@ export default function TemplatesBrowser() {
   useEffect(() => {
     if (tab !== "catalog") return;
     const timer = setTimeout(() => {
-      loadCatalog({ page: 1, sort, categoryId, q: search.trim(), append: false });
+      loadCatalog({
+        page: 1,
+        sort,
+        categoryId,
+        q: search.trim(),
+        append: false,
+      });
     }, 300);
     return () => clearTimeout(timer);
   }, [tab, sort, categoryId, search, loadCatalog]);
@@ -206,23 +254,54 @@ export default function TemplatesBrowser() {
     return () => clearTimeout(timer);
   }, [tab, favouriteIds, loadFavourites]);
 
-  // Infinite scroll: the grid tags the card ~70% of the way through what is
-  // loaded; once it scrolls into view the next page is fetched and appended.
+  // Infinite scroll, part 1 — watch the card ~70% of the way through what is
+  // loaded and record whether it is on screen. Depends only on the element, so
+  // the observer survives loads instead of being torn down by every state
+  // change. Rebuilding it was half the stall: IntersectionObserver reports
+  // transitions, so an observer recreated while the sentinel was already in
+  // view sat there reporting nothing until the user scrolled away and back.
   useEffect(() => {
-    if (tab !== "catalog" || !nearEndEl || !hasMore || loading || loadingMore) return;
+    if (!nearEndEl) return;
+    // The sentinel sits below every card, so to fire at 70% the observer reaches
+    // UP by the remaining 30% of the grid's height. Measured rather than a fixed
+    // pixel margin, because the grid is 1–5 columns depending on the window.
+    const remainder = Math.round((gridEl.current?.offsetHeight ?? 0) * (1 - PREFETCH_AT));
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          loadCatalog({ page: page + 1, sort, categoryId, q: search.trim(), append: true });
-        }
-      },
-      // Start a little early so the next page is usually there by the time the
-      // user actually reaches it.
-      { rootMargin: "300px" },
+      (entries) => setAtEnd(entries[0]?.isIntersecting ?? false),
+      { rootMargin: `${Math.max(300, remainder)}px 0px` },
     );
     observer.observe(nearEndEl);
     return () => observer.disconnect();
-  }, [tab, nearEndEl, hasMore, loading, loadingMore, page, sort, categoryId, search, loadCatalog]);
+  }, [nearEndEl, itemCount]);
+
+  // Infinite scroll, part 2 — load whenever the sentinel is showing and we are
+  // idle. Re-runs as loadingMore clears, so if the viewport is still past the
+  // trigger (tall screen, or a short page) it keeps going rather than waiting
+  // for another scroll event that may never come.
+  useEffect(() => {
+    if (tab !== "catalog" || !atEnd || !hasMore || loading || loadingMore) return;
+    const timer = setTimeout(() => {
+      loadCatalog({
+        page: page + 1,
+        sort,
+        categoryId,
+        q: search.trim(),
+        append: true,
+      });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [
+    tab,
+    atEnd,
+    hasMore,
+    loading,
+    loadingMore,
+    page,
+    sort,
+    categoryId,
+    search,
+    loadCatalog,
+  ]);
 
   function selectTab(next: Tab) {
     if (next === tab) return;
@@ -275,17 +354,17 @@ export default function TemplatesBrowser() {
   }
 
   const showingTemplates = tab === "catalog" || tab === "favourites";
-  const items = tab === "catalog" ? templates : favouriteItems;
+  const items = catalogItems;
   const count = showingTemplates ? items.length : designs.length;
   // Skeleton only when there is nothing to show. With cards already on screen a
   // refetch dims them instead, so filtering never flashes the layout away.
   const showSkeleton = loading && count === 0;
   const dim = loading && count > 0;
-  const triggerIndex = Math.max(0, Math.floor(items.length * PREFETCH_AT) - 1);
 
   const emptyCopy = useMemo(() => {
     if (tab === "catalog") return "No templates match that search.";
-    if (tab === "mine") return "Designs you finish will appear here. Open one in the Studio and save it.";
+    if (tab === "mine")
+      return "Designs you finish will appear here. Open one in the Studio and save it.";
     if (tab === "drafts") return "No drafts yet — start one from any template.";
     return "Tap the heart on a template to keep it here.";
   }, [tab]);
@@ -314,7 +393,9 @@ export default function TemplatesBrowser() {
         <>
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <label className="flex items-center gap-2 h-9 px-3 flex-1 min-w-55 max-w-sm rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) focus-within:border-(--color-brand-primary) transition-colors">
-              <SearchOutlinedIcon sx={{ fontSize: 16, color: "var(--color-text-hint)" }} />
+              <SearchOutlinedIcon
+                sx={{ fontSize: 16, color: "var(--color-text-hint)" }}
+              />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -323,20 +404,16 @@ export default function TemplatesBrowser() {
               />
             </label>
 
-            <label className="flex items-center gap-2 h-9 px-3 rounded-lg border border-(--color-border-default) bg-(--color-bg-surface)">
+            <div className="flex items-center gap-2">
               <span className="text-[12px] text-(--color-text-hint)">Sort by</span>
-              <select
+              <Dropdown
                 value={sort}
-                onChange={(e) => setSort(e.target.value as Sort)}
-                className="bg-transparent border-0 outline-none text-[12.5px] font-medium text-(--color-text-primary) cursor-pointer"
-              >
-                {SORTS.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                options={SORTS.map((s) => ({ value: s.id, label: s.label }))}
+                ariaLabel="Sort templates"
+                onChange={setSort}
+                className="w-36"
+              />
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-5">
@@ -348,7 +425,12 @@ export default function TemplatesBrowser() {
               All Templates
             </button>
             {categories.map((c) => (
-              <button key={c.id} type="button" onClick={() => setCategoryId(c.id)} className={chip(categoryId === c.id)}>
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setCategoryId(c.id)}
+                className={chip(categoryId === c.id)}
+              >
                 {c.name}
               </button>
             ))}
@@ -365,23 +447,28 @@ export default function TemplatesBrowser() {
       {showSkeleton ? (
         <TemplateGridSkeleton count={PAGE_SIZE} />
       ) : (
-        <div className={dim ? "opacity-60 transition-opacity pointer-events-none" : "transition-opacity"}>
+        <div
+          className={
+            dim
+              ? "opacity-60 transition-opacity pointer-events-none"
+              : "transition-opacity"
+          }
+        >
           {showingTemplates ? (
             items.length ? (
-              <div className={GRID}>
-                {items.map((t, i) => (
-                  <div key={t.id} ref={i === triggerIndex ? setNearEndEl : undefined}>
-                    <TemplateCard
-                      template={t}
-                      categoryName={categoryName(t.categoryId)}
-                      favourite={favourites.has(t.id)}
-                      busy={usingId === t.id}
-                      locked={false}
-                      onToggleFavourite={favourites.toggle}
-                      onPreview={setPreviewing}
-                      onUse={handleUse}
-                    />
-                  </div>
+              <div ref={gridEl} className={GRID}>
+                {items.map((t) => (
+                  <TemplateCard
+                    key={t.id}
+                    template={t}
+                    categoryName={categoryName(t.categoryId)}
+                    favourite={favourites.has(t.id)}
+                    busy={usingId === t.id}
+                    locked={false}
+                    onToggleFavourite={favourites.toggle}
+                    onPreview={setPreviewing}
+                    onUse={handleUse}
+                  />
                 ))}
               </div>
             ) : (
@@ -405,17 +492,10 @@ export default function TemplatesBrowser() {
         </div>
       )}
 
+      {/* Always rendered on the catalog tab, below every card, so scrolling can
+          always reach it and the observer always has something to watch. */}
       {tab === "catalog" && !showSkeleton && (
-        <div className="pt-6 pb-2 text-center">
-          {loadingMore ? (
-            <span className="text-[12px] text-(--color-text-hint)">Loading more…</span>
-          ) : items.length ? (
-            <span className="text-[12px] text-(--color-text-hint)">
-              Showing {items.length} of {total} templates
-              {!hasMore && total > PAGE_SIZE ? " · that's all of them" : ""}
-            </span>
-          ) : null}
-        </div>
+        <div ref={setNearEndEl} aria-hidden className="h-px w-full" />
       )}
 
       {previewing && (
@@ -446,7 +526,9 @@ function EmptyState({ copy }: { copy: string }) {
       <span className="w-12 h-12 rounded-2xl bg-(--color-brand-primary-light) flex items-center justify-center text-(--color-brand-primary) mb-3">
         <GridViewOutlinedIcon sx={{ fontSize: 24 }} />
       </span>
-      <p className="max-w-sm text-[13px] text-(--color-text-secondary)">{copy}</p>
+      <p className="max-w-sm text-[13px] text-(--color-text-secondary)">
+        {copy}
+      </p>
     </div>
   );
 }

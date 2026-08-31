@@ -468,7 +468,7 @@ export default function NotificationStudioPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav="notifications" onNavChange={handleNavChange} forceCollapsed />
+      <Sidebar activeNav="notifications" onNavChange={handleNavChange} />
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <StudioTopBar

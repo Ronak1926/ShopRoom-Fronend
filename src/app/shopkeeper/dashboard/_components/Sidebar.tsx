@@ -30,22 +30,14 @@ const NAV_ICONS: Record<string, React.ElementType> = {
 interface SidebarProps {
   activeNav: string;
   onNavChange: (id: string) => void;
-  /** Force the rail into its collapsed state and hide the toggle. Used by the
-   *  Notification Studio, which needs the extra width for its own toolbar. */
-  forceCollapsed?: boolean;
 }
 
-export default function Sidebar({
-  activeNav,
-  onNavChange,
-  forceCollapsed = false,
-}: SidebarProps) {
-  const { collapsed: storedCollapsed, toggle } = useSidebarCollapse("shopkeeper");
-  const collapsed = forceCollapsed || storedCollapsed;
+export default function Sidebar({ activeNav, onNavChange }: SidebarProps) {
+  const { collapsed, toggle } = useSidebarCollapse("shopkeeper");
 
   return (
     <aside
-      className={`flex flex-col h-screen sticky top-0 bg-(--color-bg-surface) transition-[width] duration-200 shrink-0 ${
+      className={`flex flex-col h-screen sticky top-0 overflow-hidden bg-(--color-bg-surface) transition-[width,min-width] duration-200 ease-in-out shrink-0 ${
         collapsed ? "w-16 min-w-16" : "w-56 min-w-56"
       }`}
       style={{ borderRight: "1px solid var(--color-border-default)" }}
@@ -73,24 +65,8 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Collapse toggle — hidden when the rail is force-collapsed by a page */}
-      {!forceCollapsed && (
-        <button
-          type="button"
-          onClick={toggle}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="mx-3 mb-2 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors cursor-pointer"
-        >
-          {collapsed ? (
-            <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
-          ) : (
-            <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
-          )}
-        </button>
-      )}
-
       {/* Nav */}
-      <nav className="flex-1 px-3 pt-1 flex flex-col gap-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 pt-2 flex flex-col gap-0.5 overflow-y-auto">
         {NAV_ITEMS.map(({ id, label }) => {
           if (id === "notifications") {
             return <SidebarNotifications key={id} collapsed={collapsed} />;
@@ -167,6 +143,20 @@ export default function Sidebar({
         >
           <HelpOutlineOutlinedIcon sx={{ fontSize: 16 }} />
           {!collapsed && "Help Center"}
+        </button>
+
+        {/* Collapse toggle — sits at the foot of the rail */}
+        <button
+          type="button"
+          onClick={toggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="mt-1 w-full h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-page) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+        >
+          {collapsed ? (
+            <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
+          ) : (
+            <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
+          )}
         </button>
       </div>
     </aside>

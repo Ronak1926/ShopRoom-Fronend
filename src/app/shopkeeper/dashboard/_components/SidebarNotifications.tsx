@@ -4,11 +4,25 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import {
   NOTIFICATION_SUBNAV,
   NOTIFICATION_DEFAULT_ROUTE,
 } from "../_data/constants";
+
+const SUBNAV_ICONS: Record<string, React.ElementType> = {
+  send: SendOutlinedIcon,
+  scheduled: ScheduleOutlinedIcon,
+  history: HistoryOutlinedIcon,
+  templates: DescriptionOutlinedIcon,
+  studio: AutoAwesomeOutlinedIcon,
+  preferences: TuneOutlinedIcon,
+};
 
 interface Props {
   collapsed: boolean;
@@ -71,6 +85,7 @@ export default function SidebarNotifications({ collapsed }: Props) {
         <div className="mt-0.5 ml-4 pl-3 border-l border-(--color-border-default) flex flex-col gap-0.5">
           {NOTIFICATION_SUBNAV.map(({ id, label, route }) => {
             const active = pathname === route || pathname.startsWith(route + "/");
+            const Icon = SUBNAV_ICONS[id];
             return (
               <button
                 key={id}
@@ -82,9 +97,9 @@ export default function SidebarNotifications({ collapsed }: Props) {
                     : "text-(--color-text-secondary) hover:text-(--color-text-primary)"
                 }`}
               >
-                <CircleOutlinedIcon
-                  sx={{ fontSize: 7 }}
-                  className={active ? "opacity-100" : "opacity-40"}
+                <Icon
+                  sx={{ fontSize: 16 }}
+                  className={`shrink-0 ${active ? "opacity-100" : "opacity-70"}`}
                 />
                 <span className="truncate">{label}</span>
               </button>
