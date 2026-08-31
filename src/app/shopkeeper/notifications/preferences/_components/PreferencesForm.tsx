@@ -29,8 +29,8 @@ import {
   expiryLabel,
   timeZoneLabel,
   type NotificationPreferences,
-} from "../_schemas/preferences";
-import { useNotificationPreferences } from "../_hooks/useNotificationPreferences";
+} from "@/features/notifications/preferences";
+import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import {
   CheckboxChips,
   ColorField,

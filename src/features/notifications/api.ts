@@ -238,3 +238,35 @@ export async function searchStockImages(params: {
   );
   return data.data;
 }
+
+// ── Sending ──────────────────────────────────────────────────────────────────
+
+export interface SendNotificationBody {
+  /** An owned design, or a catalog template sent as it stands. */
+  source: "DESIGN" | "TEMPLATE";
+  notificationId: string;
+  audience: {
+    mode: "ROOM_MEMBERS" | "NEARBY" | "MEMBERS_NEARBY";
+    /** Kilometres from the shop's coordinates. Ignored for ROOM_MEMBERS. */
+    radiusKm: number;
+  };
+  /** Drawn under the banner in the notification. Empty string means none. */
+  message?: string;
+}
+
+export interface SendNotificationResult {
+  id: string;
+  /** How many people the notification was queued for. */
+  recipients: number;
+}
+
+export async function sendNotification(
+  body: SendNotificationBody,
+): Promise<SendNotificationResult> {
+  const { data } = await apiClient.post<Envelope<SendNotificationResult>>(
+    "/api/notifications/send",
+    body,
+    authConfig(),
+  );
+  return data.data;
+}

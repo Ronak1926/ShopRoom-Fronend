@@ -22,7 +22,7 @@ import TemplateCard from "./TemplateCard";
 import DesignCard from "./DesignCard";
 import TemplateGridSkeleton from "./TemplateGridSkeleton";
 import TemplatePreviewModal from "./TemplatePreviewModal";
-import { useFavouriteTemplates } from "../_hooks/useFavouriteTemplates";
+import { useFavouriteTemplates } from "@/hooks/useFavouriteTemplates";
 
 type Tab = "catalog" | "mine" | "drafts" | "favourites";
 type Sort = "popular" | "newest" | "name";

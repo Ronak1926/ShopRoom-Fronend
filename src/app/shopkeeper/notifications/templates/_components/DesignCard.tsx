@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import DesignPreview from "./DesignPreview";
+import DesignPreview from "@/components/notifications/DesignPreview";
 import type { DesignSummary } from "@/features/notifications/api";
 
 const STATUS_STYLE: Record<string, string> = {

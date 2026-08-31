@@ -3,7 +3,7 @@
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import DesignPreview from "./DesignPreview";
+import DesignPreview from "@/components/notifications/DesignPreview";
 import type { TemplateSummary } from "@/features/notifications/api";
 
 interface Props {

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import DesignPreview from "./DesignPreview";
+import DesignPreview from "@/components/notifications/DesignPreview";
 import type { TemplateSummary } from "@/features/notifications/api";
 
 interface Props {

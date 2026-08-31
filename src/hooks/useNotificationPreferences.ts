@@ -5,7 +5,7 @@ import {
   DEFAULT_PREFERENCES,
   PreferencesSchema,
   type NotificationPreferences,
-} from "../_schemas/preferences";
+} from "@/features/notifications/preferences";
 
 const STORAGE_KEY = "shoproom:notification-preferences";
 
