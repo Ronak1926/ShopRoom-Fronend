@@ -1,10 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
+import Avatar from "@/components/ui/Avatar";
 import { apiClient } from "@/utils/apiClient";
 import type { ShopProfileFormValues } from "../_schemas/shopProfileSchema";
 
@@ -72,20 +71,8 @@ export default function ProfileShopCard({
   return (
     <div className="bg-(--color-bg-surface) border border-(--color-border-default) rounded-2xl p-6 flex flex-col items-center text-center gap-4">
       {/* Logo */}
-      <div className="relative w-24 h-24 rounded-full bg-(--color-brand-primary-light) flex items-center justify-center overflow-hidden">
-        {logoUrl ? (
-          <Image
-            src={logoUrl}
-            alt={shopName}
-            width={96}
-            height={96}
-            className="object-cover w-full h-full"
-          />
-        ) : (
-          <StorefrontOutlinedIcon
-            sx={{ fontSize: 42, color: "var(--color-brand-primary)" }}
-          />
-        )}
+      <div className="relative w-24 h-24 rounded-full overflow-hidden">
+        <Avatar name={shopName} src={logoUrl} size="2xl" />
         {editing && (
           <button
             type="button"

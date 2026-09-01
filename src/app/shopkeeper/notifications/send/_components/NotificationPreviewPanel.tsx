@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import Avatar from "@/components/ui/Avatar";
 import DesignPreview from "@/components/notifications/DesignPreview";
 import type { SendableNotification } from "../_hooks/useSendableNotifications";
 import type { ShopAudience } from "../_hooks/useShopAudience";
@@ -29,19 +28,12 @@ export default function NotificationPreviewPanel({ item, message, shop }: Props)
 
       <div className="mt-4 rounded-2xl border border-(--color-border-default) bg-(--color-bg-page) p-3">
         <div className="flex items-center gap-2">
-          {shop?.logoUrl ? (
-            <Image
-              src={shop.logoUrl}
-              alt=""
-              width={22}
-              height={22}
-              className="w-[22px] h-[22px] rounded-md object-cover"
-            />
-          ) : (
-            <span className="w-[22px] h-[22px] rounded-md bg-(--color-brand-primary) text-(--color-text-on-brand) flex items-center justify-center">
-              <StorefrontOutlinedIcon sx={{ fontSize: 13 }} />
-            </span>
-          )}
+          <Avatar
+            name={shop?.shopName ?? "Your shop"}
+            src={shop?.logoUrl}
+            size="xs"
+            shape="square"
+          />
           <span className="text-[11px] font-semibold text-(--color-text-secondary) truncate">
             {shop?.shopName ?? "Your shop"}
           </span>

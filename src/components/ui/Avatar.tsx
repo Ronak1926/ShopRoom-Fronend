@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import StatusDot from "./StatusDot";
 
 const AVATAR_COLORS = [
@@ -40,6 +43,7 @@ const SIZE_MAP = {
   md: { box: "w-9 h-9", text: "text-xs", dot: 9 },
   lg: { box: "w-12 h-12", text: "text-base", dot: 11 },
   xl: { box: "w-20 h-20", text: "text-2xl", dot: 16 },
+  "2xl": { box: "w-24 h-24", text: "text-3xl", dot: 18 },
 } as const;
 
 type AvatarSize = keyof typeof SIZE_MAP;
@@ -65,13 +69,20 @@ export default function Avatar({
   const radius = shape === "circle" ? "rounded-full" : "rounded-xl";
   const color = getAvatarColor(name);
 
+  // A dead or unrenderable URL — an expired upload, a host that is down —
+  // falls back to the initials rather than a broken image. The failure is
+  // remembered per URL, so a new src is always given its own chance.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const showImage = Boolean(src) && failedSrc !== src;
+
   return (
     <div className={`relative inline-flex shrink-0 ${box} ${radius} ${className}`}>
-      {src ? (
+      {showImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={src}
+          src={src ?? undefined}
           alt={name}
+          onError={() => setFailedSrc(src ?? null)}
           className={`w-full h-full object-cover ${radius}`}
         />
       ) : (

@@ -102,8 +102,9 @@ export default function MembersTable({ dashboardLoading }: MembersTableProps) {
         </div>
       </div>
 
-      {/* Table */}
-      <table className="w-full mt-4 border-collapse">
+      {/* Table — scrolls on its own now that it shares the row with the rail */}
+      <div className="mt-4 overflow-x-auto">
+      <table className="w-full min-w-[560px] border-collapse">
         <thead>
           <tr>
             <th className={`${TH} w-[35%]`}>Member Name</th>
@@ -180,6 +181,7 @@ export default function MembersTable({ dashboardLoading }: MembersTableProps) {
             ))}
         </tbody>
       </table>
+      </div>
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-4">
