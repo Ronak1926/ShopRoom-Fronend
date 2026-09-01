@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
-import SampleBadge from "./SampleBadge";
+import SampleBadge from "@/components/ui/SampleBadge";
 import ChartTooltip from "./charts/ChartTooltip";
 import type { MetricPoint } from "../_data/sampleMetrics";
 

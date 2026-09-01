@@ -5,7 +5,7 @@ import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import SampleBadge from "./SampleBadge";
+import SampleBadge from "@/components/ui/SampleBadge";
 import type { SendRow } from "../_data/sampleMetrics";
 
 /** Must match STORAGE_KEY in useNotificationDesign — the Studio opens whatever

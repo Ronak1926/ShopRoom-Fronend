@@ -3,8 +3,8 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { TYPE_LABELS } from "@/features/notifications/preferences";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
-import type { SendableNotification } from "../_hooks/useSendableNotifications";
-import type { ShopAudience } from "../_hooks/useShopAudience";
+import type { SendableNotification } from "@/hooks/useSendableNotifications";
+import type { ShopAudience } from "@/hooks/useShopAudience";
 import { AUDIENCE_LABELS, usesRadius, type AudienceMode } from "../_schemas/sendNotification";
 
 interface Props {

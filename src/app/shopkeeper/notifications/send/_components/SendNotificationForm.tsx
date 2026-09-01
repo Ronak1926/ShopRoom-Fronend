@@ -22,8 +22,8 @@ import SendSkeleton from "./SendSkeleton";
 import {
   useSendableNotifications,
   type SendableNotification,
-} from "../_hooks/useSendableNotifications";
-import { useShopAudience } from "../_hooks/useShopAudience";
+} from "@/hooks/useSendableNotifications";
+import { useShopAudience } from "@/hooks/useShopAudience";
 import {
   DEFAULT_RADIUS_KM,
   SendNotificationSchema,

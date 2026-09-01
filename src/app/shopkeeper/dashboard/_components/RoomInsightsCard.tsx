@@ -8,7 +8,7 @@ import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
-import SampleBadge from "./SampleBadge";
+import SampleBadge from "@/components/ui/SampleBadge";
 
 function Insight({
   icon: Icon,

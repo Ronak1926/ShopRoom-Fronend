@@ -2,7 +2,7 @@
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import type { SendableNotification } from "../_hooks/useSendableNotifications";
+import type { SendableNotification } from "@/hooks/useSendableNotifications";
 
 interface Props {
   item: SendableNotification;

@@ -9,7 +9,7 @@ import {
   SOURCE_TABS,
   type SendableNotification,
   type SourceTab,
-} from "../_hooks/useSendableNotifications";
+} from "@/hooks/useSendableNotifications";
 
 const GRID = "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3";
 

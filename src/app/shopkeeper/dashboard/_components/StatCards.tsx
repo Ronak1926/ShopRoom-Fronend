@@ -9,7 +9,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import AdsClickOutlinedIcon from "@mui/icons-material/AdsClickOutlined";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
-import SampleBadge from "./SampleBadge";
+import SampleBadge from "@/components/ui/SampleBadge";
 import { NEARBY_RADIUS_KM, type DashboardSnapshot } from "../_hooks/useDashboardData";
 import type { NotificationMetrics } from "../_data/sampleMetrics";
 

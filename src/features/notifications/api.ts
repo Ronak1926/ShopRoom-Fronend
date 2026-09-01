@@ -270,3 +270,67 @@ export async function sendNotification(
   );
   return data.data;
 }
+
+// ── Plan capabilities ────────────────────────────────────────────────────────
+
+export interface PlanCapabilities {
+  /** How many notifications the shop may send in a day on its plan. */
+  dailyNotificationLimit: number;
+  CUSTOM_TEMPLATE: boolean;
+  ADVANCED_TEMPLATE_EDITING: boolean;
+  CUSTOM_ANIMATION: boolean;
+}
+
+export async function getCapabilities(): Promise<{
+  planType: string;
+  capabilities: PlanCapabilities;
+}> {
+  const { data } = await apiClient.get<
+    Envelope<{ planType: string; capabilities: PlanCapabilities }>
+  >("/api/notifications/capabilities", authConfig());
+  return data.data;
+}
+
+// ── Scheduling ───────────────────────────────────────────────────────────────
+
+export interface ScheduleNotificationBody {
+  source: "DESIGN" | "TEMPLATE";
+  notificationId: string;
+  audience: {
+    includeMembers: boolean;
+    includeNearby: boolean;
+    radiusKm: number;
+    includeFutureMembers: boolean;
+    skipNotificationsOff: boolean;
+  };
+  schedule: {
+    /** ISO instant, resolved from the picked date, time and time zone. */
+    sendAt: string;
+    timeZone: string;
+    recurrence: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
+    repeatEvery: number;
+    /** Weekday indexes (0 = Sunday) — weekly recurrence only. */
+    weekdays: number[];
+    endMode: "NEVER" | "ON" | "AFTER";
+    endDate: string | null;
+    endAfter: number | null;
+    deliverySpeed: "STANDARD" | "PRIORITY";
+  };
+}
+
+export interface ScheduledNotificationResult {
+  id: string;
+  /** ISO instant of the next run. */
+  nextRunAt: string;
+}
+
+export async function createSchedule(
+  body: ScheduleNotificationBody,
+): Promise<ScheduledNotificationResult> {
+  const { data } = await apiClient.post<Envelope<ScheduledNotificationResult>>(
+    "/api/notifications/schedules",
+    body,
+    authConfig(),
+  );
+  return data.data;
+}

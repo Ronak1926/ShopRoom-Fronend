@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import SampleBadge from "./SampleBadge";
+import SampleBadge from "@/components/ui/SampleBadge";
 import type { SendRow } from "../_data/sampleMetrics";
 
 const STATUS_STYLE: Record<string, string> = {

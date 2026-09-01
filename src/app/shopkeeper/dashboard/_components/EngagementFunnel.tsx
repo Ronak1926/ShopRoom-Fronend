@@ -1,7 +1,7 @@
 "use client";
 
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import SampleBadge from "./SampleBadge";
+import SampleBadge from "@/components/ui/SampleBadge";
 import ChartTooltip from "./charts/ChartTooltip";
 import type { NotificationMetrics } from "../_data/sampleMetrics";
 

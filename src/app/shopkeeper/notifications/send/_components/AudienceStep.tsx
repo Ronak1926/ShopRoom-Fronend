@@ -5,7 +5,7 @@ import MyLocationOutlinedIcon from "@mui/icons-material/MyLocationOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import StepCard from "./StepCard";
-import type { ShopAudience } from "../_hooks/useShopAudience";
+import type { ShopAudience } from "@/hooks/useShopAudience";
 import {
   AUDIENCE_OPTIONS,
   MAX_RADIUS_KM,

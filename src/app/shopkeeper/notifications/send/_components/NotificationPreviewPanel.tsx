@@ -3,8 +3,8 @@
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import Avatar from "@/components/ui/Avatar";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import type { SendableNotification } from "../_hooks/useSendableNotifications";
-import type { ShopAudience } from "../_hooks/useShopAudience";
+import type { SendableNotification } from "@/hooks/useSendableNotifications";
+import type { ShopAudience } from "@/hooks/useShopAudience";
 
 interface Props {
   item: SendableNotification | null;
