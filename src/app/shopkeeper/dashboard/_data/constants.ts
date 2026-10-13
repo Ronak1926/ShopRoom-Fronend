@@ -5,7 +5,6 @@ export const NAV_ITEMS = [
   { id: "stockalerts", label: "Stock Alerts" },
   { id: "members", label: "Members" },
   { id: "notifications", label: "Notifications" },
-  { id: "analytics", label: "Analytics" },
   { id: "billing", label: "Billing" },
   { id: "profile", label: "Profile" },
 ] as const;

@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
-import ChartTooltip from "./charts/ChartTooltip";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 
 const DAY = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 const AXIS_TICK = { fontSize: 10.5, fill: "var(--color-text-hint)" };

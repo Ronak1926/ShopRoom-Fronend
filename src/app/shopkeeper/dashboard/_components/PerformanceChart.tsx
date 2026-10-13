@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import SampleBadge from "@/components/ui/SampleBadge";
-import ChartTooltip from "./charts/ChartTooltip";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 import type { MetricPoint } from "../_data/sampleMetrics";
 
 const DAY = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });

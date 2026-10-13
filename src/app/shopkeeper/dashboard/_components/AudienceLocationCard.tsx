@@ -2,7 +2,7 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
-import ChartTooltip from "./charts/ChartTooltip";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 import { NEARBY_RADIUS_KM, type AudienceStats } from "../_hooks/useDashboardData";
 
 const BAND_COLORS = [

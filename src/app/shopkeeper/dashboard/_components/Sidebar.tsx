@@ -5,7 +5,6 @@ import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import EqualizerOutlinedIcon from "@mui/icons-material/EqualizerOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
@@ -22,7 +21,6 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   stockalerts: NotificationsOutlinedIcon,
   members: PeopleOutlinedIcon,
   notifications: NotificationsOutlinedIcon,
-  analytics: EqualizerOutlinedIcon,
   billing: CreditCardOutlinedIcon,
   profile: PersonOutlinedIcon,
 };
