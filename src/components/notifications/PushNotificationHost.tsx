@@ -5,17 +5,26 @@
  * FCM messages and replays the shopkeeper's full animated design in-app,
  * since native OS notifications can't run Framer Motion. Mounted once in the
  * customer layout so it's present on every customer route.
+ *
+ * It also tells the server what happened to each push (delivered, opened,
+ * clicked) so the shopkeeper's analytics are real.
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onMessage } from "firebase/messaging";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
-import { getSendDesign } from "@/features/push/pushApi";
+import { getSendDesign, reportReceipt } from "@/features/push/pushApi";
 import { EDITOR_CONTEXT } from "@/features/notifications/resolver";
+import { defaultRoute, resolveActionRoute, type ActionRoute } from "@/features/notifications/actionRouter";
 import DesignPreview from "./DesignPreview";
-import type { NotificationDesign, RenderContext } from "@/features/notifications/types";
+import type {
+  ElementAction,
+  NotificationDesign,
+  RenderContext,
+} from "@/features/notifications/types";
 
 const DEFAULT_AUTO_DISMISS_MS = 4000;
 const AUTO_DISMISS_BUFFER_MS = 1000;
@@ -24,6 +33,8 @@ interface IncomingPush {
   design: NotificationDesign;
   context: RenderContext;
   roomId: string;
+  /** Identifies this device's copy of the push for delivery analytics. */
+  receiptToken: string | undefined;
 }
 
 function prefersReducedMotion(): boolean {
@@ -41,19 +52,23 @@ export default function PushNotificationHost() {
       if (!messaging) return;
       unsubscribe = onMessage(messaging, (payload) => {
         const sendId = payload.data?.sendId;
+        const receiptToken = payload.data?.rt;
         if (!sendId) return;
 
+        reportReceipt(receiptToken, "DELIVERED");
         getSendDesign(sendId)
           .then((result) => {
             setIncoming({
               design: result.designJson,
               roomId: result.roomId,
+              receiptToken,
               context: {
                 ...EDITOR_CONTEXT,
                 shop: { ...EDITOR_CONTEXT.shop, ...result.context.shop },
                 customer: { ...EDITOR_CONTEXT.customer, ...result.context.customer },
               },
             });
+            reportReceipt(receiptToken, "OPENED");
           })
           .catch(() => {
             // A push referencing a send the customer can no longer see
@@ -83,18 +98,31 @@ export default function PushNotificationHost() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [incoming]);
 
+  const follow = useCallback(
+    (route: ActionRoute | null) => {
+      if (!incoming || !route) return;
+      reportReceipt(incoming.receiptToken, "CLICKED");
+      setIncoming(null);
+      if (route.kind === "external") {
+        window.open(route.url, "_blank", "noopener,noreferrer");
+      } else {
+        router.push(route.path);
+      }
+    },
+    [incoming, router],
+  );
+
   if (!incoming) return null;
 
-  function openRoom() {
-    if (incoming) router.push(`/customer/room/${incoming.roomId}`);
-    setIncoming(null);
-  }
+  const openRoom = () => follow(defaultRoute(incoming.roomId));
+  const onElementAction = (action: ElementAction) =>
+    follow(resolveActionRoute(action, incoming.roomId));
 
   return (
     <div
       role="dialog"
       aria-label="New notification"
-      className="fixed top-4 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) shadow-lg overflow-hidden"
+      className="fixed top-4 right-4 z-9999 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) shadow-lg overflow-hidden"
     >
       <button
         type="button"
@@ -104,21 +132,25 @@ export default function PushNotificationHost() {
       >
         <CloseOutlinedIcon sx={{ fontSize: 16 }} />
       </button>
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="Open this notification's room"
-        onClick={openRoom}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openRoom();
-          }
-        }}
-        className="cursor-pointer"
-      >
-        <DesignPreview design={incoming.design} context={incoming.context} isPlaying={!prefersReducedMotion()} />
+      {/* Tapping the banner itself opens the room; elements with their own
+          action (buttons, links) handle their tap first and stop it here. The
+          keyboard path to the same place is the explicit button below. */}
+      <div onClick={openRoom} className="cursor-pointer">
+        <DesignPreview
+          design={incoming.design}
+          context={incoming.context}
+          isPlaying={!prefersReducedMotion()}
+          onAction={onElementAction}
+        />
       </div>
+      <button
+        type="button"
+        onClick={openRoom}
+        className="flex w-full items-center justify-between gap-2 px-3.5 h-10 border-0 border-t border-(--color-border-default) bg-(--color-bg-surface) text-[12px] font-semibold text-(--color-brand-primary) cursor-pointer hover:bg-(--color-bg-surface-hover)"
+      >
+        Open room
+        <ArrowForwardOutlinedIcon sx={{ fontSize: 15 }} />
+      </button>
     </div>
   );
 }

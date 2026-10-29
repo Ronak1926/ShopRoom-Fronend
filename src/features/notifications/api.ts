@@ -284,9 +284,11 @@ export interface PlanCapabilities {
 export async function getCapabilities(): Promise<{
   planType: string;
   capabilities: PlanCapabilities;
+  /** Notifications already sent today, counted against the daily limit. */
+  usedToday: number;
 }> {
   const { data } = await apiClient.get<
-    Envelope<{ planType: string; capabilities: PlanCapabilities }>
+    Envelope<{ planType: string; capabilities: PlanCapabilities; usedToday: number }>
   >("/api/notifications/capabilities", authConfig());
   return data.data;
 }
@@ -332,5 +334,100 @@ export async function createSchedule(
     body,
     authConfig(),
   );
+  return data.data;
+}
+
+export interface ScheduleView {
+  id: string;
+  status: "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED";
+  /** ISO instant of the next run; null once the series has finished. */
+  nextRunAt: string | null;
+  lastRunAt: string | null;
+  runCount: number;
+  message: string | null;
+  recurrence: ScheduleNotificationBody["schedule"]["recurrence"];
+  repeatEvery: number;
+  weekdays: number[];
+  endMode: ScheduleNotificationBody["schedule"]["endMode"];
+  endDate: string | null;
+  endAfter: number | null;
+  deliverySpeed: ScheduleNotificationBody["schedule"]["deliverySpeed"];
+  timeZone: string;
+  includeMembers: boolean;
+  includeNearby: boolean;
+  radiusKm: number;
+  designName: string;
+  designJson: NotificationDesign;
+}
+
+export interface SchedulePage {
+  items: ScheduleView[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export async function listSchedules(
+  state: "upcoming" | "completed",
+  params: { page?: number; limit?: number } = {},
+): Promise<SchedulePage> {
+  const { data } = await apiClient.get<Envelope<SchedulePage>>("/api/notifications/schedules", {
+    ...authConfig(),
+    params: { state, ...params },
+  });
+  return data.data;
+}
+
+export async function setScheduleStatus(
+  id: string,
+  status: "ACTIVE" | "PAUSED",
+): Promise<ScheduleView> {
+  const { data } = await apiClient.patch<Envelope<ScheduleView>>(
+    `/api/notifications/schedules/${id}`,
+    { status },
+    authConfig(),
+  );
+  return data.data;
+}
+
+export async function cancelSchedule(id: string): Promise<void> {
+  await apiClient.delete(`/api/notifications/schedules/${id}`, authConfig());
+}
+
+// ── Send history ─────────────────────────────────────────────────────────────
+
+export interface SendHistoryItem {
+  id: string;
+  createdAt: string;
+  sentAt: string | null;
+  status: "PENDING" | "SENT" | "FAILED";
+  failureReason: string | null;
+  audience: "ROOM_MEMBERS" | "NEARBY" | "MEMBERS_NEARBY" | "MEMBERS_AND_NEARBY";
+  radiusKm: number | null;
+  message: string | null;
+  designName: string;
+  scheduled: boolean;
+  recipientCount: number;
+  successCount: number;
+  failureCount: number;
+  deliveredCount: number;
+  openedCount: number;
+  clickedCount: number;
+}
+
+export interface SendHistoryPage {
+  items: SendHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export async function listSends(
+  params: { page?: number; limit?: number } = {},
+): Promise<SendHistoryPage> {
+  const { data } = await apiClient.get<Envelope<SendHistoryPage>>("/api/notifications/sends", {
+    ...authConfig(),
+    params,
+  });
   return data.data;
 }

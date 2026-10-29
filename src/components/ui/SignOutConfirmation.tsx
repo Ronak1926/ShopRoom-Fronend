@@ -8,11 +8,19 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import { getCookie, deleteCookie } from "../../utils/cookieUtils";
 import { setAuthToken } from "../../utils/apiClient";
 
+/** Longest sign-out waits on cleanup; a slow network must not trap anyone signed in. */
+const CLEANUP_TIMEOUT_MS = 3000;
+
 interface Props {
   cookieName: string;
   namePayloadKey: string;
   redirectTo: string;
   description: string;
+  /**
+   * Cleanup that needs the session while it still exists (e.g. unregistering a
+   * push device). Best effort: failures and slow responses never block sign-out.
+   */
+  onBeforeSignOut?: (sessionToken: string) => Promise<void>;
 }
 
 export default function SignOutConfirmation({
@@ -20,6 +28,7 @@ export default function SignOutConfirmation({
   namePayloadKey,
   redirectTo,
   description,
+  onBeforeSignOut,
 }: Props) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -41,8 +50,15 @@ export default function SignOutConfirmation({
     }
   }, [cookieName, namePayloadKey, redirectTo, router]);
 
-  function handleSignOut() {
+  async function handleSignOut() {
     setSigningOut(true);
+    const sessionToken = getCookie(cookieName);
+    if (onBeforeSignOut && sessionToken) {
+      await Promise.race([
+        onBeforeSignOut(sessionToken).catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, CLEANUP_TIMEOUT_MS)),
+      ]);
+    }
     deleteCookie(cookieName);
     setAuthToken(null);
     setTimeout(() => router.replace(redirectTo), 600);

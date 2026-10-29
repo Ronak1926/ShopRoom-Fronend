@@ -6,9 +6,10 @@
  * template names — the same renderer draws every ShopRoom + custom design.
  */
 
-import type { CSSProperties, MouseEvent } from "react";
+import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import type {
   CompositionNode,
+  ElementAction,
   NotificationDesign,
   RenderContext,
 } from "@/features/notifications/types";
@@ -29,6 +30,11 @@ interface Props {
   isPlaying?: boolean;
   /** When set, only this node animates — the inspector's per-element preview. */
   previewId?: string | null;
+  /**
+   * Makes elements that carry an `interaction.onClick` tappable and reports
+   * the action. Ignored while `onSelect` is set: in the editor a click selects.
+   */
+  onAction?: (action: ElementAction) => void;
 }
 
 export default function NotificationRenderer({
@@ -39,6 +45,7 @@ export default function NotificationRenderer({
   onSelect,
   isPlaying,
   previewId,
+  onAction,
 }: Props) {
   const { width, height, background } = design.canvas;
   return (
@@ -56,7 +63,7 @@ export default function NotificationRenderer({
         onClick={() => onSelect?.("")}
       >
         {design.elements.map((n) => (
-          <RenderNode key={n.id} node={n} inFlow={false} ctx={context} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} previewId={previewId} />
+          <RenderNode key={n.id} node={n} inFlow={false} ctx={context} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} previewId={previewId} onAction={onAction} />
         ))}
       </div>
     </div>
@@ -71,6 +78,7 @@ interface NodeProps {
   onSelect?: (id: string) => void;
   isPlaying?: boolean;
   previewId?: string | null;
+  onAction?: (action: ElementAction) => void;
 }
 
 function hasAnimation(node: CompositionNode): boolean {
@@ -82,7 +90,7 @@ const SELECTION: CSSProperties = {
   outlineOffset: "1px",
 };
 
-function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying, previewId }: NodeProps) {
+function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying, previewId, onAction }: NodeProps) {
   // Timeline Play animates everything; the inspector's preview animates one.
   const animating = !!isPlaying || previewId === node.id;
   if (node.visible === false) return null;
@@ -93,6 +101,25 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying, previe
   // reach its Properties panel and unlock it again without hunting for it in
   // the Layers list.
   const selectable = !!onSelect;
+  const action = !selectable && onAction ? node.interaction?.onClick : undefined;
+  const actionable = !!action && action.type !== "NONE";
+  const actionProps = actionable
+    ? {
+        role: "button" as const,
+        tabIndex: 0,
+        onClick: (e: MouseEvent) => {
+          e.stopPropagation();
+          onAction?.(action);
+        },
+        onKeyDown: (e: KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            onAction?.(action);
+          }
+        },
+      }
+    : null;
   const onClick = selectable
     ? (e: MouseEvent) => {
         e.stopPropagation();
@@ -114,14 +141,14 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying, previe
     const style: CSSProperties = {
       ...base,
       ...(node.layout?.direction ? flexStyle(node.layout) : null),
-      ...(selectable ? { cursor: "pointer" } : null),
+      ...(selectable || actionable ? { cursor: "pointer" } : null),
       ...(isSelected ? SELECTION : null),
     };
     const kids = children.map((c) => (
-      <RenderNode key={c.id} node={c} inFlow={!!node.layout?.direction} ctx={ctx} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} previewId={previewId} />
+      <RenderNode key={c.id} node={c} inFlow={!!node.layout?.direction} ctx={ctx} selectedId={selectedId} onSelect={onSelect} isPlaying={isPlaying} previewId={previewId} onAction={onAction} />
     ));
     return (
-      <div style={style} onClick={onClick}>
+      <div style={style} onClick={onClick} {...actionProps}>
         {hasAnimation(node) ? (
           <AnimatedNode animation={node.animation} isPlaying={animating} contentStyle={node.layout?.direction ? flexStyle(node.layout) : undefined}>
             {kids}
@@ -144,11 +171,11 @@ function RenderNode({ node, inFlow, ctx, selectedId, onSelect, isPlaying, previe
     ...base,
     ...leafContentStyle,
     ...leafOverflowStyle(node.style),
-    ...(selectable ? { cursor: "pointer" } : null),
+    ...(selectable || actionable ? { cursor: "pointer" } : null),
     ...(isSelected ? SELECTION : null),
   };
   return (
-    <div style={style} onClick={onClick}>
+    <div style={style} onClick={onClick} {...actionProps}>
       {hasAnimation(node) ? (
         <AnimatedNode animation={node.animation} isPlaying={animating} contentStyle={leafContentStyle}>
           {renderLeaf(node, ctx)}

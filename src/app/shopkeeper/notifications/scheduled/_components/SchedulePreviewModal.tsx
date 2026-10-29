@@ -5,7 +5,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import type { ScheduledItem } from "../_data/sampleSchedules";
+import type { ScheduledItem } from "../_utils/scheduleView";
 
 const WHEN = new Intl.DateTimeFormat("en-IN", {
   weekday: "short",
@@ -63,15 +63,11 @@ export default function SchedulePreviewModal({
 
         <div className="p-5 bg-(--color-bg-page)">
           <div className="rounded-xl overflow-hidden shadow-(--shadow-md) bg-(--color-bg-surface)">
-            {item.design ? (
-              <DesignPreview design={item.design.designJson} />
-            ) : (
-              <p className="aspect-2/1 flex items-center justify-center text-[12px] text-(--color-text-hint)">
-                This schedule has no design attached.
-              </p>
-            )}
+            <DesignPreview design={item.design} isPlaying />
           </div>
-          <p className="mt-3 text-[12px] text-(--color-text-secondary)">{item.body}</p>
+          {item.body && (
+            <p className="mt-3 text-[12px] text-(--color-text-secondary)">{item.body}</p>
+          )}
           <div className="mt-3 flex flex-wrap items-center gap-4 text-[11.5px] text-(--color-text-hint)">
             <span className="flex items-center gap-1">
               <ScheduleOutlinedIcon sx={{ fontSize: 14 }} />
@@ -79,7 +75,7 @@ export default function SchedulePreviewModal({
             </span>
             <span className="flex items-center gap-1">
               <PeopleOutlineOutlinedIcon sx={{ fontSize: 14 }} />
-              {item.audienceLabel} ({item.audienceCount.toLocaleString()})
+              {item.audienceLabel}
             </span>
           </div>
         </div>

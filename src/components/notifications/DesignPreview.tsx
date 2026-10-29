@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import NotificationRenderer from "@/components/notifications/NotificationRenderer";
 import { EDITOR_CONTEXT } from "@/features/notifications/resolver";
-import type { NotificationDesign, RenderContext } from "@/features/notifications/types";
+import type {
+  ElementAction,
+  NotificationDesign,
+  RenderContext,
+} from "@/features/notifications/types";
 
 /**
  * Live card preview of a design, rendered through the same renderer the Studio
@@ -19,11 +23,14 @@ export default function DesignPreview({
   design,
   context = EDITOR_CONTEXT,
   isPlaying,
+  onAction,
 }: {
   design: NotificationDesign;
   context?: RenderContext;
   /** Off by default: a grid of cards animating at once is noisy, not useful. */
   isPlaying?: boolean;
+  /** Makes elements with an onClick action tappable (the customer-facing overlay). */
+  onAction?: (action: ElementAction) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -48,7 +55,13 @@ export default function DesignPreview({
   return (
     <div ref={ref} className="relative block w-full overflow-hidden aspect-2/1">
       {scale > 0 && (
-        <NotificationRenderer design={design} context={context} scale={scale} isPlaying={isPlaying} />
+        <NotificationRenderer
+          design={design}
+          context={context}
+          scale={scale}
+          isPlaying={isPlaying}
+          onAction={onAction}
+        />
       )}
     </div>
   );

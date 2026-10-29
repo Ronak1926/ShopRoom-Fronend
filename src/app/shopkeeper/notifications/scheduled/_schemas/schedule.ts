@@ -43,7 +43,8 @@ export const ScheduleSchema = z
     includeNearby: z.boolean(),
     radiusKm: z.number().int().min(MIN_RADIUS_KM).max(MAX_RADIUS_KM),
     includeFutureMembers: z.boolean(),
-    skipNotificationsOff: z.boolean(),
+    // Members who muted the room are never notified, so this cannot be turned off.
+    skipNotificationsOff: z.literal(true),
 
     // 3 — schedule
     date: isoDate,

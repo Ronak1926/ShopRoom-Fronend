@@ -1,4 +1,5 @@
 import PushNotificationHost from "@/components/notifications/PushNotificationHost";
+import CustomerBackgroundSync from "@/components/customer/CustomerBackgroundSync";
 
 export default function CustomerLayout({
   children,
@@ -8,6 +9,7 @@ export default function CustomerLayout({
   return (
     <>
       <PushNotificationHost />
+      <CustomerBackgroundSync />
       {children}
     </>
   );

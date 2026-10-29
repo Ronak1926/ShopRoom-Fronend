@@ -88,21 +88,29 @@ function OptionRow({
   title,
   description,
   checked,
+  locked = false,
   onToggle,
 }: {
   icon: ElementType;
   title: string;
   description: string;
   checked: boolean;
+  /** A rule the platform always applies — shown ticked and not changeable. */
+  locked?: boolean;
   onToggle: () => void;
 }) {
   return (
-    <label className="flex items-center gap-3 py-3 border-b border-(--color-border-default) last:border-b-0 cursor-pointer">
+    <label
+      className={`flex items-center gap-3 py-3 border-b border-(--color-border-default) last:border-b-0 ${
+        locked ? "cursor-not-allowed" : "cursor-pointer"
+      }`}
+    >
       <input
         type="checkbox"
         checked={checked}
+        disabled={locked}
         onChange={onToggle}
-        className="w-4 h-4 shrink-0 accent-(--color-brand-primary) cursor-pointer"
+        className="w-4 h-4 shrink-0 accent-(--color-brand-primary) cursor-pointer disabled:cursor-not-allowed"
       />
       <span className="min-w-0 flex-1">
         <span className="block text-[12.5px] font-semibold text-(--color-text-primary)">
@@ -238,9 +246,10 @@ export default function AudienceStep({
         <OptionRow
           icon={NotificationsOffOutlinedIcon}
           title="Skip members with notifications off"
-          description="Respects the per-room switch each member controls."
+          description="Always on — members who muted your room are never notified."
           checked={skipNotificationsOff}
-          onToggle={() => onChange({ skipNotificationsOff: !skipNotificationsOff })}
+          locked
+          onToggle={() => undefined}
         />
       </div>
 
