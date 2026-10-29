@@ -10,6 +10,7 @@ import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import Sidebar from "@/components/customer/Sidebar";
 import Avatar from "@/components/ui/Avatar";
 import ProfileInfoCard from "./_components/ProfileInfoCard";
+import PushNotificationsCard from "./_components/PushNotificationsCard";
 import {
   customerProfileSchema,
   type CustomerProfileFormValues,
@@ -150,6 +151,10 @@ export default function CustomerProfilePage() {
               errors={errors}
               allowLocationAccess={watch("allowLocationAccess") ?? data.allowLocationAccess}
             />
+
+            <div className="mt-6">
+              <PushNotificationsCard />
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
