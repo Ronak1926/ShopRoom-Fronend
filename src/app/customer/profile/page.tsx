@@ -15,10 +15,12 @@ import {
   customerProfileSchema,
   type CustomerProfileFormValues,
 } from "./_schemas/customerProfileSchema";
+import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
 interface CustomerData {
+  hasPassword: boolean;
   fullName: string;
   email: string;
   allowLocationAccess: boolean;
@@ -154,6 +156,15 @@ export default function CustomerProfilePage() {
 
             <div className="mt-6">
               <PushNotificationsCard />
+            </div>
+
+            <div className="mt-6">
+              <DeleteAccountCard
+                cookieName="token"
+                endpoint="/api/customers/me"
+                usesGoogle={!data.hasPassword}
+                consequences="Permanently deletes your profile, location, messages and the rooms you've joined. This can't be undone."
+              />
             </div>
           </div>
         ) : (

@@ -1,3 +1,4 @@
+import "@/lib/zodJitless";
 import { z } from "zod";
 
 // ─── Zod schemas ──────────────────────────────────────────────────────────────

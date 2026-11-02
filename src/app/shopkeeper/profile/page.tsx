@@ -15,6 +15,7 @@ import ProfilePlanCard from "./_components/ProfilePlanCard";
 import ProfileRoomCard from "./_components/ProfileRoomCard";
 import ProfileShopDetailsCard from "./_components/ProfileShopDetailsCard";
 import ProfileAccountCard from "./_components/ProfileAccountCard";
+import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 import { shopProfileSchema, type ShopProfileFormValues } from "./_schemas/shopProfileSchema";
 import { apiClient, setAuthToken } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
@@ -248,6 +249,11 @@ export default function ShopkeeperProfilePage() {
                   editing={isEditing}
                   register={register}
                   errors={errors}
+                />
+                <DeleteAccountCard
+                  cookieName="shopkeeper_token"
+                  endpoint="/api/shopkeeper/me"
+                  consequences="Permanently deletes your shop, its room and chat history, your notification designs and send history. Your members keep their own accounts. This can't be undone and your subscription isn't refunded."
                 />
               </div>
             </div>
