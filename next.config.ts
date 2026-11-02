@@ -67,13 +67,37 @@ const securityHeaders = [
     : [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }]),
 ];
 
+// Signed-in areas and one-time links are for their owner, not for search results.
+const PRIVATE_PATHS = [
+  "/customer/:path*",
+  "/shopkeeper/:path*",
+  "/join/:path*",
+  "/reset-password",
+  "/forgot-password",
+  "/verify-email",
+];
+
+// Files in /public keep their names between releases, so they cannot be cached forever: a day,
+// then revalidate in the background, saves the repeat download without ever going stale.
+// Only top-level files and the two image folders: /_next/static is hashed and already immutable.
+const PUBLIC_ASSET_SOURCES = ["/:file([^/]+\\.(?:png|jpg|webp|svg|ico))", "/industries/:path*", "/profile-pic/:path*"];
+const PUBLIC_ASSET_CACHE = "public, max-age=86400, stale-while-revalidate=604800";
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      ...PRIVATE_PATHS.map((source) => ({ source, headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] })),
+      ...PUBLIC_ASSET_SOURCES.map((source) => ({ source, headers: [{ key: "Cache-Control", value: PUBLIC_ASSET_CACHE }] })),
+    ];
   },
   images: {
+    // AVIF is markedly smaller than WebP for the large illustrations; browsers without it get WebP.
+    formats: ["image/avif", "image/webp"],
+    // The optimiser's output for a given image and width never changes, so cache it for a month.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: "https",

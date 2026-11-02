@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
@@ -57,7 +57,7 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <motion.footer
+    <m.footer
       variants={fadeUp}
       initial="hidden"
       whileInView="visible"
@@ -142,6 +142,6 @@ export default function Footer() {
           </span>
         </div>
       </div>
-    </motion.footer>
+    </m.footer>
   );
 }

@@ -13,6 +13,10 @@ import Pricing from "./_components/Pricing";
 import FAQ from "./_components/FAQ";
 import FinalCTA from "./_components/FinalCTA";
 import Footer from "./_components/Footer";
+import MotionProvider from "./_components/MotionProvider";
+import JsonLd from "@/components/seo/JsonLd";
+import { faqData, organizationData } from "@/components/seo/structuredData";
+import { FAQS } from "./_components/faqData";
 
 export const metadata: Metadata = {
   title: "ShopRoom — Bring Your Shop Closer to Your Customers",
@@ -28,7 +32,10 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
+    <MotionProvider>
     <div className="flex flex-col min-h-screen bg-(--color-bg-page)">
+      <JsonLd data={organizationData()} />
+      <JsonLd data={faqData(FAQS)} />
       <Navbar />
       <main>
         <Hero />
@@ -46,5 +53,6 @@ export default function LandingPage() {
       </main>
       <Footer />
     </div>
+    </MotionProvider>
   );
 }

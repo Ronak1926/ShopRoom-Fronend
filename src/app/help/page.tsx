@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import PublicPage from "@/components/public/PublicPage";
+import JsonLd from "@/components/seo/JsonLd";
+import { faqData } from "@/components/seo/structuredData";
 import { HELP_GROUPS } from "./_content";
 
 export const metadata: Metadata = {
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 export default function HelpPage() {
   return (
     <PublicPage>
+      <JsonLd data={faqData(HELP_GROUPS.flatMap((group) => group.items))} />
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         <h1 className="text-[32px] font-extrabold tracking-[-0.8px] text-(--color-text-primary) sm:text-[40px]">Help Center</h1>
         <p className="mt-3 text-[16px] text-(--color-text-secondary)">Quick answers to the things people ask most.</p>

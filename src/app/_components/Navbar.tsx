@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { getCookie } from "@/utils/cookieUtils";
-import { slideDown, SPRING } from "./motion";
+import { SPRING } from "./motion";
 import AnimatedButton from "./ui/AnimatedButton";
 
 const NAV_LINKS = [
@@ -45,10 +45,8 @@ export default function Navbar() {
   }, []);
 
   return (
-    <motion.header
-      variants={slideDown}
-      initial="hidden"
-      animate="visible"
+    <m.header
+      initial={false}
       className={`fixed top-0 inset-x-0 z-(--z-sticky) transition-all duration-300 ${
         scrolled
           ? "bg-(--color-bg-surface)/80 backdrop-blur-lg border-b border-(--color-border-default) shadow-(--shadow-xs)"
@@ -110,7 +108,7 @@ export default function Navbar() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -137,9 +135,9 @@ export default function Navbar() {
                 </AnimatedButton>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </m.header>
   );
 }

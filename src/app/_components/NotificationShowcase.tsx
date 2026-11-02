@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ComponentType } from "react";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
@@ -74,7 +74,7 @@ export default function NotificationShowcase() {
         </div>
 
         {/* Right — phone mockup */}
-        <motion.div
+        <m.div
           variants={scaleIn}
           initial="hidden"
           whileInView="visible"
@@ -82,15 +82,15 @@ export default function NotificationShowcase() {
           className="order-1 lg:order-2 relative flex justify-center"
         >
           {/* Floating bubbles */}
-          <motion.div
+          <m.div
             animate={floatAnimate(12)}
             transition={floatTransition(4.5)}
             className="absolute -left-2 top-16 z-20 flex items-center gap-2 bg-(--color-bg-surface) rounded-full shadow-(--shadow-md) border border-(--color-border-default) px-3 py-1.5"
           >
             <FavoriteRoundedIcon sx={{ fontSize: 16, color: "var(--color-danger)" }} />
             <span className="text-[12px] font-bold text-(--color-text-primary)">128</span>
-          </motion.div>
-          <motion.div
+          </m.div>
+          <m.div
             animate={floatAnimate(14)}
             transition={floatTransition(5.5)}
             className="absolute -right-1 bottom-24 z-20 flex items-center gap-2 bg-(--color-bg-surface) rounded-full shadow-(--shadow-md) border border-(--color-border-default) px-3 py-1.5"
@@ -101,7 +101,7 @@ export default function NotificationShowcase() {
             <span className="text-[12px] font-bold text-(--color-text-primary)">
               Live
             </span>
-          </motion.div>
+          </m.div>
 
           {/* Phone */}
           <div className="relative w-[300px] max-w-full rounded-[44px] bg-(--color-gray-900) p-3 shadow-(--shadow-lg)">
@@ -118,7 +118,7 @@ export default function NotificationShowcase() {
                 </p>
               </div>
               {/* Notifications */}
-              <motion.div
+              <m.div
                 variants={staggerContainer(0.15, 0.3)}
                 initial="hidden"
                 whileInView="visible"
@@ -126,7 +126,7 @@ export default function NotificationShowcase() {
                 className="flex flex-col gap-3 p-4"
               >
                 {NOTES.map(({ Icon, tag, tagClass, title, time }) => (
-                  <motion.div
+                  <m.div
                     key={title}
                     variants={fadeUp}
                     className="flex gap-3 p-3 rounded-2xl bg-(--color-bg-surface) border border-(--color-border-default) shadow-(--shadow-xs)"
@@ -149,12 +149,12 @@ export default function NotificationShowcase() {
                         {title}
                       </p>
                     </div>
-                  </motion.div>
+                  </m.div>
                 ))}
-              </motion.div>
+              </m.div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

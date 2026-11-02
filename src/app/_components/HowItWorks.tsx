@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ComponentType } from "react";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
@@ -51,7 +51,7 @@ export default function HowItWorks() {
 
         <div className="relative">
           {/* Dashed connector line (desktop), aligned to the circle centres */}
-          <motion.div
+          <m.div
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={VIEWPORT}
@@ -59,7 +59,7 @@ export default function HowItWorks() {
             className="hidden md:block absolute top-16 left-[16.66%] right-[16.66%] h-0 origin-left border-t-2 border-dashed border-(--color-brand-primary-muted)"
           />
 
-          <motion.ol
+          <m.ol
             variants={staggerContainer(0.18, 0.2)}
             initial="hidden"
             whileInView="visible"
@@ -67,7 +67,7 @@ export default function HowItWorks() {
             className="relative grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8"
           >
             {STEPS.map(({ number, Icon, title, description }) => (
-              <motion.li
+              <m.li
                 key={number}
                 variants={fadeUp}
                 className="flex flex-col items-center text-center"
@@ -93,9 +93,9 @@ export default function HowItWorks() {
                   />
                   <span>{description}</span>
                 </p>
-              </motion.li>
+              </m.li>
             ))}
-          </motion.ol>
+          </m.ol>
         </div>
       </div>
     </section>

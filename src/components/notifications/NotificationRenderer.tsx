@@ -310,7 +310,8 @@ function DecorationNode({
       : 0;
     return <div onClick={click} style={{ ...common, background: color, borderRadius: radius }} />;
   }
-  const svg = SVG_ASSETS[aid];
+  // The id comes from the design, so it must name an entry of the map itself, not "constructor" or "__proto__".
+  const svg = Object.hasOwn(SVG_ASSETS, aid) ? SVG_ASSETS[aid] : undefined;
   if (svg) {
     // Real SVG art is mostly transparent inside its own bounding box (a
     // sparkle's viewBox dwarfs its tiny star, a leaf sprig has gaps between

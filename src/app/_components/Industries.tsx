@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { fadeUp, staggerContainer, VIEWPORT } from "./motion";
 import SectionHeader from "./ui/SectionHeader";
 
@@ -55,7 +55,7 @@ export default function Industries() {
           className="mb-14"
         />
 
-        <motion.div
+        <m.div
           variants={staggerContainer(0.07)}
           initial="hidden"
           whileInView="visible"
@@ -63,7 +63,7 @@ export default function Industries() {
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5"
         >
           {INDUSTRIES.map(({ image, title, description }) => (
-            <motion.article
+            <m.article
               key={title}
               variants={fadeUp}
               whileHover={{ y: -8 }}
@@ -89,9 +89,9 @@ export default function Industries() {
                   {description}
                 </p>
               </div>
-            </motion.article>
+            </m.article>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

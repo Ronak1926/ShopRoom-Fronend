@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { fadeUp, staggerContainer, VIEWPORT } from "./motion";
 import SectionHeader from "./ui/SectionHeader";
@@ -48,7 +48,7 @@ function TestimonialCard({
   featured?: boolean;
 }) {
   return (
-    <motion.article
+    <m.article
       whileHover={{ y: -8 }}
       className={`flex flex-col gap-5 p-7 rounded-3xl bg-(--color-bg-surface) h-full transition-shadow duration-200 ${
         featured
@@ -76,7 +76,7 @@ function TestimonialCard({
           <p className="text-[12px] text-(--color-text-hint)">{data.business}</p>
         </div>
       </div>
-    </motion.article>
+    </m.article>
   );
 }
 
@@ -103,7 +103,7 @@ export default function Testimonials() {
         />
 
         {/* Desktop grid */}
-        <motion.div
+        <m.div
           variants={staggerContainer(0.12)}
           initial="hidden"
           whileInView="visible"
@@ -113,16 +113,16 @@ export default function Testimonials() {
           className="hidden md:grid grid-cols-3 gap-6 items-center"
         >
           {TESTIMONIALS.map((t, i) => (
-            <motion.div key={t.name} variants={fadeUp} className="h-full">
+            <m.div key={t.name} variants={fadeUp} className="h-full">
               <TestimonialCard data={t} featured={i === active} />
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
 
         {/* Mobile slider */}
         <div className="md:hidden">
           <AnimatePresence mode="wait">
-            <motion.div
+            <m.div
               key={active}
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
@@ -130,7 +130,7 @@ export default function Testimonials() {
               transition={{ duration: 0.4 }}
             >
               <TestimonialCard data={TESTIMONIALS[active]} featured />
-            </motion.div>
+            </m.div>
           </AnimatePresence>
         </div>
 

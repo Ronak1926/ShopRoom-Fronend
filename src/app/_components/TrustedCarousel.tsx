@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
+import { m, useAnimationFrame, useMotionValue } from "framer-motion";
 import type { ComponentType } from "react";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 import ShoppingBasketOutlinedIcon from "@mui/icons-material/ShoppingBasketOutlined";
@@ -51,7 +51,7 @@ export default function TrustedCarousel() {
         onMouseEnter={() => (paused.current = true)}
         onMouseLeave={() => (paused.current = false)}
       >
-        <motion.div
+        <m.div
           ref={trackRef}
           style={{ x }}
           className="flex w-max items-center gap-12 pr-12"
@@ -67,7 +67,7 @@ export default function TrustedCarousel() {
               </span>
             </div>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

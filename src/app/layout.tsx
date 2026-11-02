@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import {
   DM_Sans,
-  Fraunces,
-  Geist,
   Geist_Mono,
   Inter,
   Lato,
@@ -18,15 +16,15 @@ import "./globals.css";
 
 import { Providers } from "../store/Providers";
 import ClientErrorReporter from "../components/ClientErrorReporter";
+import { SITE_URL } from "../lib/site";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
+// Only the app's own text face (Manrope) is preloaded. Monospace is a small corner of a few
+// screens, and the notification fonts below are needed only when a banner is drawn: they
+// download the moment something uses them instead of competing with the first paint.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 const manrope = Manrope({
@@ -34,29 +32,22 @@ const manrope = Manrope({
   subsets: ["latin"],
 });
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  axes: ["opsz", "SOFT"],
-});
-
 // Notification Studio text-tool font choices (see features/notifications/fonts.ts).
 // Loaded on the root layout — the studio renders font-family from arbitrary
 // JSON data via inline styles, so every option must already be on the page.
-const notifInter = Inter({ variable: "--font-notif-inter", subsets: ["latin"] });
-const notifPoppins = Poppins({ variable: "--font-notif-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800", "900"] });
-const notifRoboto = Roboto({ variable: "--font-notif-roboto", subsets: ["latin"], weight: ["300", "400", "500", "700", "900"] });
-const notifMontserrat = Montserrat({ variable: "--font-notif-montserrat", subsets: ["latin"] });
-const notifOpenSans = Open_Sans({ variable: "--font-notif-open-sans", subsets: ["latin"] });
-const notifLato = Lato({ variable: "--font-notif-lato", subsets: ["latin"], weight: ["300", "400", "700", "900"] });
-const notifPlayfair = Playfair_Display({ variable: "--font-notif-playfair-display", subsets: ["latin"] });
-const notifDmSans = DM_Sans({ variable: "--font-notif-dm-sans", subsets: ["latin"] });
-const notifPlusJakarta = Plus_Jakarta_Sans({ variable: "--font-notif-plus-jakarta-sans", subsets: ["latin"] });
+const notifInter = Inter({ variable: "--font-notif-inter", subsets: ["latin"], preload: false });
+const notifPoppins = Poppins({ variable: "--font-notif-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800", "900"], preload: false });
+const notifRoboto = Roboto({ variable: "--font-notif-roboto", subsets: ["latin"], weight: ["300", "400", "500", "700", "900"], preload: false });
+const notifMontserrat = Montserrat({ variable: "--font-notif-montserrat", subsets: ["latin"], preload: false });
+const notifOpenSans = Open_Sans({ variable: "--font-notif-open-sans", subsets: ["latin"], preload: false });
+const notifLato = Lato({ variable: "--font-notif-lato", subsets: ["latin"], weight: ["300", "400", "700", "900"], preload: false });
+const notifPlayfair = Playfair_Display({ variable: "--font-notif-playfair-display", subsets: ["latin"], preload: false });
+const notifDmSans = DM_Sans({ variable: "--font-notif-dm-sans", subsets: ["latin"], preload: false });
+const notifPlusJakarta = Plus_Jakarta_Sans({ variable: "--font-notif-plus-jakarta-sans", subsets: ["latin"], preload: false });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shoproom.in";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
+  metadataBase: new URL(SITE_URL),
   applicationName: "ShopRoom",
   title: {
     default: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
@@ -76,7 +67,7 @@ export const metadata: Metadata = {
     "real-time stock updates",
     "local retail",
   ],
-  authors: [{ name: "ShopRoom", url: APP_URL }],
+  authors: [{ name: "ShopRoom", url: SITE_URL }],
   creator: "ShopRoom",
   publisher: "ShopRoom",
   robots: {
@@ -93,34 +84,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: APP_URL,
+    url: SITE_URL,
     siteName: "ShopRoom",
     title: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
     description:
       "Discover local shops, get real-time stock alerts, and stay ahead of the rush. ShopRoom is the hyper-local platform built for physical retail.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "ShopRoom — Hyper-Local Shop Discovery Platform",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
     description:
       "Discover local shops, get real-time stock alerts, and stay ahead of the rush.",
-    images: ["/og-image.png"],
     creator: "@shoproom_in",
-  },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: "/apple-icon.png",
   },
   manifest: "/site.webmanifest",
   category: "shopping",
@@ -134,7 +109,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${fraunces.variable} ${notifInter.variable} ${notifPoppins.variable} ${notifRoboto.variable} ${notifMontserrat.variable} ${notifOpenSans.variable} ${notifLato.variable} ${notifPlayfair.variable} ${notifDmSans.variable} ${notifPlusJakarta.variable} h-full antialiased`}
+      className={`${geistMono.variable} ${manrope.variable} ${notifInter.variable} ${notifPoppins.variable} ${notifRoboto.variable} ${notifMontserrat.variable} ${notifOpenSans.variable} ${notifLato.variable} ${notifPlayfair.variable} ${notifDmSans.variable} ${notifPlusJakarta.variable} h-full antialiased`}
     >
       {/*
         Browser extensions (ColorZilla's cz-shortcut-listen, Grammarly, LastPass…)

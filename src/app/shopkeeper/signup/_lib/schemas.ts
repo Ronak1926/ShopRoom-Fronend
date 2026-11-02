@@ -1,5 +1,6 @@
 import "@/lib/zodJitless";
 import { z } from "zod";
+import { PLAN_OFFERS } from "@/features/billing/plans";
 
 // ─── Zod schemas ──────────────────────────────────────────────────────────────
 
@@ -37,35 +38,10 @@ export type Step2Values = z.infer<typeof step2Schema>;
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
 
-export type PlanId = "1m" | "2m" | "3m";
+export type { PlanId } from "@/features/billing/plans";
 
-export const PLANS: {
-  id: PlanId;
-  label: string;
-  price: number;
-  description: string;
-  recommended?: true;
-}[] = [
-  {
-    id: "1m",
-    label: "1 Month",
-    price: 399,
-    description: "Try ShopRoom for a month",
-  },
-  {
-    id: "2m",
-    label: "2 Months",
-    price: 599,
-    description: "Most popular choice",
-    recommended: true,
-  },
-  {
-    id: "3m",
-    label: "3 Months",
-    price: 899,
-    description: "Best value for money",
-  },
-];
+/** The plans offered at checkout. */
+export const PLANS = PLAN_OFFERS;
 
 // ─── Step labels ──────────────────────────────────────────────────────────────
 

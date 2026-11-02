@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import PlayCircleOutlineRoundedIcon from "@mui/icons-material/PlayCircleOutlineRounded";
 import { fadeUp, staggerContainer, VIEWPORT } from "./motion";
@@ -10,7 +10,7 @@ import AnimatedButton from "./ui/AnimatedButton";
 export default function FinalCTA() {
   return (
     <section className="w-full bg-(--color-bg-page) py-20 px-6">
-      <motion.div
+      <m.div
         variants={fadeUp}
         initial="hidden"
         whileInView="visible"
@@ -34,27 +34,27 @@ export default function FinalCTA() {
         </div>
 
         {/* Copy */}
-        <motion.div
+        <m.div
           variants={staggerContainer(0.12)}
           initial="hidden"
           whileInView="visible"
           viewport={VIEWPORT}
           className="relative z-10 w-full lg:max-w-[560px] px-8 sm:px-14 py-14 lg:py-16 text-center lg:text-left"
         >
-          <motion.h2
+          <m.h2
             variants={fadeUp}
             className="text-[clamp(28px,3.8vw,44px)] font-extrabold text-(--color-text-on-brand) leading-[1.12] tracking-tight text-balance"
           >
             Ready to grow your business?
-          </motion.h2>
-          <motion.p
+          </m.h2>
+          <m.p
             variants={fadeUp}
             className="mt-4 text-[16px] text-white/85 leading-relaxed max-w-[440px] mx-auto lg:mx-0"
           >
-            Join thousands of shopkeepers who trust ShopRoom to connect and grow
-            with their customers.
-          </motion.p>
-          <motion.div
+            Open a room for your shop and start staying in touch with the people
+            who shop with you.
+          </m.p>
+          <m.div
             variants={fadeUp}
             className="mt-8 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3.5"
           >
@@ -70,8 +70,8 @@ export default function FinalCTA() {
               <PlayCircleOutlineRoundedIcon sx={{ fontSize: 24 }} />
               Learn More
             </AnimatedButton>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
 
         {/* Mobile / tablet illustration (stacked, full width) */}
         <div className="lg:hidden absolute inset-0 z-0 opacity-25 pointer-events-none">
@@ -84,7 +84,7 @@ export default function FinalCTA() {
             className="object-cover object-center"
           />
         </div>
-      </motion.div>
+      </m.div>
     </section>
   );
 }

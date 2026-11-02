@@ -1,10 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { SPRING, VIEWPORT } from "./motion";
 import SectionHeader from "./ui/SectionHeader";
 import AnimatedButton from "./ui/AnimatedButton";
+import { COMMON_PERKS, PLAN_OFFERS } from "@/features/billing/plans";
 
 type Plan = {
   name: string;
@@ -17,66 +18,29 @@ type Plan = {
   popular?: boolean;
 };
 
+const CUSTOMER_PLAN: Plan = {
+  name: "Customers",
+  price: "₹0",
+  period: "/forever",
+  tagline: "Free for everyone who shops",
+  features: ["Discover local shops", "Join as many rooms as you like", "Chat with shopkeepers", "Get notifications from the shops you join"],
+  cta: "Get Started",
+  href: "/customer/signup",
+};
+
+// Built from the same catalog checkout uses, so the page can never advertise a price that is not charged.
 const PLANS: Plan[] = [
-  {
-    name: "Free",
-    price: "₹0",
-    period: "/forever",
-    tagline: "For customers",
-    features: [
-      "Discover local shops",
-      "Join unlimited shop rooms",
-      "Chat with shopkeepers",
-      "Real-time stock notifications",
-    ],
-    cta: "Get Started",
-    href: "/customer/signup",
-  },
-  {
-    name: "Basic",
-    price: "₹599",
-    period: "/ 1 month",
-    tagline: "For new shopkeepers",
-    features: [
-      "Create 1 Room",
-      "Up to 100 Members",
-      "Basic Chat Features",
-      "Standard Notifications",
-    ],
-    cta: "Choose Basic",
+  CUSTOMER_PLAN,
+  ...PLAN_OFFERS.map((offer) => ({
+    name: offer.label,
+    price: `₹${offer.price}`,
+    period: "one-time",
+    tagline: offer.description,
+    features: [...offer.perks, ...(offer.id === "1m" ? COMMON_PERKS : ["Everything in the shorter plans"])],
+    cta: `Choose ${offer.label}`,
     href: "/shopkeeper/signup",
-  },
-  {
-    name: "Pro",
-    price: "₹999",
-    period: "/ 2 months",
-    tagline: "Grow your business",
-    features: [
-      "Create 5 Rooms",
-      "Up to 1,000 Members",
-      "Advanced Notifications",
-      "Media Sharing",
-      "Customer Insights",
-    ],
-    cta: "Choose Pro",
-    href: "/shopkeeper/signup",
-    popular: true,
-  },
-  {
-    name: "Business",
-    price: "₹1199",
-    period: "/ 3 months",
-    tagline: "For established shops",
-    features: [
-      "Unlimited Rooms",
-      "Unlimited Members",
-      "Priority Support",
-      "Advanced Analytics",
-      "Custom Branding",
-    ],
-    cta: "Contact Sales",
-    href: "/shopkeeper/signup",
-  },
+    popular: offer.recommended,
+  })),
 ];
 
 export default function Pricing() {
@@ -85,13 +49,13 @@ export default function Pricing() {
       <div className="max-w-[1240px] mx-auto">
         <SectionHeader
           title="Simple, transparent pricing"
-          subtitle="Free for customers — flexible plans for shopkeepers of every size."
+          subtitle="Free for customers. Shopkeepers pay once for the length of plan they need."
           className="mb-14"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {PLANS.map((plan, i) => (
-            <motion.article
+            <m.article
               key={plan.name}
               initial={{ opacity: 0, y: 28 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -148,12 +112,12 @@ export default function Pricing() {
               >
                 {plan.cta}
               </AnimatedButton>
-            </motion.article>
+            </m.article>
           ))}
         </div>
 
         <p className="text-center text-[13px] text-(--color-text-hint) mt-10">
-          All shopkeeper plans include a 7-day free trial · Cancel anytime
+          One-time payment through Razorpay · No automatic renewal · Renew whenever you like
         </p>
       </div>
     </section>

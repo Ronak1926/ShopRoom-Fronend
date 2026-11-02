@@ -34,7 +34,7 @@
 
   --color-text-primary: #0f172a;
   --color-text-secondary: #55596e;
-  --color-text-hint: #979ab0;
+  --color-text-hint: #666a80; /* at least 4.5:1 on the page and surface colours (was #979ab0, 2.8:1) */
   --color-text-disabled: #c3c5d6;
   --color-text-on-brand: #ffffff;
   --color-text-on-sidebar: #ffffff;
@@ -120,7 +120,7 @@
   --color-msg-alert-border: #d97706;
 
   --font-sans: var(--font-manrope), "Inter", "Segoe UI", system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-display: Georgia, serif;
   --font-size-display: 48px;
   --font-size-h1: 32px;
   --font-size-h2: 24px;
@@ -191,7 +191,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-fraunces);
+  --font-display: Georgia, serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -223,5 +223,39 @@ body {
       transparent 1px
     );
     background-size: 32px 32px;
+  }
+}
+
+/*
+ * Hero entrance. It is plain CSS on purpose: the framer-motion version server-rendered the
+ * whole hero at opacity 0 and revealed it only once JavaScript had loaded and hydrated, which
+ * held back the page's largest paint by seconds on a phone. A CSS animation starts at first paint.
+ */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-rise {
+    animation: hero-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero-rise-1 {
+    animation-delay: 0.08s;
+  }
+  .hero-rise-2 {
+    animation-delay: 0.16s;
+  }
+  .hero-rise-3 {
+    animation-delay: 0.24s;
+  }
+  .hero-rise-4 {
+    animation-delay: 0.32s;
   }
 }

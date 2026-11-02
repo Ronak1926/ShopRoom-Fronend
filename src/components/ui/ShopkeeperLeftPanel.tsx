@@ -15,7 +15,7 @@ export function ShopkeeperLeftPanel() {
         alt="A welcoming local shop and community of happy customers"
         fill
         priority
-        unoptimized
+        sizes="58vw"
         className="object-contain p-6"
       />
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
 import CelebrationRoundedIcon from "@mui/icons-material/CelebrationRounded";
@@ -44,7 +44,7 @@ export default function CommunitySection() {
           className="mb-14"
         />
 
-        <motion.div
+        <m.div
           variants={scaleIn}
           initial="hidden"
           whileInView="visible"
@@ -52,7 +52,7 @@ export default function CommunitySection() {
           className="relative w-full max-w-[560px]"
         >
           {/* Floating: member joined */}
-          <motion.div
+          <m.div
             animate={floatAnimate(12)}
             transition={floatTransition(4.5)}
             className="absolute -left-3 sm:-left-10 top-10 z-20 flex items-center gap-2.5 bg-(--color-bg-surface) rounded-2xl shadow-(--shadow-md) border border-(--color-border-default) px-3.5 py-2.5"
@@ -65,10 +65,10 @@ export default function CommunitySection() {
             <p className="text-[12px] font-semibold text-(--color-text-primary)">
               Rohan joined the room
             </p>
-          </motion.div>
+          </m.div>
 
           {/* Floating: reactions */}
-          <motion.div
+          <m.div
             animate={floatAnimate(14)}
             transition={floatTransition(5.5)}
             className="absolute -right-2 sm:-right-8 bottom-24 z-20 flex items-center gap-1.5 bg-(--color-bg-surface) rounded-full shadow-(--shadow-md) border border-(--color-border-default) px-3 py-2"
@@ -76,7 +76,7 @@ export default function CommunitySection() {
             {REACTIONS.map(({ Icon, color }, i) => (
               <Icon key={i} sx={{ fontSize: 16, color }} />
             ))}
-          </motion.div>
+          </m.div>
 
           {/* Chat card */}
           <div className="rounded-3xl bg-(--color-bg-page) border border-(--color-border-default) shadow-(--shadow-lg) overflow-hidden">
@@ -88,7 +88,7 @@ export default function CommunitySection() {
                 </p>
                 <p className="text-[12px] text-(--color-text-hint) flex items-center gap-1.5">
                   <span className="relative flex w-2 h-2">
-                    <motion.span
+                    <m.span
                       animate={{ scale: [1, 1.8], opacity: [0.6, 0] }}
                       transition={{ duration: 1.6, repeat: Infinity }}
                       className="absolute inset-0 rounded-full bg-(--color-status-online)"
@@ -111,7 +111,7 @@ export default function CommunitySection() {
             </div>
 
             {/* Messages */}
-            <motion.div
+            <m.div
               variants={staggerContainer(0.25, 0.3)}
               initial="hidden"
               whileInView="visible"
@@ -119,7 +119,7 @@ export default function CommunitySection() {
               className="flex flex-col gap-3 p-5"
             >
               {BUBBLES.map((bubble, i) => (
-                <motion.div
+                <m.div
                   key={i}
                   variants={fadeUp}
                   className={`flex items-end gap-2 max-w-[80%] ${
@@ -138,18 +138,18 @@ export default function CommunitySection() {
                   >
                     {bubble.text}
                   </div>
-                </motion.div>
+                </m.div>
               ))}
 
               {/* Typing indicator */}
-              <motion.div
+              <m.div
                 variants={fadeUp}
                 className="self-start flex items-center gap-2"
               >
                 <Avatar name="Rahul" size="xs" />
                 <div className="flex items-center gap-1 px-4 py-3 rounded-2xl rounded-bl-md bg-(--color-bg-surface) border border-(--color-border-default)">
                   {[0, 1, 2].map((d) => (
-                    <motion.span
+                    <m.span
                       key={d}
                       animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
                       transition={{
@@ -161,10 +161,10 @@ export default function CommunitySection() {
                     />
                   ))}
                 </div>
-              </motion.div>
-            </motion.div>
+              </m.div>
+            </m.div>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

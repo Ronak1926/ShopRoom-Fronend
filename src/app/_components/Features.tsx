@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ComponentType } from "react";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 import AddBusinessOutlinedIcon from "@mui/icons-material/AddBusinessOutlined";
@@ -81,7 +81,7 @@ export default function Features() {
           className="mb-14"
         />
 
-        <motion.div
+        <m.div
           variants={staggerContainer(0.08)}
           initial="hidden"
           whileInView="visible"
@@ -89,7 +89,7 @@ export default function Features() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           {FEATURES.map(({ Icon, title, description }) => (
-            <motion.article
+            <m.article
               key={title}
               variants={fadeUp}
               whileHover={{ y: -6 }}
@@ -109,9 +109,9 @@ export default function Features() {
                   {description}
                 </p>
               </div>
-            </motion.article>
+            </m.article>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );
