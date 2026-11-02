@@ -8,8 +8,8 @@ export type RoomCard = {
   inviteCode: string;
   city: string;
   distanceKm: number | null;
-  likes: number;
-  activeNow: boolean;
+  /** A chat message or notification in the last 24 hours. */
+  activeToday: boolean;
   isJoined: boolean;
 };
 

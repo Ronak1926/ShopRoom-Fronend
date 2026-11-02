@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 import { PLANS, type PlanId } from "../_lib/schemas";
-import { apiClient } from "../../../../utils/apiClient";
-import { inputCls, labelCls } from "./FormHelpers";
+import { apiClient } from "@/utils/apiClient";
+import { payWithRazorpay, type CheckoutOrder } from "@/lib/razorpay";
 
 interface Step4PaymentProps {
   draftId: string;
@@ -15,75 +16,37 @@ interface Step4PaymentProps {
   onBack: () => void;
 }
 
-export function Step4Payment({
-  draftId,
-  userEmail: _userEmail,
-  onSuccess,
-  onError,
-  onBack,
-}: Step4PaymentProps) {
+export function Step4Payment({ draftId, userEmail, onSuccess, onError, onBack }: Step4PaymentProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null);
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const plan = PLANS.find((p) => p.id === selectedPlan);
 
-  function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
-    const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
-    setCardNumber(formatted);
-  }
-
-  function handleExpiryChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.replace(/\D/g, "").slice(0, 4);
-    if (raw.length <= 2) {
-      setExpiry(raw);
-    } else {
-      setExpiry(raw.slice(0, 2) + "/" + raw.slice(2));
-    }
-  }
-
-  function handleExpiryKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    // Allow backspace to delete the slash naturally
-    if (e.key === "Backspace" && expiry.endsWith("/")) {
-      e.preventDefault();
-      setExpiry(expiry.slice(0, -1));
-    }
-  }
-
-  // ── DEV MODE: skip real Razorpay, send mock values to backend ────────────────
   async function handlePay() {
-    if (!selectedPlan) return;
+    if (!plan) return;
     setIsProcessing(true);
     try {
-      const orderRes = await apiClient.post(
-        "/api/shopkeeper/payment/create-order",
-        {
-          draftId,
-          planType: selectedPlan,
-        },
-      );
-      const { orderId } = orderRes.data as { orderId: string };
-
-      const res = await apiClient.post("/api/shopkeeper/payment/verify", {
+      const { data: order } = await apiClient.post<CheckoutOrder>("/api/shopkeeper/payment/create-order", {
         draftId,
-        planType: selectedPlan,
-        razorpayOrderId: orderId,
-        razorpayPaymentId: `pay_dev_${Date.now()}`,
-        razorpaySignature: "dev_signature",
+        planType: plan.id,
       });
 
-      const { token, inviteCode } = res.data as {
-        token: string;
-        inviteCode: string;
-      };
-      onSuccess(token, inviteCode);
+      // Without Razorpay credentials the server hands out a development order: confirm it without a payment window.
+      const payment = order.mock
+        ? { razorpay_order_id: order.orderId, razorpay_payment_id: `pay_dev_${Date.now()}`, razorpay_signature: "dev_signature" }
+        : await payWithRazorpay(order, { description: `ShopRoom ${plan.label} plan`, email: userEmail });
+      if (!payment) return;
+
+      const { data } = await apiClient.post<{ token: string; inviteCode: string }>("/api/shopkeeper/payment/verify", {
+        draftId,
+        planType: plan.id,
+        razorpayOrderId: payment.razorpay_order_id,
+        razorpayPaymentId: payment.razorpay_payment_id,
+        razorpaySignature: payment.razorpay_signature,
+      });
+      onSuccess(data.token, data.inviteCode);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      onError(
-        e?.response?.data?.message ?? "Payment failed. Please try again.",
-      );
+      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      onError(e?.response?.data?.message ?? e?.message ?? "Payment failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -91,138 +54,64 @@ export function Step4Payment({
 
   return (
     <div>
-      <h1 className="text-[22px] font-extrabold text-[var(--color-auth-ink)] tracking-[-0.5px] mb-1">
-        Choose your plan
-      </h1>
-      <p className="text-[13px] text-[var(--color-auth-ink-muted)] mb-5">
+      <h1 className="text-[22px] font-extrabold text-(--color-auth-ink) tracking-[-0.5px] mb-1">Choose your plan</h1>
+      <p className="text-[13px] text-(--color-auth-ink-muted) mb-5">
         Select a subscription and complete your registration.
       </p>
 
-      {/* Plan cards */}
       <div className="flex flex-col gap-3 mb-5">
-        {PLANS.map((plan) => (
-          <button
-            key={plan.id}
-            type="button"
-            onClick={() => setSelectedPlan(plan.id)}
-            className={`relative flex items-center justify-between px-4 py-3.5 rounded-[10px] border-2 text-left transition ${
-              selectedPlan === plan.id
-                ? "border-[var(--color-auth-primary)] bg-[var(--color-auth-primary)]/5"
-                : "border-[var(--color-auth-border)] hover:border-[var(--color-auth-primary)]/50"
-            }`}
-          >
-            {plan.recommended && (
-              <span className="absolute -top-[11px] left-4 bg-[var(--color-auth-primary)] text-white text-[9px] font-bold px-2 py-0.5 rounded-full tracking-[0.5px] uppercase">
-                Popular
-              </span>
-            )}
-            <div>
-              <div
-                className={`font-semibold text-[14px] ${
-                  selectedPlan === plan.id
-                    ? "text-[var(--color-auth-primary)]"
-                    : "text-[var(--color-auth-ink)]"
-                }`}
-              >
-                {plan.label}
+        {PLANS.map((p) => {
+          const selected = selectedPlan === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setSelectedPlan(p.id)}
+              aria-pressed={selected}
+              className={`relative flex items-center justify-between px-4 py-3.5 rounded-[10px] border-2 text-left transition ${
+                selected
+                  ? "border-(--color-auth-primary) bg-(--color-auth-primary)/5"
+                  : "border-(--color-auth-border) hover:border-(--color-auth-primary)/50"
+              }`}
+            >
+              {p.recommended && (
+                <span className="absolute -top-[11px] left-4 bg-(--color-auth-primary) text-white text-[9px] font-bold px-2 py-0.5 rounded-full tracking-[0.5px] uppercase">
+                  Popular
+                </span>
+              )}
+              <div>
+                <div className={`font-semibold text-[14px] ${selected ? "text-(--color-auth-primary)" : "text-(--color-auth-ink)"}`}>
+                  {p.label}
+                </div>
+                <div className="text-[12px] text-(--color-auth-ink-muted)">{p.description}</div>
               </div>
-              <div className="text-[12px] text-[var(--color-auth-ink-muted)]">
-                {plan.description}
+              <div className="text-right shrink-0">
+                <div className={`text-[20px] font-extrabold tracking-[-0.5px] ${selected ? "text-(--color-auth-primary)" : "text-(--color-auth-ink)"}`}>
+                  ₹{p.price}
+                </div>
+                <div className="text-[11px] text-(--color-auth-ink-muted)">one-time</div>
               </div>
-            </div>
-            <div className="text-right shrink-0">
-              <div
-                className={`text-[20px] font-extrabold tracking-[-0.5px] ${
-                  selectedPlan === plan.id
-                    ? "text-[var(--color-auth-primary)]"
-                    : "text-[var(--color-auth-ink)]"
-                }`}
-              >
-                ₹{plan.price}
-              </div>
-              <div className="text-[11px] text-[var(--color-auth-ink-muted)]">
-                one-time
-              </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Dev notice */}
-      <div className="rounded-[10px] border border-(--color-brand-alert-muted) bg-(--color-brand-alert-light) px-4 py-2.5 text-[11px] text-(--color-brand-alert-text) mb-4 flex items-center gap-2">
-        <svg
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4M12 16h.01" />
-        </svg>
-        Dev mode — enter any card details to complete registration
-      </div>
-
-      {/* Dev card form */}
-      <div className="flex flex-col gap-3 mb-5">
-        <div className="flex flex-col gap-1">
-          <label className={labelCls()}>Name on Card</label>
-          <input
-            value={cardName}
-            onChange={(e) => setCardName(e.target.value)}
-            placeholder="e.g. Ronak Patel"
-            className={inputCls(false)}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className={labelCls()}>Card Number</label>
-          <input
-            value={cardNumber}
-            onChange={handleCardNumberChange}
-            placeholder="4111 1111 1111 1111"
-            maxLength={19}
-            inputMode="numeric"
-            className={inputCls(false)}
-          />
-        </div>
-        <div className="flex gap-3">
-          <div className="flex flex-col gap-1 flex-1">
-            <label className={labelCls()}>Expiry</label>
-            <input
-              value={expiry}
-              onChange={handleExpiryChange}
-              onKeyDown={handleExpiryKeyDown}
-              placeholder="MM/YY"
-              maxLength={5}
-              inputMode="numeric"
-              className={inputCls(false)}
-            />
-          </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label className={labelCls()}>CVV</label>
-            <input
-              value={cvv}
-              onChange={(e) => setCvv(e.target.value)}
-              placeholder="123"
-              maxLength={4}
-              className={inputCls(false)}
-            />
-          </div>
-        </div>
-      </div>
+      <p className="mb-4 flex items-center gap-1.5 text-[12px] text-(--color-auth-ink-muted)">
+        <LockOutlinedIcon sx={{ fontSize: 14 }} />
+        Secure payment by Razorpay. Cards, UPI and net banking. We never see your card details.
+      </p>
 
       <button
+        type="button"
         onClick={handlePay}
-        disabled={isProcessing || !selectedPlan}
-        className="w-full h-[48px] rounded-[8px] bg-[var(--color-auth-primary)] text-white font-semibold text-[15px] hover:bg-[var(--color-brand-primary-active)] disabled:opacity-60 transition"
+        disabled={isProcessing || !plan}
+        className="w-full h-12 rounded-lg bg-(--color-auth-primary) text-white font-semibold text-[15px] hover:bg-(--color-brand-primary-active) disabled:opacity-60 transition"
       >
         {isProcessing ? (
           "Processing…"
-        ) : selectedPlan ? (
+        ) : plan ? (
           <span className="inline-flex items-center justify-center gap-1.5">
-            {`Pay ₹${PLANS.find((p) => p.id === selectedPlan)?.price} & Complete Registration`}
+            {`Pay ₹${plan.price} & Complete Registration`}
             <ArrowForwardOutlinedIcon sx={{ fontSize: 16 }} />
           </span>
         ) : (
@@ -233,7 +122,8 @@ export function Step4Payment({
       <button
         type="button"
         onClick={onBack}
-        className="mt-4 w-full text-center text-[13px] text-[var(--color-auth-ink-muted)] hover:underline"
+        disabled={isProcessing}
+        className="mt-4 w-full text-center text-[13px] text-(--color-auth-ink-muted) hover:underline disabled:opacity-60"
       >
         ← Back
       </button>

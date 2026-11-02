@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../dashboard/_components/Sidebar";
+import Sidebar from "@/components/shopkeeper/Sidebar";
 import StudioTopBar from "./_components/StudioTopBar";
 import StudioToolbar from "./_components/StudioToolbar";
 import AddElementsPanel from "./_components/AddElementsPanel";
@@ -11,6 +11,7 @@ import AssetLibraryPanel from "./_components/AssetLibraryPanel";
 import TextPanel from "./_components/TextPanel";
 import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
 import ImagesPanel from "./_components/ImagesPanel";
+import StudioPreviewModal from "./_components/StudioPreviewModal";
 import ButtonsPanel from "./_components/ButtonsPanel";
 import IconsPanel from "./_components/IconsPanel";
 import ShapesPanel from "./_components/ShapesPanel";
@@ -62,6 +63,7 @@ export default function NotificationStudioPage() {
 
   const studio = useNotificationDesign();
   const [activeTool, setActiveTool] = useState("add");
+  const [previewOpen, setPreviewOpen] = useState(false);
   // The right rail is either the normal element inspector or the Background
   // Builder. There's no separate Scene Builder workspace — the Mobile
   // Preview canvas, the Layers panel and the Animation timeline already
@@ -114,11 +116,6 @@ export default function NotificationStudioPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [studio]);
-
-  function handleNavChange(id: string) {
-    if (id === "profile") router.push("/shopkeeper/profile");
-    else if (id !== "notifications") router.push("/shopkeeper/dashboard");
-  }
 
   // Add a new element of the toolbar tile's type, centred on the canvas.
   // The "Badge" tile opens the dedicated Badges & Labels editor instead of
@@ -462,13 +459,13 @@ export default function NotificationStudioPage() {
             />
           );
         }
-        return <AddElementsPanel width={leftWidth} onAdd={handleAdd} />;
+        return <AddElementsPanel width={leftWidth} onAdd={handleAdd} onUploadImage={() => setActiveTool("images")} />;
     }
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav="notifications" onNavChange={handleNavChange} />
+    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+      <Sidebar />
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <StudioTopBar
@@ -480,6 +477,7 @@ export default function NotificationStudioPage() {
           canUndo={studio.canUndo}
           canRedo={studio.canRedo}
           onSave={studio.saveVersionNow}
+          onPreview={() => setPreviewOpen(true)}
         />
 
         <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -559,6 +557,10 @@ export default function NotificationStudioPage() {
           )}
         </div>
       </div>
+
+      {previewOpen && studio.design && (
+        <StudioPreviewModal design={studio.design} name={studio.design.name ?? "Untitled"} onClose={() => setPreviewOpen(false)} />
+      )}
     </div>
   );
 }

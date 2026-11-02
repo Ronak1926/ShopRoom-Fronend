@@ -22,7 +22,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
 import { getSendDesign, reportReceipt, type SendDesignResponse } from "@/features/push/pushApi";
-import { parseTapHash } from "@/features/push/tapLink";
+import { parseTapHash, REPLAY_PUSH_EVENT, type TapReference } from "@/features/push/tapLink";
 import { getCookie } from "@/utils/cookieUtils";
 import { EDITOR_CONTEXT } from "@/features/notifications/resolver";
 import { defaultRoute, resolveActionRoute, type ActionRoute } from "@/features/notifications/actionRouter";
@@ -98,6 +98,21 @@ export default function PushNotificationHost() {
     return () => unsubscribe?.();
   }, []);
 
+  /** Plays a past push's animated design. `reportOpen` is for taps that the service worker did not already record. */
+  const replay = useCallback((tapped: TapReference, reportOpen: boolean) => {
+    const sessionToken = getCookie("token");
+    if (!sessionToken) return;
+    void loadDesignPreview();
+    getSendDesign(tapped.sendId, sessionToken)
+      .then((result) => {
+        setIncoming(toIncoming(result, tapped.receiptToken));
+        if (reportOpen) reportReceipt(tapped.receiptToken, "OPENED");
+      })
+      .catch(() => {
+        // A push the customer can no longer see (left the room, deleted) — nothing to show.
+      });
+  }, []);
+
   // Tapped from the OS notification tray: replay that push's animated design. The
   // service worker has already recorded OPENED, so it is not reported again here.
   useEffect(() => {
@@ -110,20 +125,22 @@ export default function PushNotificationHost() {
       // to the new URL for calls like this one. Passing the existing history state back
       // (Next's own object) skips that sync, and the router later writes the fragment back.
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
-      const sessionToken = getCookie("token");
-      if (!sessionToken) return;
-      void loadDesignPreview();
-      getSendDesign(tapped.sendId, sessionToken)
-        .then((result) => setIncoming(toIncoming(result, tapped.receiptToken)))
-        .catch(() => {
-          // A push the customer can no longer see (left the room, deleted) — nothing to show.
-        });
+      replay(tapped, false);
     }
     replayTappedPush();
     // A tap while this tab is already on the same room changes only the fragment.
     window.addEventListener("hashchange", replayTappedPush);
     return () => window.removeEventListener("hashchange", replayTappedPush);
-  }, []);
+  }, [replay]);
+
+  // Opened from inside the app (the notification bell): the open still has to be recorded.
+  useEffect(() => {
+    function onReplayRequest(e: Event) {
+      replay((e as CustomEvent<TapReference>).detail, true);
+    }
+    window.addEventListener(REPLAY_PUSH_EVENT, onReplayRequest);
+    return () => window.removeEventListener(REPLAY_PUSH_EVENT, onReplayRequest);
+  }, [replay]);
 
   useEffect(() => {
     if (!incoming) return;

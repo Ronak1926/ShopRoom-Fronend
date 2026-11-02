@@ -2,38 +2,37 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import ChartTooltip from "@/components/charts/ChartTooltip";
-import SampleBadge from "@/components/ui/SampleBadge";
-import { rate, type HistoryTotals } from "../_data/sampleHistory";
+import { rate, type HistoryTotals } from "../_utils/historyRows";
 
 const SLICE_COLORS = [
-  "var(--color-success)",
   "var(--color-brand-primary)",
   "var(--color-brand-alert-muted)",
+  "var(--color-success)",
   "var(--color-danger)",
 ];
 
 const DOT_CLASSES = [
-  "bg-(--color-success)",
   "bg-(--color-brand-primary)",
   "bg-(--color-brand-alert-muted)",
+  "bg-(--color-success)",
   "bg-(--color-danger)",
 ];
 
 export default function DeliverySummaryCard({ totals }: { totals: HistoryTotals }) {
-  const failedRecipients = Math.max(0, totals.failed);
+  // Every device that was sent to ends up in exactly one slice: clicked is part of opened,
+  // which is part of delivered.
   const slices = [
-    { name: "Delivered", value: totals.delivered, percent: rate(totals.delivered, totals.delivered) },
-    { name: "Opened", value: totals.opened, percent: rate(totals.opened, totals.delivered) },
-    { name: "Clicked", value: totals.clicked, percent: rate(totals.clicked, totals.delivered) },
-    { name: "Failed sends", value: failedRecipients, percent: rate(totals.failed, totals.sent) },
-  ];
+    { name: "Clicked", value: totals.clicked },
+    { name: "Opened", value: Math.max(0, totals.opened - totals.clicked) },
+    { name: "Delivered", value: Math.max(0, totals.delivered - totals.opened) },
+    { name: "Not delivered", value: Math.max(0, totals.sent - totals.delivered) },
+  ].map((slice) => ({ ...slice, percent: rate(slice.value, totals.sent) }));
   const hasData = slices.some((slice) => slice.value > 0);
 
   return (
     <section className="h-full rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) p-5">
       <div className="flex items-center gap-2">
         <h2 className="text-[13.5px] font-bold text-(--color-text-primary)">Delivery summary</h2>
-        <SampleBadge />
       </div>
 
       <div className="relative mt-4">
@@ -64,9 +63,9 @@ export default function DeliverySummaryCard({ totals }: { totals: HistoryTotals 
 
         <span className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-[18px] font-bold leading-none text-(--color-text-primary) tabular-nums">
-            {totals.sent.toLocaleString()}
+            {totals.notifications.toLocaleString()}
           </span>
-          <span className="text-[10.5px] text-(--color-text-hint) mt-1">Sends</span>
+          <span className="text-[10.5px] text-(--color-text-hint) mt-1">Notifications</span>
         </span>
       </div>
 

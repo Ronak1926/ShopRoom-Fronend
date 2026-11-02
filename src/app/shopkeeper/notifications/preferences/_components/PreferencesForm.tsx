@@ -53,11 +53,12 @@ const opts = <T extends string | number>(
 /** Long enough that dragging the radius slider writes once, not fifty times. */
 const AUTOSAVE_DELAY_MS = 400;
 
-type SaveStatus = "idle" | "saving" | "saved" | "invalid";
+type SaveStatus = "idle" | "saving" | "saved" | "invalid" | "failed";
 
 export default function PreferencesForm() {
   const { values, loaded, save } = useNotificationPreferences();
   const [saved, setSaved] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const { control, reset, formState } = useForm<NotificationPreferences>({
     resolver: zodResolver(PreferencesSchema),
@@ -89,8 +90,13 @@ export default function PreferencesForm() {
       const parsed = PreferencesSchema.safeParse(edited);
       // Invalid input stays on screen unsaved; the row shows what is wrong.
       if (!parsed.success) return;
-      save(parsed.data);
-      setSaved(true);
+      save(parsed.data).then(
+        () => {
+          setFailed(false);
+          setSaved(true);
+        },
+        () => setFailed(true),
+      );
     }, AUTOSAVE_DELAY_MS);
     return () => clearTimeout(timer);
   }, [edited, dirty, save]);
@@ -101,18 +107,20 @@ export default function PreferencesForm() {
   const channelError = formState.errors.channels?.message;
   const status: SaveStatus = Object.keys(formState.errors).length
     ? "invalid"
-    : dirty
-      ? "saving"
-      : saved
-        ? "saved"
-        : "idle";
+    : failed
+      ? "failed"
+      : dirty
+        ? "saving"
+        : saved
+          ? "saved"
+          : "idle";
 
   return (
     <NotificationsShell
       title="Preferences"
       description="Set your default preferences for notifications."
       icon={TuneOutlinedIcon}
-      // headerAside={<SaveStatus status={status} />}
+      headerAside={<SaveStatus status={status} />}
     >
       {!loaded ? (
         <PreferencesSkeleton />
@@ -569,8 +577,9 @@ export default function PreferencesForm() {
               These preferences apply across the Notification Studio and your
               notification workflows. You can always change them later.
               <span className="block text-(--color-text-hint) mt-0.5">
-                Saved on this device — there is no preferences table on the
-                server yet, so they will not follow you to another browser.
+                Saved to your account, so they follow you to any browser. Quiet
+                hours, weekend sending and expiry are applied to every scheduled
+                notification; sending right now is never blocked.
               </span>
             </p>
           </div>
@@ -591,6 +600,14 @@ function SaveStatus({ status }: { status: SaveStatus }) {
       >
         <ErrorOutlineOutlinedIcon sx={{ fontSize: 15 }} />
         Not saved — check the highlighted setting
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span className={`${pill} bg-(--color-danger-bg) text-(--color-danger) font-semibold`}>
+        <ErrorOutlineOutlinedIcon sx={{ fontSize: 15 }} />
+        Could not save — check your connection
       </span>
     );
   }

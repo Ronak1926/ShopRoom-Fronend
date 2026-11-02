@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
-import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import Avatar from "@/components/ui/Avatar";
 import { formatCount, type TrendingItem } from "../types";
 
@@ -18,15 +17,17 @@ type DiscoverSidebarProps = {
   customerLat: number | null;
   customerLng: number | null;
   trending: TrendingItem[];
+  onViewAll: () => void;
 };
 
 export default function DiscoverSidebar({
   customerLat,
   customerLng,
   trending,
+  onViewAll,
 }: DiscoverSidebarProps) {
   return (
-    <aside className="w-72 min-w-72 bg-(--color-bg-page) border-l border-(--color-border-default) flex flex-col gap-4 overflow-y-auto p-4">
+    <aside className="hidden xl:flex w-72 min-w-72 bg-(--color-bg-page) border-l border-(--color-border-default) flex-col gap-4 overflow-y-auto p-4">
       {/* Map card */}
       <div className="rounded-2xl overflow-hidden border border-(--color-border-default) bg-(--color-bg-surface) shadow-(--shadow-xs) shrink-0">
         <MiniMap customerLat={customerLat} customerLng={customerLng} />
@@ -37,7 +38,7 @@ export default function DiscoverSidebar({
         {/* Section header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
           <span className="text-[13px] font-bold text-(--color-text-primary) tracking-tight">
-            Most Popular This Week
+            Most Popular
           </span>
           <StarOutlinedIcon sx={{ fontSize: 16, color: "var(--color-brand-alert-hover)" }} />
         </div>
@@ -68,16 +69,17 @@ export default function DiscoverSidebar({
                     {formatCount(item.membersCount)} members
                   </div>
                 </div>
-                <ChevronRightOutlinedIcon
-                  sx={{ fontSize: 14, color: "var(--color-text-hint)", flexShrink: 0 }}
-                />
               </li>
             ))}
           </ul>
 
           <div className="mt-3 px-1">
-            <button className="w-full h-9 border border-(--color-border-default) rounded-xl text-[13px] font-semibold text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer bg-transparent">
-              View All Trending
+            <button
+              type="button"
+              onClick={onViewAll}
+              className="w-full h-9 border border-(--color-border-default) rounded-xl text-[13px] font-semibold text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer bg-transparent"
+            >
+              See all popular rooms
             </button>
           </div>
         </div>

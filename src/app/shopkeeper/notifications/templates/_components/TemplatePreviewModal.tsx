@@ -78,7 +78,7 @@ export default function TemplatePreviewModal({
             title and body around it.
           </p>
           <p className="mt-1 text-[10.5px] text-(--color-text-hint)">
-            {design.canvas.width} × {design.canvas.height} · {design.elements.length} layers
+            {design.canvas ? `${design.canvas.width} × ${design.canvas.height}` : "Unknown size"} · {design.elements?.length ?? 0} layers
           </p>
         </div>
 

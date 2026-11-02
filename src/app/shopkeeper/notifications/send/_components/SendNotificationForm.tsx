@@ -11,6 +11,7 @@ import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import NotificationsShell from "../../_components/NotificationsShell";
 import { sendNotification } from "@/features/notifications/api";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
+import { usePlanStatus } from "@/features/billing/usePlanStatus";
 import ChooseNotificationStep from "./ChooseNotificationStep";
 import AudienceStep from "./AudienceStep";
 import MessageStep from "./MessageStep";
@@ -47,6 +48,7 @@ function sendErrorMessage(err: unknown): string {
 
 export default function SendNotificationForm() {
   const router = useRouter();
+  const planExpired = usePlanStatus().billing?.active === false;
   const sources = useSendableNotifications();
   const { shop, loading: shopLoading } = useShopAudience();
   const preferences = useNotificationPreferences();
@@ -193,7 +195,8 @@ export default function SendNotificationForm() {
               </button>
               <button
                 type="submit"
-                disabled={sending}
+                disabled={sending || planExpired}
+                title={planExpired ? "Renew your plan to send notifications" : undefined}
                 className="flex items-center gap-2 h-10 px-5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SendOutlinedIcon sx={{ fontSize: 16 }} />

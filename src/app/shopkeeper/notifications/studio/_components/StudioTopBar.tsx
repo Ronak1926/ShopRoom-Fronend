@@ -19,6 +19,7 @@ interface Props {
   canUndo: boolean;
   canRedo: boolean;
   onSave: () => void;
+  onPreview: () => void;
 }
 
 export default function StudioTopBar({
@@ -30,6 +31,7 @@ export default function StudioTopBar({
   canUndo,
   canRedo,
   onSave,
+  onPreview,
 }: Props) {
   return (
     <header className="h-14 shrink-0 flex items-center gap-4 px-5 bg-(--color-bg-surface) border-b border-(--color-border-default)">
@@ -75,6 +77,7 @@ export default function StudioTopBar({
 
         <button
           type="button"
+          onClick={onPreview}
           className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-(--color-border-default) text-[13px] font-medium text-(--color-text-primary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer"
         >
           <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />

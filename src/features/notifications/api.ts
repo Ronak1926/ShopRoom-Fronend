@@ -398,6 +398,7 @@ export async function cancelSchedule(id: string): Promise<void> {
 
 export interface SendHistoryItem {
   id: string;
+  designId: string;
   createdAt: string;
   sentAt: string | null;
   status: "PENDING" | "SENT" | "FAILED";
@@ -422,9 +423,18 @@ export interface SendHistoryPage {
   limit: number;
 }
 
-export async function listSends(
-  params: { page?: number; limit?: number } = {},
-): Promise<SendHistoryPage> {
+export interface SendHistoryParams {
+  page?: number;
+  limit?: number;
+  outcome?: "all" | "delivered" | "opened" | "clicked" | "failed";
+  sort?: "latest" | "oldest" | "opens" | "clicks";
+  /** Matches the message or the design's name. */
+  q?: string;
+  /** Only sends from the last N days. */
+  days?: number;
+}
+
+export async function listSends(params: SendHistoryParams = {}): Promise<SendHistoryPage> {
   const { data } = await apiClient.get<Envelope<SendHistoryPage>>("/api/notifications/sends", {
     ...authConfig(),
     params,

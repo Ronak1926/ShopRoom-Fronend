@@ -12,6 +12,7 @@ import {
 import { firebaseAuth, googleProvider } from "../../lib/firebase";
 import { googleAuthCustomer } from "../../features/auth/authSlice";
 import { useAppDispatch } from "../../hooks/redux";
+import { nextAfterAuth } from "../../lib/safeRedirect";
 
 export function ContinueWithGoogle() {
   const dispatch = useAppDispatch();
@@ -30,7 +31,7 @@ export function ContinueWithGoogle() {
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (cancelled) return;
         if (googleAuthCustomer.fulfilled.match(action)) {
-          router.push("/customer/home");
+          router.push(nextAfterAuth());
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
           setLoading(false);
@@ -57,7 +58,7 @@ export function ContinueWithGoogle() {
         const idToken = await result.user.getIdToken();
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (googleAuthCustomer.fulfilled.match(action)) {
-          router.push("/customer/home");
+          router.push(nextAfterAuth());
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
           setLoading(false);

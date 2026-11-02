@@ -4,12 +4,11 @@ import { useRouter } from "next/navigation";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import SampleBadge from "@/components/ui/SampleBadge";
-import type { SendRow } from "../_data/sampleMetrics";
+import type { SendRow } from "../_data/metrics";
 
 const STATUS_STYLE: Record<string, string> = {
   Delivered: "bg-(--color-success-light) text-(--color-success-text)",
-  "Partially Opened": "bg-(--color-brand-alert-light) text-(--color-brand-alert-text)",
+  Failed: "bg-(--color-danger-bg) text-(--color-danger)",
   Sending: "bg-(--color-brand-primary-light) text-(--color-brand-primary)",
 };
 
@@ -30,7 +29,6 @@ export default function RecentActivityCard({ sends }: { sends: SendRow[] }) {
       <header className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-[14px] font-bold text-(--color-text-primary)">Recent Activity</h2>
-          <SampleBadge />
         </div>
         <button
           type="button"
@@ -41,6 +39,9 @@ export default function RecentActivityCard({ sends }: { sends: SendRow[] }) {
         </button>
       </header>
 
+      {sends.length === 0 && (
+        <p className="mt-4 text-[12.5px] text-(--color-text-secondary)">Nothing sent yet.</p>
+      )}
       <ul className="mt-1 flex-1">
         {sends.map((send) => (
           <li

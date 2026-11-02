@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import ClearIcon from "@mui/icons-material/Clear";
 import Avatar from "@/components/ui/Avatar";
+import NotificationBell from "@/components/customer/NotificationBell";
 
 type DiscoverTopBarProps = {
   searchQuery: string;
@@ -42,7 +42,7 @@ export default function DiscoverTopBar({
   }, []);
 
   return (
-    <div className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) px-5 flex items-center gap-3 shrink-0">
+    <div className="h-16 bg-(--color-bg-surface) border-b border-(--color-border-default) px-3 sm:px-5 flex items-center gap-2 sm:gap-3 shrink-0">
       {/* Search pill */}
       <div className="flex items-center h-10 rounded-xl bg-(--color-bg-page) border border-(--color-border-default) px-3 gap-2 flex-1 max-w-xl transition-colors focus-within:border-(--color-brand-primary)">
         <SearchOutlinedIcon
@@ -122,12 +122,9 @@ export default function DiscoverTopBar({
 
       {/* Right icons */}
       <div className="ml-auto flex items-center gap-2">
-        <button className="relative w-9 h-9 flex items-center justify-center cursor-pointer border-0 bg-transparent rounded-full hover:bg-(--color-bg-page) transition-colors">
-          <NotificationsNoneOutlinedIcon
-            sx={{ fontSize: 22, color: "var(--color-text-secondary)" }}
-          />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-(--color-danger-dot) ring-2 ring-(--color-bg-surface)" />
-        </button>
+        <span className="hidden lg:block">
+          <NotificationBell />
+        </span>
 
         <button
           type="button"

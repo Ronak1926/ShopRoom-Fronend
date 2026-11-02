@@ -102,6 +102,12 @@ export default function ShopkeeperForm() {
         )}
       </div>
 
+      <div className="-mt-1 text-right">
+        <Link href="/forgot-password?role=shopkeeper" className="text-[12px] font-bold text-(--color-auth-primary)">
+          Forgot password?
+        </Link>
+      </div>
+
       <button
         type="submit"
         disabled={!isValid || isLoading}

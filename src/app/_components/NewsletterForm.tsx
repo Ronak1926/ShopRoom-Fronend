@@ -1,11 +1,14 @@
 "use client";
 
 import "@/lib/zodJitless";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import { apiMessage } from "@/features/account/passwordApi";
+import { apiClient } from "@/utils/apiClient";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -14,16 +17,22 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function NewsletterForm() {
+  const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors, isSubmitSuccessful, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  function onSubmit() {
-    // No newsletter backend yet — acknowledge locally and clear the field.
-    reset({ email: "" });
+  async function onSubmit({ email }: FormValues) {
+    setServerError(null);
+    try {
+      await apiClient.post("/api/public/newsletter", { email });
+      reset({ email: "" });
+    } catch (err) {
+      setServerError(apiMessage(err, "Could not subscribe right now. Please try again."));
+    }
   }
 
   if (isSubmitSuccessful) {
@@ -51,15 +60,16 @@ export default function NewsletterForm() {
         />
         <button
           type="submit"
+          disabled={isSubmitting}
           aria-label="Subscribe"
           className="flex items-center justify-center w-11 h-11 shrink-0 rounded-full bg-(--color-brand-primary) text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors duration-150 cursor-pointer"
         >
           <ArrowForwardRoundedIcon sx={{ fontSize: 20 }} />
         </button>
       </div>
-      {errors.email && (
-        <span className="text-[12px] text-(--color-danger) px-4">
-          {errors.email.message}
+      {(errors.email || serverError) && (
+        <span role="alert" className="text-[12px] text-(--color-danger) px-4">
+          {errors.email?.message ?? serverError}
         </span>
       )}
     </form>

@@ -14,6 +14,7 @@ import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { loginCustomer } from "@/features/auth/authSlice";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
+import { nextAfterAuth, withNext } from "@/lib/safeRedirect";
 
 export default function CustomerForm() {
   const dispatch = useAppDispatch();
@@ -37,7 +38,7 @@ export default function CustomerForm() {
       loginCustomer({ email: values.email, password: values.password }),
     );
     if (loginCustomer.fulfilled.match(action)) {
-      router.replace("/customer/home");
+      router.replace(nextAfterAuth());
     } else {
       setError("password", { message: "Incorrect email or password" });
     }
@@ -112,6 +113,12 @@ export default function CustomerForm() {
           )}
         </div>
 
+        <div className="-mt-1 text-right">
+          <Link href="/forgot-password" className="text-[12px] font-bold text-(--color-auth-primary)">
+            Forgot password?
+          </Link>
+        </div>
+
         <button
           type="submit"
           disabled={!isValid || isLoading}
@@ -122,7 +129,7 @@ export default function CustomerForm() {
 
         <p className="text-center text-[13px] text-(--color-auth-ink-muted)">
           Don&apos;t have an account?{" "}
-          <Link href="/customer/signup" className="font-bold text-(--color-auth-primary)">
+          <Link href={withNext("/customer/signup")} className="font-bold text-(--color-auth-primary)">
             Sign up
           </Link>
         </p>

@@ -67,3 +67,25 @@ export function reportReceipt(receiptToken: string | undefined, event: ReceiptEv
   if (!receiptToken) return;
   apiClient.post("/api/notifications/receipts", { token: receiptToken, event }).catch(() => {});
 }
+
+export interface FeedItem {
+  sendId: string;
+  roomId: string;
+  shopName: string;
+  message: string | null;
+  sentAt: string;
+  read: boolean;
+  /** Presented back when the banner is replayed, so the open is counted. */
+  receiptToken: string;
+}
+
+export interface Feed {
+  items: FeedItem[];
+  unread: number;
+}
+
+/** The customer's recent notifications, newest first. */
+export async function getFeed(authToken?: string): Promise<Feed> {
+  const { data } = await apiClient.get<Envelope<Feed>>("/api/notifications/feed", bearer(authToken));
+  return data.data;
+}

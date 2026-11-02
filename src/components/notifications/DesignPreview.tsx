@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import NotificationRenderer from "@/components/notifications/NotificationRenderer";
+import PreviewBoundary, { PreviewUnavailable } from "@/components/notifications/PreviewBoundary";
 import { EDITOR_CONTEXT } from "@/features/notifications/resolver";
 import type {
   ElementAction,
@@ -48,20 +49,23 @@ export default function DesignPreview({
   }, []);
 
   const scale = useMemo(
-    () => (width && design.canvas.width ? width / design.canvas.width : 0),
-    [width, design.canvas.width],
+    () => (width && design.canvas?.width ? width / design.canvas.width : 0),
+    [width, design.canvas?.width],
   );
 
   return (
     <div ref={ref} className="relative block w-full overflow-hidden aspect-2/1">
+      {!design.canvas && <PreviewUnavailable />}
       {scale > 0 && (
-        <NotificationRenderer
-          design={design}
-          context={context}
-          scale={scale}
-          isPlaying={isPlaying}
-          onAction={onAction}
-        />
+        <PreviewBoundary resetKey={design}>
+          <NotificationRenderer
+            design={design}
+            context={context}
+            scale={scale}
+            isPlaying={isPlaying}
+            onAction={onAction}
+          />
+        </PreviewBoundary>
       )}
     </div>
   );

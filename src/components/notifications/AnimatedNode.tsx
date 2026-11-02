@@ -23,7 +23,7 @@
  * case here — that catalog and these maps are asserted to agree.
  */
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import {
   motion,
@@ -301,7 +301,10 @@ export default function AnimatedNode({ animation, isPlaying, contentStyle, child
   const controls = useAnimationControls();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  // A layout effect, so the pre-entry frame is applied before the browser paints. In a
+  // normal effect the node showed for one frame at rest (fully visible) before jumping
+  // to its starting frame, which read as a flash on every element with an entrance.
+  useLayoutEffect(() => {
     if (timer.current) clearTimeout(timer.current);
 
     // Resolved inside the effect, not above it: `directed()` returns a fresh
@@ -350,6 +353,12 @@ export default function AnimatedNode({ animation, isPlaying, contentStyle, child
 
   const entered = animation?.entry ? entrySpec(animation.entry) : undefined;
   const exited = animation?.exit ? exitSpec(animation.exit) : undefined;
+  // Mounted while playing, the node must not even be painted at rest: it starts on the
+  // frame its entrance travels from. (`initial` is only read on mount.)
+  const startFrame: Frame =
+    isPlaying && entered
+      ? { ...REST, ...entered.rest, ...(entered.keyframes ? firstFrame(entered.keyframes) : entered.frame) }
+      : REST;
   const emphasisStep = isPlaying ? animation?.attention : undefined;
   const emphasis = emphasisStep ? EMPHASIS[emphasisStep.type] : undefined;
   // Emphasis starts once entry has finished (matching how the Timeline draws
@@ -389,7 +398,7 @@ export default function AnimatedNode({ animation, isPlaying, contentStyle, child
   };
 
   return (
-    <motion.div style={outerStyle} initial={REST} animate={controls}>
+    <motion.div style={outerStyle} initial={startFrame} animate={controls}>
       {emphasis && emphasisStep ? (
         <motion.div
           style={innerStyle}

@@ -10,7 +10,7 @@ import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import Sidebar from "@/components/customer/Sidebar";
 import Avatar from "@/components/ui/Avatar";
 import ProfileInfoCard from "./_components/ProfileInfoCard";
-import PushNotificationsCard from "./_components/PushNotificationsCard";
+import PushNotificationsCard from "@/components/customer/PushNotificationsCard";
 import {
   customerProfileSchema,
   type CustomerProfileFormValues,
@@ -77,11 +77,6 @@ export default function CustomerProfilePage() {
       .finally(() => setInitialLoading(false));
   }, [router, reset]);
 
-  function handleNavChange(id: string) {
-    if (id === "discover") router.push("/customer/home");
-    else if (id === "myrooms") router.push("/customer/myrooms");
-  }
-
   async function onSubmit(values: CustomerProfileFormValues) {
     setSaving(true);
     try {
@@ -100,8 +95,8 @@ export default function CustomerProfilePage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav="profile" onNavChange={handleNavChange} />
+    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+      <Sidebar />
 
       <div className="flex-1 overflow-y-auto p-6">
         {initialLoading ? (

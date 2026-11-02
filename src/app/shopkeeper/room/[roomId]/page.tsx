@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Sidebar from "../../dashboard/_components/Sidebar";
+import Sidebar from "@/components/shopkeeper/Sidebar";
 import MyRoom from "./_components/MyRoom";
 import { apiClient, setAuthToken } from "../../../../utils/apiClient";
 import { getCookie } from "../../../../utils/cookieUtils";
@@ -30,13 +30,8 @@ export default function RoomPage() {
   }, [params.roomId, router]);
 
   return (
-    <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
-      <Sidebar
-        activeNav="myroom"
-        onNavChange={(id) => {
-          if (id !== "myroom") router.push("/shopkeeper/dashboard");
-        }}
-      />
+    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+      <Sidebar />
 
       {loading ? (
         <div className="flex-1 flex items-center justify-center text-sm text-(--color-text-hint)">

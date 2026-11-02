@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import ChatHeader from "@/components/chat/ChatHeader";
 import RoomInfoPanel from "@/components/chat/RoomInfoPanel";
@@ -69,10 +70,13 @@ export default function MyRoom({ room }: MyRoomProps) {
             replyingTo={replyingTo}
             onCancelReply={() => setReplyingTo(null)}
             extraAction={
-              <button className="h-9 px-4 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)">
+              <Link
+                href="/shopkeeper/notifications/send"
+                className="h-9 px-4 rounded-xl text-[13px] font-bold text-white transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)"
+              >
                 <BoltOutlinedIcon sx={{ fontSize: 16 }} />
                 Send Alert
-              </button>
+              </Link>
             }
           />
         </>

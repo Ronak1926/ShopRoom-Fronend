@@ -197,7 +197,12 @@ export default function MiniMap({
     if (mapRef.current) return; // already initialised
     if (!mapDivRef.current) return;
 
+    // Leaflet loads asynchronously. If this effect is cleaned up (or runs twice, as in development)
+    // before it arrives, the stale callback must not build a second map on the same element.
+    let cancelled = false;
+
     import("leaflet").then((L) => {
+      if (cancelled || mapRef.current || !mapDivRef.current) return;
       // Inject Leaflet CSS
       if (!document.getElementById("leaflet-css")) {
         const link = document.createElement("link");
@@ -297,6 +302,7 @@ export default function MiniMap({
     });
 
     return () => {
+      cancelled = true;
       if (debounceRef.current) clearTimeout(debounceRef.current);
       mapRef.current?.remove();
       mapRef.current = null;

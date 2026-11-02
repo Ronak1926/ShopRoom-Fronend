@@ -29,6 +29,13 @@ export function buildTapHash(sendId: string, receiptToken?: string): string {
   return `${PREFIX}${sendId}${token ? `:${token}` : ""}`;
 }
 
+/** Fired on `window` by in-app surfaces (the bell) to replay a past notification's banner. */
+export const REPLAY_PUSH_EVENT = "shoproom:replay-push";
+
+export function requestReplay(reference: TapReference): void {
+  window.dispatchEvent(new CustomEvent<TapReference>(REPLAY_PUSH_EVENT, { detail: reference }));
+}
+
 /** Reads a tap reference from `location.hash`; anything malformed is ignored. */
 export function parseTapHash(hash: string): TapReference | null {
   if (!hash.startsWith(PREFIX)) return null;

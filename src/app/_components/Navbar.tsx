@@ -11,11 +11,11 @@ import { slideDown, SPRING } from "./motion";
 import AnimatedButton from "./ui/AnimatedButton";
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "How it Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Success Stories", href: "#testimonials" },
-  { label: "Resources", href: "#faq" },
+  { label: "Features", href: "/#features" },
+  { label: "How it Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "Success Stories", href: "/#testimonials" },
+  { label: "Help", href: "/help" },
 ] as const;
 
 type LoggedInState = { href: string } | null;

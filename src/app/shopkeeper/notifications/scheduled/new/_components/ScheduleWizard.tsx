@@ -12,6 +12,7 @@ import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import NotificationsShell from "../../../_components/NotificationsShell";
 import { createSchedule } from "@/features/notifications/api";
+import { usePlanStatus } from "@/features/billing/usePlanStatus";
 import { TYPE_LABELS, timeZoneLabel } from "@/features/notifications/preferences";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import {
@@ -80,6 +81,7 @@ export default function ScheduleWizard() {
   const sources = useSendableNotifications();
   const { shop } = useShopAudience();
   const preferences = useNotificationPreferences();
+  const planExpired = usePlanStatus().billing?.active === false;
 
   const [openStep, setOpenStep] = useState<WizardStep>("notification");
   const [completed, setCompleted] = useState<WizardStep[]>([]);
@@ -321,7 +323,8 @@ export default function ScheduleWizard() {
                 {step.id === "review" ? (
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={saving || planExpired}
+                    title={planExpired ? "Renew your plan to schedule notifications" : undefined}
                     className="flex items-center gap-2 h-10 px-5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} />

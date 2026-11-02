@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +10,7 @@ import { ShopkeeperLeftPanel } from "@/components/ui/ShopkeeperLeftPanel";
 import { useAppDispatch } from "@/hooks/redux";
 import { hydrateToken } from "@/features/auth/authSlice";
 import { getCookie } from "@/utils/cookieUtils";
+import { nextAfterAuth } from "@/lib/safeRedirect";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
 import CustomerForm from "./CustomerForm";
 import ShopkeeperForm from "./ShopkeeperForm";
@@ -29,7 +31,7 @@ export default function LoginClient({ initialTab }: Props) {
     const shopkeeperToken = getCookie("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
-      router.replace("/customer/home");
+      router.replace(nextAfterAuth());
     } else if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
     } else {
@@ -95,8 +97,8 @@ export default function LoginClient({ initialTab }: Props) {
 
           <div className="mt-8 flex items-center justify-center gap-8 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
             <span>© 2026 SHOPROOM</span>
-            <span>PRIVACY POLICY</span>
-            <span>HELP CENTER</span>
+            <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
+            <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
           </div>
         </div>
       </div>

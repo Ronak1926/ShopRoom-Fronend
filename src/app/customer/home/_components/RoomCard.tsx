@@ -1,13 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
-import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkOutlined";
 import Avatar from "@/components/ui/Avatar";
 import { cloudinaryLoader } from "@/lib/cloudinaryLoader";
 import StatusDot from "@/components/ui/StatusDot";
@@ -20,8 +16,6 @@ type RoomCardProps = {
 };
 
 export default function RoomCard({ room, joining, onJoin }: RoomCardProps) {
-  const [saved, setSaved] = useState(false);
-
   return (
     <div className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden cursor-pointer hover:shadow-(--shadow-lg) hover:-translate-y-0.5 transition-all duration-200 group">
       {/* Image zone */}
@@ -57,21 +51,6 @@ export default function RoomCard({ room, joining, onJoin }: RoomCardProps) {
           </div>
         )}
 
-        {/* Bookmark toggle */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setSaved((s) => !s);
-          }}
-          aria-label={saved ? "Remove bookmark" : "Bookmark room"}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-(--shadow-xs) border-0 cursor-pointer transition-colors"
-        >
-          {saved ? (
-            <BookmarkOutlinedIcon sx={{ fontSize: 17, color: "var(--color-brand-primary)" }} />
-          ) : (
-            <BookmarkBorderOutlinedIcon sx={{ fontSize: 17, color: "var(--color-text-secondary)" }} />
-          )}
-        </button>
       </div>
 
       {/* Card body */}
@@ -80,13 +59,13 @@ export default function RoomCard({ room, joining, onJoin }: RoomCardProps) {
           {room.shopName}
         </div>
         <div className="text-[11px] uppercase tracking-widest text-(--color-text-hint) font-semibold mt-0.5">
-          {room.category}
+          {room.category} · {room.city}
         </div>
         <div className="flex items-center gap-3 mt-2.5">
           <div className="flex items-center gap-1.5">
-            <StatusDot status={room.activeNow ? "online" : "offline"} size={7} />
+            <StatusDot status={room.activeToday ? "online" : "offline"} size={7} />
             <span className="text-xs text-(--color-text-secondary)">
-              {room.activeNow ? "Active now" : "Inactive"}
+              {room.activeToday ? "Active today" : "Quiet lately"}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -96,17 +75,11 @@ export default function RoomCard({ room, joining, onJoin }: RoomCardProps) {
             </span>
           </div>
         </div>
-        <div className="flex items-center justify-between mt-3.5 pt-3.5 border-t border-(--color-border-default)">
-          <div className="flex items-center gap-1">
-            <FavoriteBorderIcon sx={{ fontSize: 15, color: "var(--color-danger)" }} />
-            <span className="text-[13px] text-(--color-text-secondary)">
-              {formatCount(room.likes)}
-            </span>
-          </div>
+        <div className="flex items-center justify-end mt-3.5 pt-3.5 border-t border-(--color-border-default)">
           {room.isJoined ? (
             <button
               onClick={() => onJoin(room)}
-              className="h-9 px-4 flex items-center gap-1.5 bg-(--color-success-light) text-(--color-success-text) text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors hover:bg-(--color-badge-success-bg)"
+              className="h-9 px-4 flex items-center gap-1.5 whitespace-nowrap bg-(--color-success-light) text-(--color-success-text) text-[13px] font-semibold rounded-xl border-0 cursor-pointer transition-colors hover:bg-(--color-badge-success-bg)"
             >
               <CheckCircleOutlinedIcon sx={{ fontSize: 15 }} />
               Already in Room

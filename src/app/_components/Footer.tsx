@@ -15,28 +15,23 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
-      { label: "How it Works", href: "#how-it-works" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Updates", href: "#" },
+      { label: "Features", href: "/#features" },
+      { label: "How it Works", href: "/#how-it-works" },
+      { label: "Pricing", href: "/#pricing" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Blog", href: "#" },
-      { label: "Help Center", href: "#" },
-      { label: "Guides", href: "#" },
+      { label: "Help Center", href: "/help" },
       { label: "Contact Us", href: "/contact" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Success Stories", href: "#testimonials" },
-      { label: "Community", href: "#" },
+      { label: "About Us", href: "/about" },
+      { label: "Success Stories", href: "/#testimonials" },
     ],
   },
   {
@@ -45,18 +40,20 @@ const COLUMNS = [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Cookie Policy", href: "/cookies" },
-      { label: "Security", href: "#" },
+      { label: "Security", href: "/security" },
     ],
   },
 ] as const;
 
+// Profile addresses come from the environment, so an icon shows only once there is a real page behind it.
+// (NEXT_PUBLIC_* values must be read by their literal names for Next to inline them.)
 const SOCIALS = [
-  { Icon: FacebookIcon, label: "Facebook" },
-  { Icon: InstagramIcon, label: "Instagram" },
-  { Icon: TwitterIcon, label: "Twitter" },
-  { Icon: YouTubeIcon, label: "YouTube" },
-  { Icon: LinkedInIcon, label: "LinkedIn" },
-] as const;
+  { Icon: FacebookIcon, label: "Facebook", href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK },
+  { Icon: InstagramIcon, label: "Instagram", href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM },
+  { Icon: TwitterIcon, label: "Twitter", href: process.env.NEXT_PUBLIC_SOCIAL_TWITTER },
+  { Icon: YouTubeIcon, label: "YouTube", href: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE },
+  { Icon: LinkedInIcon, label: "LinkedIn", href: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN },
+].filter((social): social is typeof social & { href: string } => Boolean(social.href));
 
 export default function Footer() {
   return (
@@ -86,10 +83,12 @@ export default function Footer() {
               together.
             </p>
             <div className="flex items-center gap-2">
-              {SOCIALS.map(({ Icon, label }) => (
+              {SOCIALS.map(({ Icon, label, href }) => (
                 <a
                   key={label}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="flex items-center justify-center w-9 h-9 rounded-full bg-(--color-bg-page) text-(--color-text-secondary) hover:bg-(--color-brand-primary) hover:text-(--color-text-on-brand) transition-colors duration-150"
                 >

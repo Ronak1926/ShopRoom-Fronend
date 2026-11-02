@@ -1,22 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import Sidebar from "./_components/Sidebar";
-import TopBar from "./_components/TopBar";
+import ShopkeeperShell from "@/components/shopkeeper/ShopkeeperShell";
 import DashboardHero from "./_components/DashboardHero";
 import StatCards from "./_components/StatCards";
 import RecentActivityCard from "./_components/RecentActivityCard";
 import RecentNotificationsTable from "./_components/RecentNotificationsTable";
 import RoomInsightsCard from "./_components/RoomInsightsCard";
-import MembersTable from "./_components/MembersTable";
+import MembersTable from "@/components/shopkeeper/MembersTable";
 import DashboardSkeleton from "./_components/DashboardSkeleton";
 import ShareModal from "@/components/ui/ShareModal";
 import ChartCardSkeleton from "./_components/ChartCardSkeleton";
 import { useDashboardData, joinsByDay, joinTrend } from "./_hooks/useDashboardData";
-import { buildSampleMetrics } from "./_data/sampleMetrics";
+import { useDashboardMetrics } from "./_hooks/useDashboardMetrics";
 import { DEFAULT_RANGE_DAYS, rangeLabel, rangeSpanLabel } from "./_data/ranges";
 
 const MEMBERS_ANCHOR = "room-members";
@@ -42,9 +40,7 @@ const EngagementFunnel = dynamic(() => import("./_components/EngagementFunnel"),
 });
 
 export default function ShopkeeperDashboard() {
-  const router = useRouter();
   const { data, loading, error, reload } = useDashboardData();
-  const [activeNav, setActiveNav] = useState("dashboard");
   const [rangeDays, setRangeDays] = useState<number>(DEFAULT_RANGE_DAYS);
   const [showShare, setShowShare] = useState(false);
 
@@ -56,33 +52,14 @@ export default function ShopkeeperDashboard() {
     () => joinsByDay(data?.members ?? [], rangeDays),
     [data?.members, rangeDays],
   );
-  const metrics = useMemo(
-    () => buildSampleMetrics(rangeDays, data?.membersTotal ?? 0, data?.designs ?? []),
-    [rangeDays, data?.membersTotal, data?.designs],
-  );
-
-  function handleNavChange(id: string) {
-    if (id === "myroom") router.push(`/shopkeeper/room/${data?.roomId ?? "_"}`);
-    else if (id === "profile") router.push("/shopkeeper/profile");
-    else if (id === "members") scrollToMembers();
-    else setActiveNav(id);
-  }
+  const { metrics, error: metricsError } = useDashboardMetrics(rangeDays, data?.designs ?? []);
 
   function scrollToMembers() {
     document.getElementById(MEMBERS_ANCHOR)?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
-    <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
-      <Sidebar activeNav={activeNav} onNavChange={handleNavChange} />
-
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <TopBar
-          inviteLink={data?.inviteLink ?? undefined}
-          onShareClick={() => setShowShare(true)}
-        />
-
-        <main className="flex-1 p-7 overflow-y-auto">
+    <ShopkeeperShell topBar={{ inviteLink: data?.inviteLink ?? undefined, onShareClick: () => setShowShare(true) }}>
           {!data ? (
             loading ? (
               <DashboardSkeleton />
@@ -111,16 +88,26 @@ export default function ShopkeeperDashboard() {
                 onShare={() => setShowShare(true)}
               />
 
-              <StatCards
-                data={data}
-                metrics={metrics}
-                memberDelta={trend.delta}
-                windowLabel={`vs previous ${rangeDays} days`}
-              />
+              {metricsError && !metrics && (
+                <p role="alert" className="rounded-xl bg-(--color-danger-bg) px-4 py-3 text-[13px] text-(--color-danger)">
+                  Could not load notification results. Refresh to try again.
+                </p>
+              )}
+
+              {metrics ? (
+                <StatCards
+                  data={data}
+                  metrics={metrics}
+                  memberDelta={trend.delta}
+                  windowLabel={`vs previous ${rangeDays} days`}
+                />
+              ) : (
+                <ChartCardSkeleton />
+              )}
 
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
                 <div className="xl:col-span-5 min-w-0">
-                  <PerformanceChart series={metrics.series} rangeLabel={rangeLabel(rangeDays)} />
+                  {metrics ? <PerformanceChart series={metrics.series} rangeLabel={rangeLabel(rangeDays)} /> : <ChartCardSkeleton />}
                 </div>
                 <div className="xl:col-span-3 min-w-0">
                   <AudienceLocationCard
@@ -130,7 +117,7 @@ export default function ShopkeeperDashboard() {
                   />
                 </div>
                 <div className="xl:col-span-4 min-w-0">
-                  <RecentActivityCard sends={metrics.recent} />
+                  {metrics ? <RecentActivityCard sends={metrics.recent} /> : <ChartCardSkeleton />}
                 </div>
               </div>
 
@@ -143,38 +130,40 @@ export default function ShopkeeperDashboard() {
                   />
                 </div>
                 <div className="xl:col-span-5 min-w-0">
-                  <EngagementFunnel metrics={metrics} />
+                  {metrics ? <EngagementFunnel metrics={metrics} /> : <ChartCardSkeleton />}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
                 <div className="xl:col-span-7 min-w-0">
-                  <RecentNotificationsTable sends={metrics.recent} />
+                  {metrics ? <RecentNotificationsTable sends={metrics.recent} /> : <ChartCardSkeleton />}
                 </div>
                 <div className="xl:col-span-5 min-w-0">
-                  <RoomInsightsCard
-                    membersTotal={data.membersTotal}
-                    newMembers={trend.count}
-                    newMembersDelta={trend.delta}
-                    activeMembers={metrics.insights.activeMembers}
-                    returningMembers={metrics.insights.returningMembers}
-                    engagementScore={metrics.insights.engagementScore}
-                    windowLabel={`vs previous ${rangeDays} days`}
-                  />
+                  {metrics ? (
+                    <RoomInsightsCard
+                      membersTotal={data.membersTotal}
+                      newMembers={trend.count}
+                      newMembersDelta={trend.delta}
+                      activeMembers={metrics.insights.activeMembers}
+                      returningMembers={metrics.insights.returningMembers}
+                      engagementScore={metrics.insights.engagementScore}
+                      windowLabel={`vs previous ${rangeDays} days`}
+                    />
+                  ) : (
+                    <ChartCardSkeleton />
+                  )}
                 </div>
               </div>
 
               <div id={MEMBERS_ANCHOR}>
-                <MembersTable />
+                <MembersTable variant="preview" />
               </div>
             </div>
           )}
-        </main>
-      </div>
 
       {showShare && data?.inviteLink && (
         <ShareModal inviteLink={data.inviteLink} onClose={() => setShowShare(false)} />
       )}
-    </div>
+    </ShopkeeperShell>
   );
 }

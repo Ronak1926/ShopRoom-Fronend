@@ -20,6 +20,7 @@ import { hydrateToken, registerCustomer } from "@/features/auth/authSlice";
 import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
+import { DEFAULT_AFTER_AUTH, nextAfterAuth, withNext } from "@/lib/safeRedirect";
 
 const signupSchema = z
   .object({
@@ -52,7 +53,7 @@ export default function SignupPage() {
     const shopkeeperToken = getCookie("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
-      router.replace("/customer/home");
+      router.replace(nextAfterAuth());
     } else if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
     } else {
@@ -142,7 +143,9 @@ export default function SignupPage() {
     } catch {
       // OTP send failed â€” still proceed to verify page, user can resend
     }
-    router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
+    const next = nextAfterAuth();
+    const carry = next === DEFAULT_AFTER_AUTH ? "" : `&next=${encodeURIComponent(next)}`;
+    router.push(`/verify-email?email=${encodeURIComponent(values.email)}${carry}`);
   }
 
   const inputClass =
@@ -339,7 +342,7 @@ export default function SignupPage() {
                 <div className="text-center text-[14px] text-(--color-auth-ink-muted)">
                   Already have an account?{" "}
                   <Link
-                    href="/customer/login"
+                    href={withNext("/customer/login")}
                     className="font-bold text-(--color-auth-primary)"
                   >
                     Log in
@@ -350,8 +353,8 @@ export default function SignupPage() {
 
             <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
               <span>© 2026 SHOPROOM</span>
-              <span>PRIVACY POLICY</span>
-              <span>HELP CENTER</span>
+              <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
+              <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
             </div>
           </div>
         </div>
