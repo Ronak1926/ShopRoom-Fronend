@@ -48,9 +48,10 @@ export interface SendDesignResponse {
   context: RenderContext;
 }
 
-export async function getSendDesign(sendId: string): Promise<SendDesignResponse> {
+export async function getSendDesign(sendId: string, authToken?: string): Promise<SendDesignResponse> {
   const { data } = await apiClient.get<Envelope<SendDesignResponse>>(
     `/api/notifications/sends/${sendId}/design`,
+    bearer(authToken),
   );
   return data.data;
 }

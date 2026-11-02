@@ -6,6 +6,10 @@
  * since native OS notifications can't run Framer Motion. Mounted once in the
  * customer layout so it's present on every customer route.
  *
+ * The same banner also plays when the customer TAPS the notification in the OS
+ * tray: the service worker opens the room with a "#push=" fragment (see
+ * features/push/tapLink.ts) and this host replays that push's design.
+ *
  * It also tells the server what happened to each push (delivered, opened,
  * clicked) so the shopkeeper's analytics are real.
  */
@@ -17,7 +21,9 @@ import { onMessage } from "firebase/messaging";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
-import { getSendDesign, reportReceipt } from "@/features/push/pushApi";
+import { getSendDesign, reportReceipt, type SendDesignResponse } from "@/features/push/pushApi";
+import { parseTapHash } from "@/features/push/tapLink";
+import { getCookie } from "@/utils/cookieUtils";
 import { EDITOR_CONTEXT } from "@/features/notifications/resolver";
 import { defaultRoute, resolveActionRoute, type ActionRoute } from "@/features/notifications/actionRouter";
 import type {
@@ -44,6 +50,19 @@ interface IncomingPush {
 const loadDesignPreview = () => import("./DesignPreview");
 const DesignPreview = dynamic(loadDesignPreview, { ssr: false });
 
+function toIncoming(result: SendDesignResponse, receiptToken: string | undefined): IncomingPush {
+  return {
+    design: result.designJson,
+    roomId: result.roomId,
+    receiptToken,
+    context: {
+      ...EDITOR_CONTEXT,
+      shop: { ...EDITOR_CONTEXT.shop, ...result.context.shop },
+      customer: { ...EDITOR_CONTEXT.customer, ...result.context.customer },
+    },
+  };
+}
+
 function prefersReducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -66,16 +85,7 @@ export default function PushNotificationHost() {
         reportReceipt(receiptToken, "DELIVERED");
         getSendDesign(sendId)
           .then((result) => {
-            setIncoming({
-              design: result.designJson,
-              roomId: result.roomId,
-              receiptToken,
-              context: {
-                ...EDITOR_CONTEXT,
-                shop: { ...EDITOR_CONTEXT.shop, ...result.context.shop },
-                customer: { ...EDITOR_CONTEXT.customer, ...result.context.customer },
-              },
-            });
+            setIncoming(toIncoming(result, receiptToken));
             reportReceipt(receiptToken, "OPENED");
           })
           .catch(() => {
@@ -86,6 +96,33 @@ export default function PushNotificationHost() {
     });
 
     return () => unsubscribe?.();
+  }, []);
+
+  // Tapped from the OS notification tray: replay that push's animated design. The
+  // service worker has already recorded OPENED, so it is not reported again here.
+  useEffect(() => {
+    function replayTappedPush() {
+      const tapped = parseTapHash(window.location.hash);
+      if (!tapped) return;
+      // Remove the reference at once so a refresh, or a copied link, replays nothing
+      // (and the receipt token does not linger in the address bar or history). The state
+      // argument must be null: Next wraps history.replaceState and only syncs its router
+      // to the new URL for calls like this one. Passing the existing history state back
+      // (Next's own object) skips that sync, and the router later writes the fragment back.
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      const sessionToken = getCookie("token");
+      if (!sessionToken) return;
+      void loadDesignPreview();
+      getSendDesign(tapped.sendId, sessionToken)
+        .then((result) => setIncoming(toIncoming(result, tapped.receiptToken)))
+        .catch(() => {
+          // A push the customer can no longer see (left the room, deleted) — nothing to show.
+        });
+    }
+    replayTappedPush();
+    // A tap while this tab is already on the same room changes only the fragment.
+    window.addEventListener("hashchange", replayTappedPush);
+    return () => window.removeEventListener("hashchange", replayTappedPush);
   }, []);
 
   useEffect(() => {
@@ -113,7 +150,10 @@ export default function PushNotificationHost() {
       setIncoming(null);
       if (route.kind === "external") {
         window.open(route.url, "_blank", "noopener,noreferrer");
-      } else {
+      } else if (route.path !== window.location.pathname) {
+        // Already on that page (typical after tapping a notification, which opens the
+        // room): nothing to navigate to. Pushing the current path would also make Next
+        // re-apply the "#push=" fragment it still remembers from the tap.
         router.push(route.path);
       }
     },
