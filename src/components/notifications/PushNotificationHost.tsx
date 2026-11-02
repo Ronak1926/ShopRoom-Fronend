@@ -11,6 +11,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { onMessage } from "firebase/messaging";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
@@ -19,7 +20,6 @@ import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
 import { getSendDesign, reportReceipt } from "@/features/push/pushApi";
 import { EDITOR_CONTEXT } from "@/features/notifications/resolver";
 import { defaultRoute, resolveActionRoute, type ActionRoute } from "@/features/notifications/actionRouter";
-import DesignPreview from "./DesignPreview";
 import type {
   ElementAction,
   NotificationDesign,
@@ -37,6 +37,13 @@ interface IncomingPush {
   receiptToken: string | undefined;
 }
 
+// The renderer, Framer Motion and the animation preset catalog are only needed once a
+// push actually arrives, yet this host is mounted on every customer page. Loading them
+// lazily keeps them out of every page's first load; the chunk is fetched in the
+// background as soon as the listener is set up, so the banner still appears instantly.
+const loadDesignPreview = () => import("./DesignPreview");
+const DesignPreview = dynamic(loadDesignPreview, { ssr: false });
+
 function prefersReducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -50,6 +57,7 @@ export default function PushNotificationHost() {
 
     getMessagingIfSupported().then((messaging) => {
       if (!messaging) return;
+      void loadDesignPreview();
       unsubscribe = onMessage(messaging, (payload) => {
         const sendId = payload.data?.sendId;
         const receiptToken = payload.data?.rt;

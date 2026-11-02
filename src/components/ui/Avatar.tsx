@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { cloudinaryLoader } from "@/lib/cloudinaryLoader";
 import StatusDot from "./StatusDot";
 
 const AVATAR_COLORS = [
@@ -38,12 +40,12 @@ export function getInitials(name: string): string {
 }
 
 const SIZE_MAP = {
-  xs: { box: "w-6 h-6", text: "text-[9px]", dot: 6 },
-  sm: { box: "w-8 h-8", text: "text-[11px]", dot: 8 },
-  md: { box: "w-9 h-9", text: "text-xs", dot: 9 },
-  lg: { box: "w-12 h-12", text: "text-base", dot: 11 },
-  xl: { box: "w-20 h-20", text: "text-2xl", dot: 16 },
-  "2xl": { box: "w-24 h-24", text: "text-3xl", dot: 18 },
+  xs: { box: "w-6 h-6", text: "text-[9px]", dot: 6, px: 24 },
+  sm: { box: "w-8 h-8", text: "text-[11px]", dot: 8, px: 32 },
+  md: { box: "w-9 h-9", text: "text-xs", dot: 9, px: 36 },
+  lg: { box: "w-12 h-12", text: "text-base", dot: 11, px: 48 },
+  xl: { box: "w-20 h-20", text: "text-2xl", dot: 16, px: 80 },
+  "2xl": { box: "w-24 h-24", text: "text-3xl", dot: 18, px: 96 },
 } as const;
 
 type AvatarSize = keyof typeof SIZE_MAP;
@@ -65,7 +67,7 @@ export default function Avatar({
   shape = "circle",
   className = "",
 }: AvatarProps) {
-  const { box, text, dot } = SIZE_MAP[size];
+  const { box, text, dot, px } = SIZE_MAP[size];
   const radius = shape === "circle" ? "rounded-full" : "rounded-xl";
   const color = getAvatarColor(name);
 
@@ -78,12 +80,14 @@ export default function Avatar({
   return (
     <div className={`relative inline-flex shrink-0 ${box} ${radius} ${className}`}>
       {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src ?? undefined}
+        <Image
+          loader={cloudinaryLoader}
+          src={src as string}
           alt={name}
+          fill
+          sizes={`${px}px`}
           onError={() => setFailedSrc(src ?? null)}
-          className={`w-full h-full object-cover ${radius}`}
+          className={`object-cover ${radius}`}
         />
       ) : (
         <div

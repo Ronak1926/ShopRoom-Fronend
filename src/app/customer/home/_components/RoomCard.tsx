@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -8,6 +9,7 @@ import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkOutlined";
 import Avatar from "@/components/ui/Avatar";
+import { cloudinaryLoader } from "@/lib/cloudinaryLoader";
 import StatusDot from "@/components/ui/StatusDot";
 import { formatCount, type RoomCard as RoomCardData } from "../types";
 
@@ -25,11 +27,13 @@ export default function RoomCard({ room, joining, onJoin }: RoomCardProps) {
       {/* Image zone */}
       <div className="relative h-44">
         {room.coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
+            loader={cloudinaryLoader}
             src={room.coverUrl}
             alt={room.shopName}
-            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-(--color-brand-primary-light) to-(--color-brand-primary-muted)" />

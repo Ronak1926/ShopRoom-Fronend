@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "prepare": "git config core.hooksPath .githooks || true",
-    "lint:ratchet": "node scripts/lintRatchet.mjs"
+    "lint:ratchet": "node scripts/lintRatchet.mjs",
+    "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

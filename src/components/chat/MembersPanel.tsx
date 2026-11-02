@@ -44,6 +44,7 @@ function formatDate(iso: string): string {
  */
 export default function MembersPanel({ roomId, role, onlineCustomerIds }: MembersPanelProps) {
   const [members, setMembers] = useState<Member[]>([]);
+  const [totalMembers, setTotalMembers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -53,9 +54,10 @@ export default function MembersPanel({ roomId, role, onlineCustomerIds }: Member
     if (!token) return;
     setAuthToken(token);
     apiClient
-      .get<{ members: Member[] }>(`/api/rooms/${roomId}/members`)
+      .get<{ members: Member[]; total: number }>(`/api/rooms/${roomId}/members`)
       .then((res) => {
         setMembers(res.data.members);
+        setTotalMembers(res.data.total);
         setSelectedId((prev) => prev ?? res.data.members[0]?.customerId ?? null);
       })
       .catch(() => {})
@@ -74,7 +76,7 @@ export default function MembersPanel({ roomId, role, onlineCustomerIds }: Member
       <aside className="w-80 min-w-80 bg-(--color-bg-surface) border-r border-(--color-border-default) flex flex-col">
         <div className="px-4 pt-4 pb-3 shrink-0">
           <p className="text-[11px] font-bold uppercase tracking-widest text-(--color-text-hint) mb-2.5">
-            Members — {members.length}
+            Members — {totalMembers}
           </p>
           <div className="relative">
             <SearchOutlinedIcon

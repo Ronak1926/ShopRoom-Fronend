@@ -34,6 +34,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit
+      - run: pnpm test
       - run: pnpm build
+      # Fails when a route's first-load JavaScript passes its budget (see scripts/bundleAudit.mjs).
+      - run: node scripts/bundleAudit.mjs
       # Existing lint errors are tolerated (see .lint-baseline.json); new ones fail the build.
       - run: pnpm lint:ratchet
