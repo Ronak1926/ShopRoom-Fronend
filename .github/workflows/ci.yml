@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [development, main]
+    branches: [development, main, master]
   pull_request:
 
 permissions:
@@ -35,6 +35,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit
       - run: pnpm build
-      # The codebase has existing lint errors; report them without blocking until they are cleared.
-      - run: pnpm lint
-        continue-on-error: true
+      # Existing lint errors are tolerated (see .lint-baseline.json); new ones fail the build.
+      - run: pnpm lint:ratchet
