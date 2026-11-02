@@ -17,6 +17,7 @@ import {
 import "./globals.css";
 
 import { Providers } from "../store/Providers";
+import ClientErrorReporter from "../components/ClientErrorReporter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -142,6 +143,7 @@ export default function RootLayout({
         attribute diff — mismatches inside the app still surface normally.
       */}
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <ClientErrorReporter />
         <Providers>{children}</Providers>
       </body>
     </html>
