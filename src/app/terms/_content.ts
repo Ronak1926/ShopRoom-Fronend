@@ -2,7 +2,7 @@ import type { LegalContent } from "@/components/public/LegalDocument";
 
 export const TERMS: LegalContent = {
   title: "Terms of Service",
-  updated: "2 November 2026",
+  updated: "6 November 2026",
   intro:
     "These terms are the agreement between you and ShopRoom when you use our website and apps, as a customer or as a shopkeeper. By creating an account or using ShopRoom you agree to them. If you do not agree, please do not use ShopRoom.",
   sections: [
@@ -39,7 +39,8 @@ export const TERMS: LegalContent = {
         "Each plan is a one-time payment made through Razorpay. Plans do not renew automatically.",
         "When a plan ends, sending and scheduling notifications is paused. Your room, members, chat and designs are kept, and everything resumes when you renew.",
         "When you renew early, the new time is added to the end of your current plan.",
-        "Payments are not refunded, except where the law requires it. If you think you were charged by mistake, contact us with your payment details.",
+        "Payments are not refunded, except where the law requires it. The exception we apply ourselves: if a payment cannot be turned into what you paid for (for example, someone registered your email address while you were paying, or the same plan was paid for twice), we refund it in full to the original payment method automatically. Your bank may take 5 to 7 working days to show it. If you think you were charged by mistake, contact us with your payment details.",
+        "We email a receipt for each payment to the address on your account. It is a payment receipt, not a tax invoice.",
         "Daily sending limits and plan features are described in the product and may change; we will not reduce what you have already paid for during your plan.",
       ],
     },

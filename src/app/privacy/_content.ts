@@ -2,7 +2,7 @@ import type { LegalContent } from "@/components/public/LegalDocument";
 
 export const PRIVACY: LegalContent = {
   title: "Privacy Policy",
-  updated: "2 November 2026",
+  updated: "6 November 2026",
   intro:
     "ShopRoom connects customers with the local shops they like: customers join a shop's room, chat with the shop, and get its notifications. This policy explains what we collect when you use ShopRoom, why, who can see it, and how you stay in control of it.",
   sections: [
@@ -12,7 +12,7 @@ export const PRIVACY: LegalContent = {
       bullets: [
         "Customers: your name, email address and a one-way hash of your password (we never store the password itself); the rooms you have joined and whether notifications are on for each; your messages in those rooms; and, only if you allow it, your location.",
         "Customers who turn on notifications: a push token for your browser or device, the type of browser, and what happened to each notification sent to you (delivered, opened, tapped).",
-        "Shopkeepers: your email, name and a password hash; your shop's name, category, description, address, city, state, pincode, phone number, location and logo; your plan and payment records (plan, amount, and Razorpay order and payment identifiers); and the notification designs, images, schedules, preferences and send history you create.",
+        "Shopkeepers: your email, name and a password hash; your shop's name, category, description, address, city, state, pincode, phone number, location and logo; your plan and payment records (plan, amount, and Razorpay order and payment identifiers, including payment attempts that were not completed); and the notification designs, images, schedules, preferences and send history you create.",
         "Visitors: the email address you give us to subscribe to the newsletter, and anything you write in the contact form.",
         "Everyone: technical logs (such as the time and path of a request and error details) that we use to keep the service running and secure.",
       ],
@@ -30,7 +30,8 @@ export const PRIVACY: LegalContent = {
         "To run rooms: showing shops near you, letting you join them, and delivering chat messages.",
         "To deliver the notifications a shop sends to its members, and to tell the shop in aggregate how they performed (how many were delivered, opened and tapped).",
         "To take payment for shop plans and keep a record of it.",
-        "To send you emails you need: verification codes, password-reset links and replies to messages you send us.",
+        "To send you emails you need: verification codes, password-reset links, payment receipts and replies to messages you send us.",
+        "To send the newsletter to people who subscribed. Subscribing sends one welcome email, and it contains a link to unsubscribe.",
         "To detect abuse, fix problems and keep the service secure.",
       ],
       paragraphs: ["We do not sell your personal data and we do not show advertising."],
@@ -58,7 +59,7 @@ export const PRIVACY: LegalContent = {
         "Twilio: verifies shopkeepers' phone numbers by sending a one-time code.",
         "Google and Firebase: sign-in with Google, and delivery of push notifications.",
         "Cloudinary: stores and serves shop images and notification images.",
-        "An email provider: sends verification codes, password-reset links and replies to contact messages.",
+        "An email provider: sends verification codes, password-reset links, payment receipts, the newsletter welcome email and replies to contact messages.",
         "Pexels and Unsplash: stock-image search for shopkeepers. They receive only the search words typed.",
       ],
     },
@@ -69,8 +70,8 @@ export const PRIVACY: LegalContent = {
         "Verification codes: removed a day after they expire. Password-reset links: valid for 30 minutes and removed a day after they expire.",
         "Per-device delivery records for notifications: 180 days. The shop keeps only the aggregate counts afterwards.",
         "Push tokens: until you turn notifications off or sign out, 270 days without use, or when the push service reports them invalid.",
-        "Payment records (identifiers, plan and amount): while the account exists, and longer where the law requires us to keep financial records.",
-        "Newsletter email addresses: until you ask us to remove you.",
+        "Payment records (identifiers, plan and amount): while the account exists, and longer where the law requires us to keep financial records. Payment attempts nobody completed: 90 days.",
+        "Newsletter email addresses: until you unsubscribe (use the link in the welcome email) or ask us to remove you.",
       ],
     },
     {
@@ -79,7 +80,9 @@ export const PRIVACY: LegalContent = {
         "Delete your account: from your profile page. Your account and its data are erased together. For a shopkeeper this includes the shop, its room, chat history, designs and send history.",
         "Change your location setting or your notification setting at any time.",
         "Change your password, or sign out of every device, from Settings.",
-        "Ask for a copy of your data, or for a correction or removal, through the contact page. We answer these by hand.",
+        "Download a copy of your data from your profile page: choose \"Download my data\" and enter your password again. The file leaves out your password and sign-in tokens, and for a shopkeeper it leaves out your members' names and emails, which belong to them.",
+        "Unsubscribe from the newsletter with the link in the welcome email.",
+        "Ask for a correction, or for anything the profile page does not cover, through the contact page. We answer these by hand.",
       ],
     },
     {
