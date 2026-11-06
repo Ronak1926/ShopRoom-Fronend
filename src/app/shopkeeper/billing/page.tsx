@@ -12,6 +12,7 @@ import { formatDate } from "@/features/billing/format";
 import { deleteCookie } from "@/utils/cookieUtils";
 import BillingSkeleton from "./_components/BillingSkeleton";
 import CurrentPlanCard from "./_components/CurrentPlanCard";
+import GstinCard from "./_components/GstinCard";
 import PaymentHistory from "./_components/PaymentHistory";
 import PlanPicker from "./_components/PlanPicker";
 
@@ -120,7 +121,8 @@ export default function ShopkeeperBillingPage() {
 
           <CurrentPlanCard billing={billing} />
           <PlanPicker plans={billing.plans} selected={selected} onSelect={setSelected} onPay={() => void pay()} paying={paying} active={billing.active} />
-          <PaymentHistory payments={billing.payments} />
+          <PaymentHistory payments={billing.payments} invoicesEnabled={billing.invoicesEnabled} />
+          {billing.invoicesEnabled && <GstinCard initial={billing.gstin} />}
         </div>
       ) : (
         <div className="flex items-center justify-center py-20">

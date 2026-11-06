@@ -14,7 +14,7 @@ interface Step2ShopDetailsProps {
   initialValues: Step2Values | null;
   onSubmit: (
     v: Step2Values,
-    logoFile: File | null,
+    logoFisale: File | null,
     coords: { lat: number; lng: number } | null,
   ) => void;
   onBack: () => void;

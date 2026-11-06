@@ -20,6 +20,10 @@ export interface Billing {
   /** Whole days left, 0 once expired. */
   daysLeft: number;
   plans: { id: PlanId; label: string; priceInr: number; days: number }[];
+  /** The GSTIN printed as the buyer's on new invoices. */
+  gstin: string | null;
+  /** True when the business has set up GST invoicing. */
+  invoicesEnabled: boolean;
   payments: { id: string; purpose: "REGISTRATION" | "RENEWAL"; planType: string; amountInr: number; paidAt: string; refunded: boolean }[];
 }
 

@@ -2,7 +2,7 @@ import type { LegalContent } from "@/components/public/LegalDocument";
 
 export const PRIVACY: LegalContent = {
   title: "Privacy Policy",
-  updated: "6 November 2026",
+  updated: "7 November 2026",
   intro:
     "ShopRoom connects customers with the local shops they like: customers join a shop's room, chat with the shop, and get its notifications. This policy explains what we collect when you use ShopRoom, why, who can see it, and how you stay in control of it.",
   sections: [
@@ -71,6 +71,8 @@ export const PRIVACY: LegalContent = {
         "Per-device delivery records for notifications: 180 days. The shop keeps only the aggregate counts afterwards.",
         "Push tokens: until you turn notifications off or sign out, 270 days without use, or when the push service reports them invalid.",
         "Payment records (identifiers, plan and amount): while the account exists, and longer where the law requires us to keep financial records. Payment attempts nobody completed: 90 days.",
+        "Tax invoices: when you delete a shop account, a copy of each invoice we issued to it (the shop's name and address, any GSTIN you added, the amount and the invoice number) is kept for as long as tax law requires, then erased. Nothing else about the account is kept.",
+        "Sign-in and account-change history (the time, device and address of sign-ins, password changes and similar): one year, and it is erased with your account. You can see your own on your profile page.",
         "Newsletter email addresses: until you unsubscribe (use the link in the welcome email) or ask us to remove you.",
       ],
     },
@@ -79,7 +81,7 @@ export const PRIVACY: LegalContent = {
       bullets: [
         "Delete your account: from your profile page. Your account and its data are erased together. For a shopkeeper this includes the shop, its room, chat history, designs and send history.",
         "Change your location setting or your notification setting at any time.",
-        "Change your password, or sign out of every device, from Settings.",
+        "Change your password, turn on two-step verification (an authenticator app), or sign out of every device, from your profile and settings pages.",
         "Download a copy of your data from your profile page: choose \"Download my data\" and enter your password again. The file leaves out your password and sign-in tokens, and for a shopkeeper it leaves out your members' names and emails, which belong to them.",
         "Unsubscribe from the newsletter with the link in the welcome email.",
         "Ask for a correction, or for anything the profile page does not cover, through the contact page. We answer these by hand.",
