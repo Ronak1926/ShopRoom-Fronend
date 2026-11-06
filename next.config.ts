@@ -75,6 +75,7 @@ const PRIVATE_PATHS = [
   "/reset-password",
   "/forgot-password",
   "/verify-email",
+  "/unsubscribe",
 ];
 
 // Files in /public keep their names between releases, so they cannot be cached forever: a day,
