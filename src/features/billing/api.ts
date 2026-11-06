@@ -5,7 +5,7 @@
 
 import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
-import { payWithRazorpay, type CheckoutOrder } from "@/lib/razorpay";
+import { runCheckout, type CheckoutOrder } from "./checkout";
 
 function authConfig() {
   return { headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` } };
@@ -29,27 +29,22 @@ export async function fetchBilling(): Promise<Billing> {
 }
 
 /**
- * Takes payment for a renewal and confirms it with the server. Resolves with the
- * updated billing, or null when the shopkeeper closed the payment window.
+ * Takes payment for a renewal and confirms it with the server. Resolves with the updated billing,
+ * or null when the shopkeeper closed the payment window.
  */
 export async function renewPlan(planId: PlanId, description: string): Promise<Billing | null> {
   const order = (await apiClient.post<{ data: CheckoutOrder }>("/api/shopkeeper/billing/order", { planType: planId }, authConfig())).data.data;
 
-  // Without Razorpay credentials the server hands out a development order: confirm it without a payment window.
-  const payment = order.mock
-    ? { razorpay_order_id: order.orderId, razorpay_payment_id: `pay_dev_${Date.now()}`, razorpay_signature: "dev_signature" }
-    : await payWithRazorpay(order, { description });
-  if (!payment) return null;
-
-  const { data } = await apiClient.post<{ data: Billing }>(
-    "/api/shopkeeper/billing/verify",
-    {
-      planType: planId,
-      razorpayOrderId: payment.razorpay_order_id,
-      razorpayPaymentId: payment.razorpay_payment_id,
-      razorpaySignature: payment.razorpay_signature,
+  return runCheckout({
+    order,
+    description,
+    confirm: async (payment) => {
+      const { data } = await apiClient.post<{ data: Billing }>(
+        "/api/shopkeeper/billing/verify",
+        { razorpayOrderId: payment.orderId, razorpayPaymentId: payment.paymentId, razorpaySignature: payment.signature },
+        authConfig(),
+      );
+      return data.data;
     },
-    authConfig(),
-  );
-  return data.data;
+  });
 }
