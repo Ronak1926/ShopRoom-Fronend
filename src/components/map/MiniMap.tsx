@@ -12,6 +12,10 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from "react";
+import "leaflet/dist/leaflet.css";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { useRouter } from "next/navigation";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
@@ -203,14 +207,6 @@ export default function MiniMap({
 
     import("leaflet").then((L) => {
       if (cancelled || mapRef.current || !mapDivRef.current) return;
-      // Inject Leaflet CSS
-      if (!document.getElementById("leaflet-css")) {
-        const link = document.createElement("link");
-        link.id = "leaflet-css";
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(link);
-      }
       // Inject popup style override
       if (!document.getElementById("shoproom-map-style")) {
         const style = document.createElement("style");
@@ -226,11 +222,9 @@ export default function MiniMap({
 
       // Fix default icon paths
       (L.Icon.Default as any).mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl:
-          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl:
-          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        iconUrl: markerIcon.src,
+        iconRetinaUrl: markerIcon2x.src,
+        shadowUrl: markerShadow.src,
       });
 
       // Expose L globally for renderPins callback

@@ -6,9 +6,9 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { getToken, deleteToken } from "firebase/messaging";
 import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
 import { registerDevice, unregisterDevice } from "@/features/push/pushApi";
+import { loadMessagingSdk, PUSH_ENABLED_EVENT } from "@/features/push/pushEvents";
 
 export type PushPermissionState = "checking" | "unsupported" | "default" | "denied" | "granted";
 
@@ -50,6 +50,7 @@ export function usePushNotifications() {
         return;
       }
 
+      const { getToken } = await loadMessagingSdk();
       const token = await getToken(messaging, {
         vapidKey: VAPID_KEY,
         serviceWorkerRegistration: registration,
@@ -57,6 +58,8 @@ export function usePushNotifications() {
       if (!token) throw new Error("Could not get a push token");
 
       await registerDevice(token);
+      // The page that listens for pushes while it is open skipped loading the SDK until now.
+      window.dispatchEvent(new Event(PUSH_ENABLED_EVENT));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not enable notifications");
     } finally {
@@ -71,6 +74,7 @@ export function usePushNotifications() {
       const messaging = await getMessagingIfSupported();
       if (!messaging) return;
 
+      const { getToken, deleteToken } = await loadMessagingSdk();
       const token = await getToken(messaging, { vapidKey: VAPID_KEY });
       if (token) {
         await unregisterDevice(token);

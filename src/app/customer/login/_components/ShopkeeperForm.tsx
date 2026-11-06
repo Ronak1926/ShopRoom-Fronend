@@ -53,7 +53,7 @@ export default function ShopkeeperForm() {
       noValidate
     >
       <div className="flex flex-col gap-1">
-        <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+        <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
           Email Address
         </label>
         <div className="relative">
@@ -69,12 +69,12 @@ export default function ShopkeeperForm() {
           />
         </div>
         {errors.email && (
-          <p className="text-[11px] text-(--color-danger)">{errors.email.message}</p>
+          <p className="text-[12px] text-(--color-danger)">{errors.email.message}</p>
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+        <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
           Password
         </label>
         <div className="relative">
@@ -88,6 +88,7 @@ export default function ShopkeeperForm() {
           <button
             type="button"
             onClick={() => setShowPw((v) => !v)}
+            aria-label={showPw ? "Hide password" : "Show password"}
             className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
           >
             {showPw ? (
@@ -98,7 +99,7 @@ export default function ShopkeeperForm() {
           </button>
         </div>
         {errors.password && (
-          <p className="text-[11px] text-(--color-danger)">{errors.password.message}</p>
+          <p className="text-[12px] text-(--color-danger)">{errors.password.message}</p>
         )}
       </div>
 

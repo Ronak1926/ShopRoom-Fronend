@@ -14,7 +14,8 @@ import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { loginCustomer } from "@/features/auth/authSlice";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
-import { nextAfterAuth, withNext } from "@/lib/safeRedirect";
+import { nextAfterAuth } from "@/lib/safeRedirect";
+import LinkWithNext from "@/components/ui/LinkWithNext";
 
 export default function CustomerForm() {
   const dispatch = useAppDispatch();
@@ -50,7 +51,7 @@ export default function CustomerForm() {
 
       <div className="my-6 flex items-center gap-4">
         <div className="h-px flex-1 bg-(--color-border-default)" />
-        <span className="text-[10px] tracking-[1px] text-(--color-auth-ink-muted) uppercase opacity-50">
+        <span className="text-[12px] tracking-[1px] text-(--color-auth-ink-muted) uppercase">
           OR
         </span>
         <div className="h-px flex-1 bg-(--color-border-default)" />
@@ -62,7 +63,7 @@ export default function CustomerForm() {
         noValidate
       >
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+          <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
             Email Address
           </label>
           <div className="relative">
@@ -78,12 +79,12 @@ export default function CustomerForm() {
             />
           </div>
           {errors.email && (
-            <p className="text-[11px] text-(--color-danger)">{errors.email.message}</p>
+            <p className="text-[12px] text-(--color-danger)">{errors.email.message}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+          <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
             Password
           </label>
           <div className="relative">
@@ -97,6 +98,7 @@ export default function CustomerForm() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
+              aria-label={showPw ? "Hide password" : "Show password"}
               className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
             >
               {showPw ? (
@@ -107,7 +109,7 @@ export default function CustomerForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-[11px] text-(--color-danger)">
+            <p className="text-[12px] text-(--color-danger)">
               {errors.password.message}
             </p>
           )}
@@ -129,9 +131,9 @@ export default function CustomerForm() {
 
         <p className="text-center text-[13px] text-(--color-auth-ink-muted)">
           Don&apos;t have an account?{" "}
-          <Link href={withNext("/customer/signup")} className="font-bold text-(--color-auth-primary)">
+          <LinkWithNext path="/customer/signup" className="font-bold text-(--color-auth-primary)">
             Sign up
-          </Link>
+          </LinkWithNext>
         </p>
       </form>
     </>

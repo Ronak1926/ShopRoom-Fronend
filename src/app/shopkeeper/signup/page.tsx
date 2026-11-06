@@ -19,7 +19,6 @@ import { Step4Payment } from "./_components/Step4Payment";
 export default function ShopkeeperSignupPage() {
   const router = useRouter();
 
-  const [ready, setReady] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +41,6 @@ export default function ShopkeeperSignupPage() {
     }
     const saved = localStorage.getItem("shopkeeper_draft_id");
     if (saved) setDraftId(saved);
-    setReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,8 +169,6 @@ export default function ShopkeeperSignupPage() {
       setServerError(e?.response?.data?.message ?? "Failed to resend");
     }
   }
-
-  if (!ready) return null;
 
   return (
     <div className="flex flex-1 bg-[var(--color-bg-page)]">

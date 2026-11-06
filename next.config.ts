@@ -14,7 +14,6 @@ const IMAGE_HOSTS = [
   "https://plus.unsplash.com",
   "https://api.dicebear.com",
   "https://*.tile.openstreetmap.org",
-  "https://unpkg.com",
 ];
 
 /**
@@ -30,7 +29,7 @@ const IMAGE_HOSTS = [
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://checkout.razorpay.com https://www.gstatic.com https://apis.google.com`,
-  "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   `img-src 'self' data: blob: ${IMAGE_HOSTS.join(" ")}`,
   "font-src 'self' data: https://fonts.gstatic.com",
   [

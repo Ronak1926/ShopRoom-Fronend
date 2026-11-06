@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signInWithPopup } from "firebase/auth";
 import { z } from "zod";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { firebaseAuth, googleProvider } from "@/lib/firebase";
+import { firebaseAuth, googleProvider, popupResolver } from "@/lib/firebase";
 import { downloadAccountData, type ExportProof } from "@/features/account/exportApi";
 
 const passwordSchema = z.object({
@@ -62,7 +62,7 @@ export default function ExportDataCard({ cookieName, endpoint, description, uses
     setBusy(true);
     setError(null);
     try {
-      const { user } = await signInWithPopup(firebaseAuth, googleProvider);
+      const { user } = await signInWithPopup(firebaseAuth, googleProvider, popupResolver);
       await download({ idToken: await user.getIdToken() });
     } catch {
       setError("Google sign-in didn't complete. Please try again.");

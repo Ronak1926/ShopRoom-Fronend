@@ -20,7 +20,8 @@ import { hydrateToken, registerCustomer } from "@/features/auth/authSlice";
 import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
-import { DEFAULT_AFTER_AUTH, nextAfterAuth, withNext } from "@/lib/safeRedirect";
+import { DEFAULT_AFTER_AUTH, nextAfterAuth } from "@/lib/safeRedirect";
+import LinkWithNext from "@/components/ui/LinkWithNext";
 
 const signupSchema = z
   .object({
@@ -46,7 +47,6 @@ export default function SignupPage() {
   const { status, token } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
 
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const customerToken = getCookie("token");
@@ -58,7 +58,6 @@ export default function SignupPage() {
       router.replace("/shopkeeper/dashboard");
     } else {
       dispatch(hydrateToken());
-      setReady(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -151,10 +150,8 @@ export default function SignupPage() {
   const inputClass =
     "w-full h-[48px] rounded-[8px] bg-(--color-auth-input-bg) px-4 text-sm text-(--color-auth-ink) placeholder:text-(--color-auth-ink-muted) outline-none focus:ring-2 focus:ring-(--color-auth-primary)/30 transition-shadow";
   const labelClass =
-    "text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)";
-  const errorClass = "mt-1 text-[11px] text-(--color-danger)";
-
-  if (!ready) return null;
+    "text-[12px] leading-[15px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)";
+  const errorClass = "mt-1 text-[12px] text-(--color-danger)";
 
   return (
     <div className="flex flex-1 bg-(--color-bg-page)">
@@ -199,7 +196,7 @@ export default function SignupPage() {
 
               <div className="my-6 flex items-center gap-4 w-[400px]">
                 <div className="h-px flex-1 bg-(--color-border-default)" />
-                <span className="text-[10px] tracking-[1px] text-(--color-auth-ink-muted) uppercase opacity-50">
+                <span className="text-[12px] tracking-[1px] text-(--color-auth-ink-muted) uppercase">
                   OR
                 </span>
                 <div className="h-px flex-1 bg-(--color-border-default)" />
@@ -259,6 +256,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                         className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
                       >
                         {showPassword ? (
@@ -296,7 +294,7 @@ export default function SignupPage() {
                     <div className="text-[14px] font-bold text-(--color-auth-ink)">
                       Allow location access
                     </div>
-                    <div className="text-[11px] text-(--color-auth-ink-muted)">
+                    <div className="text-[12px] text-(--color-auth-ink-muted)">
                       Show rooms near your current position.
                     </div>
                   </div>
@@ -306,6 +304,7 @@ export default function SignupPage() {
                     disabled={locationLoading}
                     className={`relative w-[44px] h-[24px] rounded-full transition-colors disabled:opacity-60 ${allowLocation ? "bg-(--color-auth-primary)" : "bg-(--color-auth-border)/60"}`}
                     aria-pressed={allowLocation}
+                    aria-label="Share my location"
                   >
                     {locationLoading ? (
                       <span className="absolute inset-0 flex items-center justify-center">
@@ -341,17 +340,17 @@ export default function SignupPage() {
 
                 <div className="text-center text-[14px] text-(--color-auth-ink-muted)">
                   Already have an account?{" "}
-                  <Link
-                    href={withNext("/customer/login")}
+                  <LinkWithNext
+                    path="/customer/login"
                     className="font-bold text-(--color-auth-primary)"
                   >
                     Log in
-                  </Link>
+                  </LinkWithNext>
                 </div>
               </form>
             </div>
 
-            <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
+            <div className="mt-12 flex items-center justify-center gap-12 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
               <span>© 2026 SHOPROOM</span>
               <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
               <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>

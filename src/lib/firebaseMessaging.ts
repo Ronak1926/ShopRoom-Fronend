@@ -4,13 +4,15 @@
  * callers can degrade gracefully rather than crash.
  */
 
-import { getMessaging, isSupported, type Messaging } from "firebase/messaging";
+import type { Messaging } from "firebase/messaging";
+import { loadMessagingSdk } from "@/features/push/pushEvents";
 import { app } from "./firebase";
 
 let messagingInstance: Messaging | null = null;
 
 export async function getMessagingIfSupported(): Promise<Messaging | null> {
   if (typeof window === "undefined") return null;
+  const { getMessaging, isSupported } = await loadMessagingSdk();
   if (!(await isSupported())) return null;
   if (!messagingInstance) messagingInstance = getMessaging(app);
   return messagingInstance;

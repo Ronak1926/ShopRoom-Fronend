@@ -4,9 +4,9 @@
  * prompt: it only acts when the customer has already allowed notifications.
  */
 
-import { getToken } from "firebase/messaging";
 import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
 import { registerDevice, unregisterDevice } from "./pushApi";
+import { loadMessagingSdk } from "./pushEvents";
 
 export const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
 const WORKER_URL = "/firebase-messaging-sw.js";
@@ -22,6 +22,7 @@ async function currentToken(): Promise<string | null> {
     (await navigator.serviceWorker.register(WORKER_URL));
   await navigator.serviceWorker.ready;
 
+  const { getToken } = await loadMessagingSdk();
   const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
   return token || null;
 }

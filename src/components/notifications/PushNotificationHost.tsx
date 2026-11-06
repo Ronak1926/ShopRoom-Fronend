@@ -17,10 +17,10 @@
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { onMessage } from "firebase/messaging";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import { getMessagingIfSupported } from "@/lib/firebaseMessaging";
+import { loadMessagingSdk, PUSH_ENABLED_EVENT } from "@/features/push/pushEvents";
 import { getSendDesign, reportReceipt, type SendDesignResponse } from "@/features/push/pushApi";
 import { parseTapHash, REPLAY_PUSH_EVENT, type TapReference } from "@/features/push/tapLink";
 import { getCookie } from "@/utils/cookieUtils";
@@ -71,11 +71,16 @@ export default function PushNotificationHost() {
   const router = useRouter();
   const [incoming, setIncoming] = useState<IncomingPush | null>(null);
 
+  // A push can only arrive in this tab if notifications are allowed, so the Firebase SDK is only
+  // fetched then (or the moment the person turns them on), not for every visitor to a customer page.
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
+    let stopped = false;
 
-    getMessagingIfSupported().then((messaging) => {
-      if (!messaging) return;
+    async function startListening() {
+      if (unsubscribe) return;
+      const [messaging, { onMessage }] = await Promise.all([getMessagingIfSupported(), loadMessagingSdk()]);
+      if (stopped || unsubscribe || !messaging) return;
       void loadDesignPreview();
       unsubscribe = onMessage(messaging, (payload) => {
         const sendId = payload.data?.sendId;
@@ -93,9 +98,16 @@ export default function PushNotificationHost() {
             // (e.g. left the room) — silently drop it.
           });
       });
-    });
+    }
 
-    return () => unsubscribe?.();
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") void startListening();
+    window.addEventListener(PUSH_ENABLED_EVENT, startListening);
+
+    return () => {
+      stopped = true;
+      window.removeEventListener(PUSH_ENABLED_EVENT, startListening);
+      unsubscribe?.();
+    };
   }, []);
 
   /** Plays a past push's animated design. `reportOpen` is for taps that the service worker did not already record. */

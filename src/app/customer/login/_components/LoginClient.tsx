@@ -23,7 +23,6 @@ export default function LoginClient({ initialTab }: Props) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<"customer" | "shopkeeper">(initialTab);
 
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function LoginClient({ initialTab }: Props) {
       router.replace("/shopkeeper/dashboard");
     } else {
       dispatch(hydrateToken());
-      setReady(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -48,8 +46,6 @@ export default function LoginClient({ initialTab }: Props) {
       { scroll: false },
     );
   }
-
-  if (!ready) return null;
 
   const isShopkeeper = tab === "shopkeeper";
 
@@ -95,7 +91,7 @@ export default function LoginClient({ initialTab }: Props) {
             {isShopkeeper ? <ShopkeeperForm /> : <CustomerForm />}
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-8 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
+          <div className="mt-8 flex items-center justify-center gap-8 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
             <span>© 2026 SHOPROOM</span>
             <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
             <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>

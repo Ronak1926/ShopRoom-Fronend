@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signInWithPopup } from "firebase/auth";
 import { z } from "zod";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import { firebaseAuth, googleProvider } from "@/lib/firebase";
+import { firebaseAuth, googleProvider, popupResolver } from "@/lib/firebase";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { deleteCookie, getCookie } from "@/utils/cookieUtils";
 
@@ -73,7 +73,7 @@ export default function DeleteAccountCard({ cookieName, endpoint, consequences, 
     setBusy(true);
     setError(null);
     try {
-      const { user } = await signInWithPopup(firebaseAuth, googleProvider);
+      const { user } = await signInWithPopup(firebaseAuth, googleProvider, popupResolver);
       await deleteAccount({ idToken: await user.getIdToken() });
     } catch {
       setError("Google sign-in didn't complete. Please try again.");
