@@ -18,6 +18,7 @@ import {
 import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 import ExportDataCard from "@/components/account/ExportDataCard";
 import RecentActivityCard from "@/components/account/RecentActivityCard";
+import TwoStepCard from "@/components/account/TwoStepCard";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
@@ -153,6 +154,10 @@ export default function CustomerProfilePage() {
 
             <div className="mt-6">
               <PushNotificationsCard />
+            </div>
+
+            <div className="mt-6">
+              <TwoStepCard role="customer" usesGoogle={!data.hasPassword} />
             </div>
 
             <div className="mt-6">

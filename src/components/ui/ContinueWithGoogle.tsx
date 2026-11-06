@@ -34,7 +34,12 @@ function setRedirectPending(pending: boolean): void {
   }
 }
 
-export function ContinueWithGoogle() {
+interface Props {
+  /** Google accepted the person but their account needs a code from its authenticator app. */
+  onMfaRequired?: (mfaToken: string) => void;
+}
+
+export function ContinueWithGoogle({ onMfaRequired }: Props) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -54,6 +59,11 @@ export function ContinueWithGoogle() {
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (cancelled) return;
         if (googleAuthCustomer.fulfilled.match(action)) {
+          if ("mfaRequired" in action.payload) {
+            setLoading(false);
+            onMfaRequired?.(action.payload.mfaToken);
+            return;
+          }
           router.push(nextAfterAuth());
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
@@ -69,7 +79,7 @@ export function ContinueWithGoogle() {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, router]);
+  }, [dispatch, router, onMfaRequired]);
 
   // NOT async — signInWithPopup must be called synchronously so the browser
   // recognises it as a direct user gesture (prevents popup-blocked errors)
@@ -81,6 +91,11 @@ export function ContinueWithGoogle() {
         const idToken = await result.user.getIdToken();
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (googleAuthCustomer.fulfilled.match(action)) {
+          if ("mfaRequired" in action.payload) {
+            setLoading(false);
+            onMfaRequired?.(action.payload.mfaToken);
+            return;
+          }
           router.push(nextAfterAuth());
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");

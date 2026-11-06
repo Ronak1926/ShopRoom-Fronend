@@ -12,7 +12,8 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 
 import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { loginCustomer } from "@/features/auth/authSlice";
+import { loginCustomer, sessionStarted } from "@/features/auth/authSlice";
+import MfaChallenge from "@/components/auth/MfaChallenge";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
 import { nextAfterAuth } from "@/lib/safeRedirect";
 import LinkWithNext from "@/components/ui/LinkWithNext";
@@ -23,6 +24,7 @@ export default function CustomerForm() {
   const { status } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
   const [showPw, setShowPw] = useState(false);
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
 
   const {
     register,
@@ -39,15 +41,30 @@ export default function CustomerForm() {
       loginCustomer({ email: values.email, password: values.password }),
     );
     if (loginCustomer.fulfilled.match(action)) {
-      router.replace(nextAfterAuth());
+      if ("mfaRequired" in action.payload) setMfaToken(action.payload.mfaToken);
+      else router.replace(nextAfterAuth());
     } else {
       setError("password", { message: "Incorrect email or password" });
     }
   }
 
+  if (mfaToken) {
+    return (
+      <MfaChallenge
+        role="customer"
+        mfaToken={mfaToken}
+        onVerified={(result) => {
+          dispatch(sessionStarted(result.token));
+          router.replace(nextAfterAuth());
+        }}
+        onCancel={() => setMfaToken(null)}
+      />
+    );
+  }
+
   return (
     <>
-      <ContinueWithGoogle />
+      <ContinueWithGoogle onMfaRequired={setMfaToken} />
 
       <div className="my-6 flex items-center gap-4">
         <div className="h-px flex-1 bg-(--color-border-default)" />

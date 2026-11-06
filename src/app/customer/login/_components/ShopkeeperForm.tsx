@@ -12,12 +12,14 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 
 import { apiClient } from "@/utils/apiClient";
 import { setCookie } from "@/utils/cookieUtils";
+import MfaChallenge from "@/components/auth/MfaChallenge";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
 
 export default function ShopkeeperForm() {
   const router = useRouter();
   const [showPw, setShowPw] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
 
   const {
     register,
@@ -36,6 +38,10 @@ export default function ShopkeeperForm() {
         email: values.email,
         password: values.password,
       });
+      if ((res.data as { mfaRequired?: boolean }).mfaRequired) {
+        setMfaToken((res.data as { mfaToken: string }).mfaToken);
+        return;
+      }
       const { token } = res.data as { token: string };
       setCookie("shopkeeper_token", token);
       router.replace("/shopkeeper/dashboard");
@@ -44,6 +50,20 @@ export default function ShopkeeperForm() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (mfaToken) {
+    return (
+      <MfaChallenge
+        role="shopkeeper"
+        mfaToken={mfaToken}
+        onVerified={(result) => {
+          setCookie("shopkeeper_token", result.token);
+          router.replace("/shopkeeper/dashboard");
+        }}
+        onCancel={() => setMfaToken(null)}
+      />
+    );
   }
 
   return (

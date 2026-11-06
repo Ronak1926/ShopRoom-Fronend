@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 import { apiClient, setAuthToken } from "../../utils/apiClient";
 import { getCookie, setCookie, deleteCookie } from "../../utils/cookieUtils";
@@ -8,6 +8,7 @@ import type {
   GoogleAuthRequest,
   LoginRequest,
   LoginResponse,
+  MfaRequiredResponse,
   RegisterRequest,
 } from "./authTypes";
 
@@ -42,11 +43,11 @@ export const registerCustomer = createAsyncThunk<
   }
 });
 
-export const loginCustomer = createAsyncThunk<LoginResponse, LoginRequest>(
+export const loginCustomer = createAsyncThunk<LoginResponse | MfaRequiredResponse, LoginRequest>(
   "auth/loginCustomer",
   async (payload, thunkApi) => {
     try {
-      const res = await apiClient.post<LoginResponse>(
+      const res = await apiClient.post<LoginResponse | MfaRequiredResponse>(
         "/api/customers/login",
         payload,
       );
@@ -60,11 +61,11 @@ export const loginCustomer = createAsyncThunk<LoginResponse, LoginRequest>(
 );
 
 export const googleAuthCustomer = createAsyncThunk<
-  LoginResponse,
+  LoginResponse | MfaRequiredResponse,
   GoogleAuthRequest
 >("auth/googleAuthCustomer", async (payload, thunkApi) => {
   try {
-    const res = await apiClient.post<LoginResponse>(
+    const res = await apiClient.post<LoginResponse | MfaRequiredResponse>(
       "/api/customers/google-auth",
       payload,
     );
@@ -85,6 +86,14 @@ export const authSlice = createSlice({
       state.token = token;
       setAuthToken(token);
     },
+    /** The second step of signing in finished: start the session. */
+    sessionStarted(state, action: PayloadAction<string>) {
+      state.status = "succeeded";
+      state.token = action.payload;
+      state.error = null;
+      setCookie("token", action.payload);
+      setAuthToken(action.payload);
+    },
     logout(state) {
       state.token = null;
       state.customer = null;
@@ -101,6 +110,11 @@ export const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginCustomer.fulfilled, (state, action) => {
+        if ("mfaRequired" in action.payload) {
+          // Password accepted, code still needed: no session yet.
+          state.status = "idle";
+          return;
+        }
         state.status = "succeeded";
         state.token = action.payload.token;
         state.customer = action.payload.customer ?? null;
@@ -117,6 +131,10 @@ export const authSlice = createSlice({
         state.error = null;
       })
       .addCase(googleAuthCustomer.fulfilled, (state, action) => {
+        if ("mfaRequired" in action.payload) {
+          state.status = "idle";
+          return;
+        }
         state.status = "succeeded";
         state.token = action.payload.token;
         state.customer = action.payload.customer ?? null;
@@ -147,5 +165,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { hydrateToken, logout } = authSlice.actions;
+export const { hydrateToken, logout, sessionStarted } = authSlice.actions;
 export const authReducer = authSlice.reducer;

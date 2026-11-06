@@ -31,3 +31,9 @@ export type LoginResponse = {
   token: string;
   customer?: Customer;
 };
+
+/** The password was right but the account has two-step verification: a code is still needed. */
+export type MfaRequiredResponse = {
+  mfaRequired: true;
+  mfaToken: string;
+};
