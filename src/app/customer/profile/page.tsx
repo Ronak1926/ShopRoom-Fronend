@@ -16,6 +16,7 @@ import {
   type CustomerProfileFormValues,
 } from "./_schemas/customerProfileSchema";
 import DeleteAccountCard from "@/components/account/DeleteAccountCard";
+import ExportDataCard from "@/components/account/ExportDataCard";
 import { apiClient, setAuthToken } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
@@ -151,6 +152,15 @@ export default function CustomerProfilePage() {
 
             <div className="mt-6">
               <PushNotificationsCard />
+            </div>
+
+            <div className="mt-6">
+              <ExportDataCard
+                cookieName="token"
+                endpoint="/api/customers/me/export"
+                usesGoogle={!data.hasPassword}
+                description="A copy of what ShopRoom holds about you as a file: your details, the rooms you've joined, your messages and reactions, and how notifications reached you. Passwords and sign-in tokens are never included."
+              />
             </div>
 
             <div className="mt-6">

@@ -15,6 +15,7 @@ import ProfileRoomCard from "./_components/ProfileRoomCard";
 import ProfileShopDetailsCard from "./_components/ProfileShopDetailsCard";
 import ProfileAccountCard from "./_components/ProfileAccountCard";
 import DeleteAccountCard from "@/components/account/DeleteAccountCard";
+import ExportDataCard from "@/components/account/ExportDataCard";
 import { shopProfileSchema, type ShopProfileFormValues } from "./_schemas/shopProfileSchema";
 import { apiClient, setAuthToken } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
@@ -232,6 +233,11 @@ export default function ShopkeeperProfilePage() {
                   editing={isEditing}
                   register={register}
                   errors={errors}
+                />
+                <ExportDataCard
+                  cookieName="shopkeeper_token"
+                  endpoint="/api/shopkeeper/me/export"
+                  description="A copy of your shop's data as a file: your details, plan and payments, notification designs, schedules and send history, and your own chat messages. Your members' names and emails, and your password, are not included."
                 />
                 <DeleteAccountCard
                   cookieName="shopkeeper_token"
