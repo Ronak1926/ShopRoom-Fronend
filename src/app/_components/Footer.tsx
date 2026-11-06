@@ -31,7 +31,6 @@ const COLUMNS = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
-      { label: "Success Stories", href: "/#testimonials" },
     ],
   },
   {

@@ -80,7 +80,7 @@ const PRIVATE_PATHS = [
 // Files in /public keep their names between releases, so they cannot be cached forever: a day,
 // then revalidate in the background, saves the repeat download without ever going stale.
 // Only top-level files and the two image folders: /_next/static is hashed and already immutable.
-const PUBLIC_ASSET_SOURCES = ["/:file([^/]+\\.(?:png|jpg|webp|svg|ico))", "/industries/:path*", "/profile-pic/:path*"];
+const PUBLIC_ASSET_SOURCES = ["/:file([^/]+\\.(?:png|jpg|webp|svg|ico))", "/industries/:path*"];
 const PUBLIC_ASSET_CACHE = "public, max-age=86400, stale-while-revalidate=604800";
 
 const nextConfig: NextConfig = {
