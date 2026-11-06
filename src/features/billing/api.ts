@@ -20,7 +20,7 @@ export interface Billing {
   /** Whole days left, 0 once expired. */
   daysLeft: number;
   plans: { id: PlanId; label: string; priceInr: number; days: number }[];
-  payments: { id: string; purpose: "REGISTRATION" | "RENEWAL"; planType: string; amountInr: number; paidAt: string }[];
+  payments: { id: string; purpose: "REGISTRATION" | "RENEWAL"; planType: string; amountInr: number; paidAt: string; refunded: boolean }[];
 }
 
 export async function fetchBilling(): Promise<Billing> {

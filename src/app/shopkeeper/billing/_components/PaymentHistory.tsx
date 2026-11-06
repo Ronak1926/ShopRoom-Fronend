@@ -27,7 +27,10 @@ export default function PaymentHistory({ payments }: { payments: Billing["paymen
                   <td className="py-2.5 pr-4 text-(--color-text-primary)">{formatDate(p.paidAt)}</td>
                   <td className="py-2.5 pr-4 text-(--color-text-secondary)">{PURPOSE_LABELS[p.purpose]}</td>
                   <td className="py-2.5 pr-4 text-(--color-text-secondary)">{PLAN_LABELS[p.planType] ?? p.planType}</td>
-                  <td className="py-2.5 text-right font-semibold text-(--color-text-primary)">{formatInr(p.amountInr)}</td>
+                  <td className="py-2.5 text-right font-semibold text-(--color-text-primary)">
+                    {formatInr(p.amountInr)}
+                    {p.refunded && <span className="ml-2 rounded-full bg-(--color-bg-surface-hover) px-2 py-0.5 text-[11px] font-semibold text-(--color-text-secondary)">Refunded</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>

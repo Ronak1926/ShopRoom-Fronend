@@ -16,6 +16,7 @@ import ProfileShopDetailsCard from "./_components/ProfileShopDetailsCard";
 import ProfileAccountCard from "./_components/ProfileAccountCard";
 import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 import ExportDataCard from "@/components/account/ExportDataCard";
+import RecentActivityCard from "@/components/account/RecentActivityCard";
 import { shopProfileSchema, type ShopProfileFormValues } from "./_schemas/shopProfileSchema";
 import { apiClient, setAuthToken } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
@@ -234,6 +235,7 @@ export default function ShopkeeperProfilePage() {
                   register={register}
                   errors={errors}
                 />
+                <RecentActivityCard cookieName="shopkeeper_token" endpoint="/api/shopkeeper/me/security-events" />
                 <ExportDataCard
                   cookieName="shopkeeper_token"
                   endpoint="/api/shopkeeper/me/export"
