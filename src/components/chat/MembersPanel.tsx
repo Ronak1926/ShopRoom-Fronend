@@ -7,7 +7,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import Avatar from "@/components/ui/Avatar";
 import StatusDot from "@/components/ui/StatusDot";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import type { Role } from "@/lib/socket";
 
@@ -52,7 +52,6 @@ export default function MembersPanel({ roomId, role, onlineCustomerIds }: Member
   useEffect(() => {
     const token = getCookie(COOKIE_BY_ROLE[role]);
     if (!token) return;
-    setAuthToken(token);
     apiClient
       .get<{ members: Member[]; total: number }>(`/api/rooms/${roomId}/members`)
       .then((res) => {

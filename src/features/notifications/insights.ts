@@ -4,7 +4,6 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import type { SendHistoryItem } from "./api";
 
 export interface Counts {
@@ -31,7 +30,6 @@ export interface Analytics {
 export async function fetchAnalytics(days: number): Promise<Analytics> {
   const { data } = await apiClient.get<{ data: Analytics }>("/api/notifications/analytics", {
     params: { days },
-    headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` },
   });
   return data.data;
 }

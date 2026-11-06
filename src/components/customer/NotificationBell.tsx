@@ -20,9 +20,8 @@ export default function NotificationBell() {
   const rootRef = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(() => {
-    const token = getCookie("token");
-    if (!token) return;
-    getFeed(token).then(
+    if (!getCookie("token")) return;
+    getFeed().then(
       (next) => {
         setFeed(next);
         setFailed(false);

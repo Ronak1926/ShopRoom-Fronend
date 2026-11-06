@@ -30,7 +30,7 @@ export default function CustomerSettings() {
           </div>
           <PushNotificationsCard />
           <ChangePasswordCard role="customer" onTokenRefreshed={() => dispatch(hydrateToken())} />
-          <SignOutEverywhereCard role="customer" onBeforeSignOut={() => unregisterCurrentDevice(getCookie("token") ?? "")} />
+          <SignOutEverywhereCard role="customer" onBeforeSignOut={unregisterCurrentDevice} />
         </div>
       </div>
     </div>

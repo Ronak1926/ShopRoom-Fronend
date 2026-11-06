@@ -7,8 +7,6 @@ import { describeSecurityEvent } from "@/features/account/describeSecurityEvent"
 import { fetchSecurityEvents, type SecurityEvent } from "@/features/account/securityEvents";
 
 interface Props {
-  /** Cookie holding this role's session token. */
-  cookieName: "token" | "shopkeeper_token";
   /** GET endpoint for this role. */
   endpoint: string;
 }
@@ -25,19 +23,19 @@ function ActivitySkeleton() {
   );
 }
 
-export default function RecentActivityCard({ cookieName, endpoint }: Props) {
+export default function RecentActivityCard({ endpoint }: Props) {
   const [events, setEvents] = useState<SecurityEvent[] | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetchSecurityEvents(endpoint, cookieName)
+    fetchSecurityEvents(endpoint)
       .then((rows) => !cancelled && setEvents(rows))
       .catch(() => !cancelled && setFailed(true));
     return () => {
       cancelled = true;
     };
-  }, [cookieName, endpoint]);
+  }, [endpoint]);
 
   return (
     <div className="rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) p-5">

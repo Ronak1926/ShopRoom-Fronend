@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import { apiClient, setAuthToken } from "../../utils/apiClient";
-import { getCookie, setCookie, deleteCookie } from "../../utils/cookieUtils";
+import { apiClient } from "../../utils/apiClient";
+import { getCookie } from "../../utils/cookieUtils";
+import { markSignedIn, markSignedOut } from "../../utils/session";
 
 import type {
   Customer,
@@ -84,23 +85,20 @@ export const authSlice = createSlice({
     hydrateToken(state) {
       const token = getCookie("token");
       state.token = token;
-      setAuthToken(token);
     },
     /** The second step of signing in finished: start the session. */
     sessionStarted(state, action: PayloadAction<string>) {
       state.status = "succeeded";
-      state.token = action.payload;
+      markSignedIn("customer", action.payload);
+      state.token = getCookie("token");
       state.error = null;
-      setCookie("token", action.payload);
-      setAuthToken(action.payload);
     },
     logout(state) {
       state.token = null;
       state.customer = null;
       state.status = "idle";
       state.error = null;
-      deleteCookie("token");
-      setAuthToken(null);
+      markSignedOut("customer");
     },
   },
   extraReducers: (builder) => {
@@ -116,11 +114,10 @@ export const authSlice = createSlice({
           return;
         }
         state.status = "succeeded";
-        state.token = action.payload.token;
+        markSignedIn("customer", action.payload.customerId);
+        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        setCookie("token", action.payload.token);
-        setAuthToken(action.payload.token);
       })
       .addCase(loginCustomer.rejected, (state, action) => {
         state.status = "failed";
@@ -136,11 +133,10 @@ export const authSlice = createSlice({
           return;
         }
         state.status = "succeeded";
-        state.token = action.payload.token;
+        markSignedIn("customer", action.payload.customerId);
+        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        setCookie("token", action.payload.token);
-        setAuthToken(action.payload.token);
       })
       .addCase(googleAuthCustomer.rejected, (state, action) => {
         state.status = "failed";
@@ -152,11 +148,10 @@ export const authSlice = createSlice({
       })
       .addCase(registerCustomer.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.token = action.payload.token;
+        markSignedIn("customer", action.payload.customerId);
+        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        setCookie("token", action.payload.token);
-        setAuthToken(action.payload.token);
       })
       .addCase(registerCustomer.rejected, (state, action) => {
         state.status = "failed";

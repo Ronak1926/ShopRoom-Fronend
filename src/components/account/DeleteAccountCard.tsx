@@ -9,8 +9,8 @@ import { signInWithPopup } from "firebase/auth";
 import { z } from "zod";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import { firebaseAuth, googleProvider, popupResolver } from "@/lib/firebase";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
-import { deleteCookie, getCookie } from "@/utils/cookieUtils";
+import { apiClient } from "@/utils/apiClient";
+import { deleteCookie } from "@/utils/cookieUtils";
 
 const passwordSchema = z.object({
   password: z.string().min(1, "Enter your password to confirm"),
@@ -56,12 +56,8 @@ export default function DeleteAccountCard({ cookieName, endpoint, consequences, 
     setBusy(true);
     setError(null);
     try {
-      await apiClient.delete(endpoint, {
-        data: body,
-        headers: { Authorization: `Bearer ${getCookie(cookieName)}` },
-      });
+      await apiClient.delete(endpoint, { data: body });
       deleteCookie(cookieName);
-      setAuthToken(null);
       router.replace("/");
     } catch (err) {
       setError(errorMessage(err));

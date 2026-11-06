@@ -1,5 +1,4 @@
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 
 export type SecurityEventType =
   | "LOGIN_SUCCESS"
@@ -23,7 +22,7 @@ export interface SecurityEvent {
   detail: { method?: string; action?: string } | null;
 }
 
-export async function fetchSecurityEvents(endpoint: string, cookieName: "token" | "shopkeeper_token"): Promise<SecurityEvent[]> {
-  const { data } = await apiClient.get<{ data: SecurityEvent[] }>(endpoint, { headers: { Authorization: `Bearer ${getCookie(cookieName)}` } });
+export async function fetchSecurityEvents(endpoint: string): Promise<SecurityEvent[]> {
+  const { data } = await apiClient.get<{ data: SecurityEvent[] }>(endpoint);
   return data.data;
 }

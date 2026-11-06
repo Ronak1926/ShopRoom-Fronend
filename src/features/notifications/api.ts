@@ -4,12 +4,7 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import type { DesignRecord, NotificationDesign } from "./types";
-
-function authConfig() {
-  return { headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` } };
-}
 
 interface Envelope<T> {
   data: T;
@@ -60,7 +55,6 @@ export interface ListDesignsParams {
 
 export async function listDesigns(params: ListDesignsParams = {}): Promise<DesignPage> {
   const { data } = await apiClient.get<Envelope<DesignPage>>("/api/notifications/designs", {
-    ...authConfig(),
     params: {
       ...params,
       ...(params.archived === undefined ? {} : { archived: String(params.archived) }),
@@ -72,7 +66,6 @@ export async function listDesigns(params: ListDesignsParams = {}): Promise<Desig
 export async function getDesign(id: string): Promise<DesignRecord> {
   const { data } = await apiClient.get<Envelope<DesignRecord>>(
     `/api/notifications/designs/${id}`,
-    authConfig(),
   );
   return data.data;
 }
@@ -81,7 +74,6 @@ export async function createBlankDesign(name: string, category: string): Promise
   const { data } = await apiClient.post<Envelope<DesignRecord>>(
     "/api/notifications/designs",
     { name, category },
-    authConfig(),
   );
   return data.data;
 }
@@ -93,7 +85,6 @@ export async function autosaveDesign(
   const { data } = await apiClient.patch<Envelope<{ id: string; version: number; updatedAt: string; status: string }>>(
     `/api/notifications/designs/${id}`,
     { design },
-    authConfig(),
   );
   return data.data;
 }
@@ -106,14 +97,13 @@ export async function autosaveDesign(
  * behind `isArchived` and POST /designs/:id/restore brings it back.
  */
 export async function archiveDesign(id: string): Promise<void> {
-  await apiClient.post(`/api/notifications/designs/${id}/archive`, {}, authConfig());
+  await apiClient.post(`/api/notifications/designs/${id}/archive`, {});
 }
 
 export async function saveVersion(id: string): Promise<{ id: string; version: number }> {
   const { data } = await apiClient.post<Envelope<{ id: string; version: number }>>(
     `/api/notifications/designs/${id}/versions`,
     {},
-    authConfig(),
   );
   return data.data;
 }
@@ -138,7 +128,6 @@ export interface ListTemplatesParams {
 
 export async function listTemplates(params: ListTemplatesParams = {}): Promise<TemplatePage> {
   const { data } = await apiClient.get<Envelope<TemplatePage>>("/api/notifications/templates", {
-    ...authConfig(),
     params,
   });
   return data.data;
@@ -154,7 +143,6 @@ export interface NotificationCategory {
 export async function listCategories(): Promise<NotificationCategory[]> {
   const { data } = await apiClient.get<Envelope<NotificationCategory[]>>(
     "/api/notifications/categories",
-    authConfig(),
   );
   return data.data;
 }
@@ -163,7 +151,6 @@ export async function cloneTemplate(templateId: string): Promise<DesignRecord> {
   const { data } = await apiClient.post<Envelope<DesignRecord>>(
     `/api/notifications/templates/${templateId}/use`,
     {},
-    authConfig(),
   );
   return data.data;
 }
@@ -187,7 +174,6 @@ export async function uploadAsset(
     "/api/notifications/assets",
     { image: imageDataUri, ...meta },
     {
-      ...authConfig(),
       onUploadProgress: onProgress
         ? (e) => onProgress(e.total ? Math.round((e.loaded / e.total) * 100) : 0)
         : undefined,
@@ -199,7 +185,6 @@ export async function uploadAsset(
 export async function listAssets(): Promise<AssetSummary[]> {
   const { data } = await apiClient.get<Envelope<AssetSummary[]>>(
     "/api/notifications/assets",
-    authConfig(),
   );
   return data.data;
 }
@@ -234,7 +219,7 @@ export async function searchStockImages(params: {
 }): Promise<StockImageSearchResult> {
   const { data } = await apiClient.get<Envelope<StockImageSearchResult>>(
     "/api/notifications/stock-images",
-    { ...authConfig(), params },
+    { params },
   );
   return data.data;
 }
@@ -266,7 +251,6 @@ export async function sendNotification(
   const { data } = await apiClient.post<Envelope<SendNotificationResult>>(
     "/api/notifications/send",
     body,
-    authConfig(),
   );
   return data.data;
 }
@@ -289,7 +273,7 @@ export async function getCapabilities(): Promise<{
 }> {
   const { data } = await apiClient.get<
     Envelope<{ planType: string; capabilities: PlanCapabilities; usedToday: number }>
-  >("/api/notifications/capabilities", authConfig());
+  >("/api/notifications/capabilities");
   return data.data;
 }
 
@@ -332,7 +316,6 @@ export async function createSchedule(
   const { data } = await apiClient.post<Envelope<ScheduledNotificationResult>>(
     "/api/notifications/schedules",
     body,
-    authConfig(),
   );
   return data.data;
 }
@@ -372,7 +355,6 @@ export async function listSchedules(
   params: { page?: number; limit?: number } = {},
 ): Promise<SchedulePage> {
   const { data } = await apiClient.get<Envelope<SchedulePage>>("/api/notifications/schedules", {
-    ...authConfig(),
     params: { state, ...params },
   });
   return data.data;
@@ -385,13 +367,12 @@ export async function setScheduleStatus(
   const { data } = await apiClient.patch<Envelope<ScheduleView>>(
     `/api/notifications/schedules/${id}`,
     { status },
-    authConfig(),
   );
   return data.data;
 }
 
 export async function cancelSchedule(id: string): Promise<void> {
-  await apiClient.delete(`/api/notifications/schedules/${id}`, authConfig());
+  await apiClient.delete(`/api/notifications/schedules/${id}`);
 }
 
 // ── Send history ─────────────────────────────────────────────────────────────
@@ -436,7 +417,6 @@ export interface SendHistoryParams {
 
 export async function listSends(params: SendHistoryParams = {}): Promise<SendHistoryPage> {
   const { data } = await apiClient.get<Envelope<SendHistoryPage>>("/api/notifications/sends", {
-    ...authConfig(),
     params,
   });
   return data.data;

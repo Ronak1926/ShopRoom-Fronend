@@ -11,7 +11,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 
 import { apiClient } from "@/utils/apiClient";
-import { setCookie } from "@/utils/cookieUtils";
+import { markSignedIn } from "@/utils/session";
 import MfaChallenge from "@/components/auth/MfaChallenge";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
 
@@ -42,8 +42,7 @@ export default function ShopkeeperForm() {
         setMfaToken((res.data as { mfaToken: string }).mfaToken);
         return;
       }
-      const { token } = res.data as { token: string };
-      setCookie("shopkeeper_token", token);
+      markSignedIn("shopkeeper", (res.data as { shopkeeperId: string }).shopkeeperId);
       router.replace("/shopkeeper/dashboard");
     } catch {
       setError("password", { message: "Incorrect email or password" });
@@ -58,7 +57,8 @@ export default function ShopkeeperForm() {
         role="shopkeeper"
         mfaToken={mfaToken}
         onVerified={(result) => {
-          setCookie("shopkeeper_token", result.token);
+          if (!result.shopkeeperId) return;
+          markSignedIn("shopkeeper", result.shopkeeperId);
           router.replace("/shopkeeper/dashboard");
         }}
         onCancel={() => setMfaToken(null)}

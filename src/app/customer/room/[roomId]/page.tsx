@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/components/customer/Sidebar";
 import CustomerRoom from "./_components/CustomerRoom";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import type { RoomDetails } from "@/components/chat/types";
 
@@ -20,7 +20,6 @@ export default function CustomerRoomPage() {
       router.replace("/customer/login");
       return;
     }
-    setAuthToken(token);
 
     apiClient
       .get<RoomDetails>(`/api/rooms/${params.roomId}`)

@@ -32,16 +32,16 @@ async function currentToken(): Promise<string | null> {
  * between accounts therefore only ever notifies whoever is signed in now, and a
  * rotated token is picked up without the customer doing anything.
  */
-export async function syncDeviceRegistration(authToken: string): Promise<void> {
+export async function syncDeviceRegistration(): Promise<void> {
   const token = await currentToken();
-  if (token) await registerDevice(token, authToken);
+  if (token) await registerDevice(token);
 }
 
 /**
  * Stops notifications for the signed-in customer on this browser. The browser
  * keeps its token, so signing back in re-registers without another prompt.
  */
-export async function unregisterCurrentDevice(authToken: string): Promise<void> {
+export async function unregisterCurrentDevice(): Promise<void> {
   const token = await currentToken();
-  if (token) await unregisterDevice(token, authToken);
+  if (token) await unregisterDevice(token);
 }

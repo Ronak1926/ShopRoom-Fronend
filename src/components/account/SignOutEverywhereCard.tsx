@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
-import { deleteCookie, getCookie } from "@/utils/cookieUtils";
+import { apiClient } from "@/utils/apiClient";
+import { deleteCookie } from "@/utils/cookieUtils";
 import type { AccountRole } from "@/features/account/passwordApi";
 
 interface SignOutEverywhereCardProps {
@@ -29,9 +29,8 @@ export default function SignOutEverywhereCard({ role, onBeforeSignOut }: SignOut
     setError(null);
     try {
       await onBeforeSignOut?.().catch(() => undefined);
-      await apiClient.post(endpoint, {}, { headers: { Authorization: `Bearer ${getCookie(cookie)}` } });
+      await apiClient.post(endpoint, {});
       deleteCookie(cookie);
-      setAuthToken(null);
       router.replace(loginPath);
     } catch {
       setError("Could not sign you out everywhere. Please try again.");

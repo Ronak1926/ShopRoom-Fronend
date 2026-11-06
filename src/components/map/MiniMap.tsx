@@ -18,7 +18,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { useRouter } from "next/navigation";
 import OpenInFullOutlinedIcon from "@mui/icons-material/OpenInFullOutlined";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import StatusDot from "@/components/ui/StatusDot";
 
@@ -79,7 +79,6 @@ export default function MiniMap({
   const fetchPins = useCallback(async (map: import("leaflet").Map) => {
     const token = getCookie("token");
     if (!token) return;
-    setAuthToken(token);
 
     // Claim a sequence slot — any response with a lower seq is stale
     const seq = ++fetchSeqRef.current;

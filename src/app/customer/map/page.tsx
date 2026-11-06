@@ -6,7 +6,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import "leaflet/dist/leaflet.css";
 import { getCookie } from "@/utils/cookieUtils";
 import type { MapPin } from "@/components/map/MiniMap";
@@ -148,7 +148,6 @@ export default function FullMapPage() {
       const token =
         getCookie("token");
       if (!token) return;
-      setAuthToken(token);
 
       // Claim a sequence slot — any response with a lower seq is stale
       const seq = ++fetchSeqRef.current;
@@ -274,10 +273,6 @@ export default function FullMapPage() {
     if (typeof window === "undefined") return;
     if (mapRef.current) return;
     if (!mapDivRef.current) return;
-
-    const token =
-      getCookie("token");
-    if (token) setAuthToken(token);
 
     import("leaflet").then(async (L) => {
       if (!document.getElementById("shoproom-map-style")) {

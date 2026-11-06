@@ -14,7 +14,7 @@ import { describePaymentFailure } from "@/features/billing/describePaymentFailur
 interface Step4PaymentProps {
   draftId: string;
   userEmail: string;
-  onSuccess: (token: string, inviteCode: string) => void;
+  onSuccess: (shopkeeperId: string, inviteCode: string) => void;
   onError: (msg: string) => void;
   onBack: () => void;
 }
@@ -59,7 +59,7 @@ export function Step4Payment({ draftId, userEmail, onSuccess, onError, onBack }:
         email: userEmail,
         confirm: async (payment) =>
           (
-            await apiClient.post<{ token: string; inviteCode: string }>("/api/shopkeeper/payment/verify", {
+            await apiClient.post<{ shopkeeperId: string; inviteCode: string }>("/api/shopkeeper/payment/verify", {
               draftId,
               razorpayOrderId: payment.orderId,
               razorpayPaymentId: payment.paymentId,
@@ -67,7 +67,7 @@ export function Step4Payment({ draftId, userEmail, onSuccess, onError, onBack }:
             })
           ).data,
       });
-      if (account) onSuccess(account.token, account.inviteCode);
+      if (account) onSuccess(account.shopkeeperId, account.inviteCode);
     } catch (err) {
       if (err instanceof PaymentUnconfirmedError) setUnconfirmedPaymentId(err.paymentId);
       else onError(describePaymentFailure(err, "Payment failed. Please try again."));

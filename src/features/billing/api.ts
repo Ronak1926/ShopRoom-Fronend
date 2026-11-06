@@ -4,12 +4,7 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import { runCheckout, type CheckoutOrder } from "./checkout";
-
-function authConfig() {
-  return { headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` } };
-}
 
 export type PlanId = "1m" | "2m" | "3m";
 
@@ -28,7 +23,7 @@ export interface Billing {
 }
 
 export async function fetchBilling(): Promise<Billing> {
-  const { data } = await apiClient.get<{ data: Billing }>("/api/shopkeeper/billing", authConfig());
+  const { data } = await apiClient.get<{ data: Billing }>("/api/shopkeeper/billing");
   return data.data;
 }
 
@@ -37,17 +32,17 @@ export async function fetchBilling(): Promise<Billing> {
  * or null when the shopkeeper closed the payment window.
  */
 export async function renewPlan(planId: PlanId, description: string): Promise<Billing | null> {
-  const order = (await apiClient.post<{ data: CheckoutOrder }>("/api/shopkeeper/billing/order", { planType: planId }, authConfig())).data.data;
+  const order = (await apiClient.post<{ data: CheckoutOrder }>("/api/shopkeeper/billing/order", { planType: planId })).data.data;
 
   return runCheckout({
     order,
     description,
     confirm: async (payment) => {
-      const { data } = await apiClient.post<{ data: Billing }>(
-        "/api/shopkeeper/billing/verify",
-        { razorpayOrderId: payment.orderId, razorpayPaymentId: payment.paymentId, razorpaySignature: payment.signature },
-        authConfig(),
-      );
+      const { data } = await apiClient.post<{ data: Billing }>("/api/shopkeeper/billing/verify", {
+        razorpayOrderId: payment.orderId,
+        razorpayPaymentId: payment.paymentId,
+        razorpaySignature: payment.signature,
+      });
       return data.data;
     },
   });

@@ -19,7 +19,7 @@ import ExportDataCard from "@/components/account/ExportDataCard";
 import RecentActivityCard from "@/components/account/RecentActivityCard";
 import TwoStepCard from "@/components/account/TwoStepCard";
 import { shopProfileSchema, type ShopProfileFormValues } from "./_schemas/shopProfileSchema";
-import { apiClient, setAuthToken } from "../../../utils/apiClient";
+import { apiClient } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -72,12 +72,9 @@ export default function ShopkeeperProfilePage() {
       router.replace("/customer/login?tab=shopkeeper");
       return;
     }
-    setAuthToken(token);
 
     apiClient
-      .get<ProfileData>("/api/shop/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get<ProfileData>("/api/shop/profile")
       .then((res: { data: ProfileData }) => {
         setData(res.data);
         setLogoUrl(res.data.shop.logoUrl);
@@ -237,9 +234,8 @@ export default function ShopkeeperProfilePage() {
                   errors={errors}
                 />
                 <TwoStepCard role="shopkeeper" />
-                <RecentActivityCard cookieName="shopkeeper_token" endpoint="/api/shopkeeper/me/security-events" />
+                <RecentActivityCard endpoint="/api/shopkeeper/me/security-events" />
                 <ExportDataCard
-                  cookieName="shopkeeper_token"
                   endpoint="/api/shopkeeper/me/export"
                   description="A copy of your shop's data as a file: your details, plan and payments, notification designs, schedules and send history, and your own chat messages. Your members' names and emails, and your password, are not included."
                 />

@@ -1,8 +1,7 @@
 /**
  * features/push/pushApi.ts — Typed client for push-notification device
- * registration and resolving a received push's design. Uses the plain
- * apiClient (not a manual cookie-read authConfig()) since these calls only
- * ever fire from already-hydrated customer pages where setAuthToken already ran.
+ * registration and resolving a received push's design. The customer's
+ * HttpOnly session cookie travels with every apiClient call.
  */
 
 import { apiClient } from "@/utils/apiClient";
@@ -13,32 +12,17 @@ interface Envelope<T> {
   message?: string;
 }
 
-/**
- * `authToken` is for callers that run before the page has put the customer's
- * session on apiClient (the layout's background sync, the sign-out screen).
- */
-function bearer(authToken: string | undefined) {
-  return authToken ? { headers: { Authorization: `Bearer ${authToken}` } } : {};
+export async function registerDevice(fcmToken: string, platform: "WEB" = "WEB"): Promise<void> {
+  await apiClient.post("/api/customers/me/devices", { fcmToken, platform });
 }
 
-export async function registerDevice(
-  fcmToken: string,
-  authToken?: string,
-  platform: "WEB" = "WEB",
-): Promise<void> {
-  await apiClient.post("/api/customers/me/devices", { fcmToken, platform }, bearer(authToken));
-}
-
-export async function unregisterDevice(fcmToken: string, authToken?: string): Promise<void> {
-  await apiClient.delete("/api/customers/me/devices", { data: { fcmToken }, ...bearer(authToken) });
+export async function unregisterDevice(fcmToken: string): Promise<void> {
+  await apiClient.delete("/api/customers/me/devices", { data: { fcmToken } });
 }
 
 /** Stores the customer's current position for radius-based notifications. */
-export async function reportLocation(
-  position: { latitude: number; longitude: number },
-  authToken: string,
-): Promise<void> {
-  await apiClient.put("/api/customers/me/location", position, bearer(authToken));
+export async function reportLocation(position: { latitude: number; longitude: number }): Promise<void> {
+  await apiClient.put("/api/customers/me/location", position);
 }
 
 export interface SendDesignResponse {
@@ -48,11 +32,8 @@ export interface SendDesignResponse {
   context: RenderContext;
 }
 
-export async function getSendDesign(sendId: string, authToken?: string): Promise<SendDesignResponse> {
-  const { data } = await apiClient.get<Envelope<SendDesignResponse>>(
-    `/api/notifications/sends/${sendId}/design`,
-    bearer(authToken),
-  );
+export async function getSendDesign(sendId: string): Promise<SendDesignResponse> {
+  const { data } = await apiClient.get<Envelope<SendDesignResponse>>(`/api/notifications/sends/${sendId}/design`);
   return data.data;
 }
 
@@ -85,7 +66,7 @@ export interface Feed {
 }
 
 /** The customer's recent notifications, newest first. */
-export async function getFeed(authToken?: string): Promise<Feed> {
-  const { data } = await apiClient.get<Envelope<Feed>>("/api/notifications/feed", bearer(authToken));
+export async function getFeed(): Promise<Feed> {
+  const { data } = await apiClient.get<Envelope<Feed>>("/api/notifications/feed");
   return data.data;
 }

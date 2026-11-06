@@ -54,7 +54,8 @@ export default function CustomerForm() {
         role="customer"
         mfaToken={mfaToken}
         onVerified={(result) => {
-          dispatch(sessionStarted(result.token));
+          if (!result.customerId) return;
+          dispatch(sessionStarted(result.customerId));
           router.replace(nextAfterAuth());
         }}
         onCancel={() => setMfaToken(null)}

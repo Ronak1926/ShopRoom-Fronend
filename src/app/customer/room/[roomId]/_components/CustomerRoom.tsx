@@ -7,24 +7,13 @@ import MembersPanel from "@/components/chat/MembersPanel";
 import MessageFeed from "@/components/chat/MessageFeed";
 import Composer from "@/components/chat/Composer";
 import { useRoomChat, type ChatMessage } from "@/hooks/useRoomChat";
-import { getCookie } from "@/utils/cookieUtils";
+import { signedInAccountId } from "@/utils/session";
 import type { ChatTab, RoomDetails } from "@/components/chat/types";
-
-function decodeCustomerId(): string | null {
-  const token = getCookie("token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1])) as { sub?: unknown };
-    return typeof payload.sub === "string" ? payload.sub : null;
-  } catch {
-    return null;
-  }
-}
 
 export default function CustomerRoom({ room }: { room: RoomDetails }) {
   const [activeTab, setActiveTab] = useState<ChatTab>("chat");
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
-  const myCustomerId = useMemo(() => decodeCustomerId(), []);
+  const myCustomerId = useMemo(() => signedInAccountId("customer"), []);
   const {
     messages,
     typingUsers,

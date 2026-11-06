@@ -2,30 +2,23 @@
 
 import { io, type Socket } from "socket.io-client";
 import { API_BASE_URL } from "@/constants/api";
-import { getCookie } from "@/utils/cookieUtils";
 
 export type Role = "customer" | "shopkeeper";
-
-const COOKIE_BY_ROLE: Record<Role, string> = {
-  customer: "token",
-  shopkeeper: "shopkeeper_token",
-};
 
 const sockets: Partial<Record<Role, Socket>> = {};
 
 /**
- * Singleton Socket.IO connection per role, reusing the same bearer-token
- * cookie apiClient already reads (see src/utils/apiClient.ts) — passed via
- * the handshake `auth` payload since the backend has no HttpOnly session
- * cookie to read automatically.
+ * Singleton Socket.IO connection per role. The session is the HttpOnly cookie the browser already holds for
+ * the API (`withCredentials` sends it with the handshake), so there is no token for the page to read or pass:
+ * only the role is stated, so the API knows which of the two session cookies to check.
  */
 export function getSocket(role: Role): Socket {
   const existing = sockets[role];
   if (existing) return existing;
 
-  const token = getCookie(COOKIE_BY_ROLE[role]);
   const socket = io(API_BASE_URL, {
-    auth: { token, role },
+    auth: { role },
+    withCredentials: true,
     transports: ["websocket", "polling"],
   });
   sockets[role] = socket;

@@ -1,5 +1,4 @@
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import { fileNameFrom } from "./fileName";
 
 export type ExportProof = { password: string } | { idToken: string };
@@ -20,13 +19,10 @@ async function messageFromFailure(err: unknown): Promise<string> {
 }
 
 /** Asks for the account's data (proving identity again) and saves it as a file in the browser. */
-export async function downloadAccountData(endpoint: string, cookieName: "token" | "shopkeeper_token", proof: ExportProof): Promise<void> {
+export async function downloadAccountData(endpoint: string, proof: ExportProof): Promise<void> {
   let response;
   try {
-    response = await apiClient.post<Blob>(endpoint, proof, {
-      responseType: "blob",
-      headers: { Authorization: `Bearer ${getCookie(cookieName)}` },
-    });
+    response = await apiClient.post<Blob>(endpoint, proof, { responseType: "blob" });
   } catch (err) {
     throw new Error(await messageFromFailure(err));
   }

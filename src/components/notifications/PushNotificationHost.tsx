@@ -112,10 +112,9 @@ export default function PushNotificationHost() {
 
   /** Plays a past push's animated design. `reportOpen` is for taps that the service worker did not already record. */
   const replay = useCallback((tapped: TapReference, reportOpen: boolean) => {
-    const sessionToken = getCookie("token");
-    if (!sessionToken) return;
+    if (!getCookie("token")) return;
     void loadDesignPreview();
-    getSendDesign(tapped.sendId, sessionToken)
+    getSendDesign(tapped.sendId)
       .then((result) => {
         setIncoming(toIncoming(result, tapped.receiptToken));
         if (reportOpen) reportReceipt(tapped.receiptToken, "OPENED");

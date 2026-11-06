@@ -150,13 +150,12 @@ export function useDashboardData() {
       router.replace("/customer/login?tab=shopkeeper");
       return;
     }
-    const auth = { headers: { Authorization: `Bearer ${token}` } };
 
     setLoading(true);
     try {
       const [dashboard, profile, designs, drafts] = await Promise.all([
-        apiClient.get<DashboardResponse>("/api/shop/dashboard", auth),
-        apiClient.get<ProfileResponse>("/api/shop/profile", auth),
+        apiClient.get<DashboardResponse>("/api/shop/dashboard"),
+        apiClient.get<ProfileResponse>("/api/shop/profile"),
         listDesigns({ archived: false, limit: 6 }),
         listDesigns({ archived: false, status: "DRAFT", limit: 1 }),
       ]);
@@ -164,10 +163,7 @@ export function useDashboardData() {
       const room = dashboard.data.room;
       let members: RoomMember[] = [];
       if (room) {
-        const roomMembers = await apiClient.get<RoomMembersResponse>(
-          `/api/rooms/${room.roomId}/members`,
-          auth,
-        );
+        const roomMembers = await apiClient.get<RoomMembersResponse>(`/api/rooms/${room.roomId}/members`);
         members = roomMembers.data.members;
       }
 

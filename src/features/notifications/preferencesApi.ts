@@ -5,19 +5,14 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import type { NotificationPreferences } from "./preferences";
-
-function authConfig() {
-  return { headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` } };
-}
 
 /** `null` until the shopkeeper has saved preferences for the first time. */
 export async function fetchPreferences(): Promise<Record<string, unknown> | null> {
-  const { data } = await apiClient.get<{ data: Record<string, unknown> | null }>("/api/notifications/preferences", authConfig());
+  const { data } = await apiClient.get<{ data: Record<string, unknown> | null }>("/api/notifications/preferences");
   return data.data;
 }
 
 export async function savePreferencesRemote(values: NotificationPreferences): Promise<void> {
-  await apiClient.put("/api/notifications/preferences", values, authConfig());
+  await apiClient.put("/api/notifications/preferences", values);
 }

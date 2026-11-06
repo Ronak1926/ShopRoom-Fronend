@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { ShopkeeperLeftPanel } from "../../../components/ui/ShopkeeperLeftPanel";
 import { AuthTabButton } from "../../../components/ui/AuthTabButton";
 import { apiClient } from "../../../utils/apiClient";
-import { getCookie, setCookie } from "../../../utils/cookieUtils";
+import { getCookie } from "../../../utils/cookieUtils";
+import { markSignedIn } from "../../../utils/session";
 import { type Step1Values, type Step2Values } from "./_lib/schemas";
 import { StepIndicator } from "./_components/StepIndicator";
 import { Step1Account } from "./_components/Step1Account";
@@ -245,9 +246,9 @@ export default function ShopkeeperSignupPage() {
               <Step4Payment
                 draftId={draftId}
                 userEmail={step1Email}
-                onSuccess={(token, inviteCode) => {
+                onSuccess={(shopkeeperId, inviteCode) => {
                   localStorage.removeItem("shopkeeper_draft_id");
-                  setCookie("shopkeeper_token", token);
+                  markSignedIn("shopkeeper", shopkeeperId);
                   localStorage.setItem("shopkeeper_invite_code", inviteCode);
                   router.push("/shopkeeper/dashboard");
                 }}

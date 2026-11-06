@@ -9,28 +9,17 @@ import MembersPanel from "@/components/chat/MembersPanel";
 import MessageFeed from "@/components/chat/MessageFeed";
 import Composer from "@/components/chat/Composer";
 import { useRoomChat, type ChatMessage } from "@/hooks/useRoomChat";
-import { getCookie } from "@/utils/cookieUtils";
+import { signedInAccountId } from "@/utils/session";
 import type { ChatTab, RoomDetails } from "@/components/chat/types";
 
 interface MyRoomProps {
   room: RoomDetails;
 }
 
-function decodeShopkeeperId(): string | null {
-  const token = getCookie("shopkeeper_token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1])) as { sub?: unknown };
-    return typeof payload.sub === "string" ? payload.sub : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function MyRoom({ room }: MyRoomProps) {
   const [activeTab, setActiveTab] = useState<ChatTab>("chat");
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
-  const myShopkeeperId = useMemo(() => decodeShopkeeperId(), []);
+  const myShopkeeperId = useMemo(() => signedInAccountId("shopkeeper"), []);
   const {
     messages,
     typingUsers,

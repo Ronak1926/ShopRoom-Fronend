@@ -4,7 +4,6 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 
 export interface MemberRow {
   id: string;
@@ -32,7 +31,7 @@ const EXPORT_MAX_PAGES = 100;
 export async function fetchMembers(page: number, limit: number, filter: MembersFilter = {}): Promise<MembersPage> {
   const { data } = await apiClient.get<MembersPage>("/api/shop/members", {
     params: { page, limit, ...(filter.q ? { q: filter.q } : {}), ...(filter.notifications ? { notifications: filter.notifications } : {}) },
-    headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}`, "Cache-Control": "no-cache" },
+    headers: { "Cache-Control": "no-cache" },
   });
   return data;
 }

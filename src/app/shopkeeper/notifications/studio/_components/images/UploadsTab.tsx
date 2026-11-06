@@ -5,7 +5,6 @@ import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import ImageGrid, { type ImageTile } from "./ImageGrid";
 import UploadDropzone from "./UploadDropzone";
 import { useImageUploads } from "./useImageUploads";
@@ -22,9 +21,7 @@ export default function UploadsTab({ replacing, onAdd }: Props) {
 
   const addShopLogo = useCallback(async () => {
     try {
-      const { data } = await apiClient.get<{ shop: { logoUrl: string | null } }>("/api/shop/dashboard", {
-        headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` },
-      });
+      const { data } = await apiClient.get<{ shop: { logoUrl: string | null } }>("/api/shop/dashboard");
       if (data.shop.logoUrl) {
         onAdd({ key: "shop-logo", thumbUrl: data.shop.logoUrl, fullUrl: data.shop.logoUrl, credit: "Shop logo" });
       }

@@ -19,7 +19,7 @@ import DeleteAccountCard from "@/components/account/DeleteAccountCard";
 import ExportDataCard from "@/components/account/ExportDataCard";
 import RecentActivityCard from "@/components/account/RecentActivityCard";
 import TwoStepCard from "@/components/account/TwoStepCard";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
 interface CustomerData {
@@ -60,7 +60,6 @@ export default function CustomerProfilePage() {
       router.replace("/customer/login");
       return;
     }
-    setAuthToken(token);
 
     apiClient
       .get<{ customer: CustomerData }>("/api/customers/me")
@@ -161,12 +160,11 @@ export default function CustomerProfilePage() {
             </div>
 
             <div className="mt-6">
-              <RecentActivityCard cookieName="token" endpoint="/api/customers/me/security-events" />
+              <RecentActivityCard endpoint="/api/customers/me/security-events" />
             </div>
 
             <div className="mt-6">
               <ExportDataCard
-                cookieName="token"
                 endpoint="/api/customers/me/export"
                 usesGoogle={!data.hasPassword}
                 description="A copy of what ShopRoom holds about you as a file: your details, the rooms you've joined, your messages and reactions, and how notifications reached you. Passwords and sign-in tokens are never included."

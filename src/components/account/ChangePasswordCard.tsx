@@ -6,12 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { authInputCls, authLabelCls } from "@/components/ui/authInput";
 import { changePasswordSchema, type ChangePasswordValues } from "@/features/account/passwordSchema";
 import { apiMessage, changePassword, type AccountRole } from "@/features/account/passwordApi";
-import { setAuthToken } from "@/utils/apiClient";
-import { setCookie } from "@/utils/cookieUtils";
 
 interface ChangePasswordCardProps {
   role: AccountRole;
-  /** Called after the session token has been replaced, for state that mirrors it (the customer's Redux slice). */
+  /** Called after the session has been replaced, for state that mirrors it (the customer's Redux slice). */
   onTokenRefreshed?: () => void;
 }
 
@@ -34,9 +32,7 @@ export default function ChangePasswordCard({ role, onTokenRefreshed }: ChangePas
     setMessage(null);
     try {
       const result = await changePassword(role, values.currentPassword, values.newPassword);
-      // Every other device was signed out; this token keeps the current one going.
-      setCookie(role === "customer" ? "token" : "shopkeeper_token", result.token);
-      if (role === "customer") setAuthToken(result.token);
+      // Every other device was signed out; the API already replaced this browser's session cookie.
       onTokenRefreshed?.();
       reset();
       setMessage({ ok: true, text: result.message });

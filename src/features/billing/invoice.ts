@@ -4,7 +4,6 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 
 export interface Invoice {
   number: string;
@@ -24,15 +23,13 @@ export interface Invoice {
   refunded: boolean;
 }
 
-const authConfig = () => ({ headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` } });
-
 export async function fetchInvoice(paymentId: string): Promise<Invoice> {
-  const { data } = await apiClient.get<{ data: Invoice }>(`/api/shopkeeper/billing/invoices/${encodeURIComponent(paymentId)}`, authConfig());
+  const { data } = await apiClient.get<{ data: Invoice }>(`/api/shopkeeper/billing/invoices/${encodeURIComponent(paymentId)}`);
   return data.data;
 }
 
 /** Saves the GSTIN printed on future invoices; an empty value clears it. */
 export async function saveGstin(gstin: string): Promise<string> {
-  const { data } = await apiClient.put<{ message: string }>("/api/shopkeeper/billing/gstin", { gstin: gstin.trim() === "" ? null : gstin.trim() }, authConfig());
+  const { data } = await apiClient.put<{ message: string }>("/api/shopkeeper/billing/gstin", { gstin: gstin.trim() === "" ? null : gstin.trim() });
   return data.message;
 }

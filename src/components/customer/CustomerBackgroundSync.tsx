@@ -65,23 +65,21 @@ export default function CustomerBackgroundSync() {
     // Not on the sign-out screen: a sync there could re-register the device
     // just after the customer unregistered it.
     if (pathname.startsWith("/customer/logout")) return;
-    const authToken = getCookie("token");
-    if (!authToken || syncedFor.current === authToken) return;
-    syncedFor.current = authToken;
+    // The signed-in flag is unique to each sign-in, so a different account on the same tab is noticed.
+    const session = getCookie("token");
+    if (!session || syncedFor.current === session) return;
+    syncedFor.current = session;
 
     // Best effort: both syncs improve delivery, neither is worth interrupting
     // the customer over, and the next page load tries again.
-    syncDeviceRegistration(authToken).catch(() => {});
+    syncDeviceRegistration().catch(() => {});
 
     if (Date.now() - lastReportedAt() < LOCATION_REFRESH_MS) return;
     locationAlreadyAllowed()
       .then((allowed) => (allowed ? currentPosition() : null))
       .then(async (position) => {
         if (!position) return;
-        await reportLocation(
-          { latitude: position.coords.latitude, longitude: position.coords.longitude },
-          authToken,
-        );
+        await reportLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
         rememberReport();
       })
       .catch(() => {});

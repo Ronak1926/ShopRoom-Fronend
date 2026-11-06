@@ -16,8 +16,6 @@ const passwordSchema = z.object({
 type PasswordValues = z.infer<typeof passwordSchema>;
 
 interface Props {
-  /** Cookie holding this role's session token. */
-  cookieName: "token" | "shopkeeper_token";
   /** POST endpoint for this role. */
   endpoint: string;
   /** What the file contains, shown before the user asks for it. */
@@ -26,7 +24,7 @@ interface Props {
   usesGoogle?: boolean;
 }
 
-export default function ExportDataCard({ cookieName, endpoint, description, usesGoogle = false }: Props) {
+export default function ExportDataCard({ endpoint, description, usesGoogle = false }: Props) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -48,7 +46,7 @@ export default function ExportDataCard({ cookieName, endpoint, description, uses
     setBusy(true);
     setError(null);
     try {
-      await downloadAccountData(endpoint, cookieName, proof);
+      await downloadAccountData(endpoint, proof);
       setDone(true);
       close();
     } catch (err) {

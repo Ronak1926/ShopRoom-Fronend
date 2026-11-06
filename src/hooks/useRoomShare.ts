@@ -10,7 +10,7 @@ let cached: { token: string; link: Promise<string | null> } | null = null;
 function loadInviteLink(token: string): Promise<string | null> {
   if (cached?.token === token) return cached.link;
   const link = apiClient
-    .get<{ room: { inviteLink: string } | null }>("/api/shop/me", { headers: { Authorization: `Bearer ${token}` } })
+    .get<{ room: { inviteLink: string } | null }>("/api/shop/me")
     .then((res) => res.data.room?.inviteLink ?? null)
     .catch(() => {
       cached = null;

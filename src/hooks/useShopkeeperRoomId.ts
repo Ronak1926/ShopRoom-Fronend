@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 
 const STORAGE_KEY = "shopkeeper_room_id";
 
@@ -18,9 +17,7 @@ export function useShopkeeperRoomId() {
     const cached = remembered();
     if (cached) return cached;
     try {
-      const { data } = await apiClient.get<{ room: { roomId: string } | null }>("/api/shop/me", {
-        headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` },
-      });
+      const { data } = await apiClient.get<{ room: { roomId: string } | null }>("/api/shop/me");
       const id = data.room?.roomId ?? null;
       if (id) sessionStorage.setItem(STORAGE_KEY, id);
       return id;

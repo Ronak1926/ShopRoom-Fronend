@@ -7,7 +7,7 @@ import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import Sidebar from "@/components/customer/Sidebar";
 import Avatar from "@/components/ui/Avatar";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
 interface JoinedRoom {
@@ -30,7 +30,6 @@ export default function MyRoomsPage() {
       router.replace("/customer/login");
       return;
     }
-    setAuthToken(token);
     apiClient
       .get<{ rooms: JoinedRoom[] }>("/api/customers/me/rooms")
       .then((res) => setRooms(res.data.rooms))

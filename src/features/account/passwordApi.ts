@@ -4,7 +4,6 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 
 export type AccountRole = "customer" | "shopkeeper";
 
@@ -33,13 +32,8 @@ export async function resetPassword(role: AccountRole, token: string, password: 
   return data.message;
 }
 
-/** Resolves with a fresh session token: changing the password signs every other device out. */
-export async function changePassword(role: AccountRole, currentPassword: string, newPassword: string): Promise<{ message: string; token: string }> {
-  const cookie = role === "customer" ? "token" : "shopkeeper_token";
-  const { data } = await apiClient.patch<{ message: string; token: string }>(
-    `${BASE[role]}/me/password`,
-    { currentPassword, newPassword },
-    { headers: { Authorization: `Bearer ${getCookie(cookie)}` } },
-  );
+/** Changing the password signs every other device out; the API replaces this browser's session cookie so it carries on. */
+export async function changePassword(role: AccountRole, currentPassword: string, newPassword: string): Promise<{ message: string }> {
+  const { data } = await apiClient.patch<{ message: string }>(`${BASE[role]}/me/password`, { currentPassword, newPassword });
   return data;
 }

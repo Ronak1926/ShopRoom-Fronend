@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 
 /** What the send flow needs to know about the shop it is sending from. */
 export interface ShopAudience {
@@ -34,9 +33,7 @@ export function useShopAudience() {
   useEffect(() => {
     let cancelled = false;
     apiClient
-      .get<ProfileResponse>("/api/shop/profile", {
-        headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` },
-      })
+      .get<ProfileResponse>("/api/shop/profile")
       .then(({ data }) => {
         if (cancelled) return;
         setShop({

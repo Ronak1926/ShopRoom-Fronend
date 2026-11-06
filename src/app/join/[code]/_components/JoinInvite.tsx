@@ -10,7 +10,7 @@ import LinkOffOutlinedIcon from "@mui/icons-material/LinkOffOutlined";
 import Avatar from "@/components/ui/Avatar";
 import { apiClient } from "@/utils/apiClient";
 import { useAuthSession } from "@/hooks/useAuthSession";
-import { deleteCookie, getCookie } from "@/utils/cookieUtils";
+import { deleteCookie } from "@/utils/cookieUtils";
 
 interface InvitePreview {
   shop: { shopName: string; category: string; description: string | null; logoUrl: string | null; address: string; city: string };
@@ -74,11 +74,7 @@ export default function JoinInvite({ code }: { code: string }) {
     setJoining(true);
     setJoinError(null);
     try {
-      const { data } = await apiClient.post<{ roomId: string }>(
-        `/api/shop/join/${encodeURIComponent(code)}`,
-        {},
-        { headers: { Authorization: `Bearer ${getCookie("token")}` } },
-      );
+      const { data } = await apiClient.post<{ roomId: string }>(`/api/shop/join/${encodeURIComponent(code)}`, {});
       router.replace(`/customer/room/${data.roomId}`);
     } catch (err) {
       if ((err as { response?: { status?: number } })?.response?.status === 401) {

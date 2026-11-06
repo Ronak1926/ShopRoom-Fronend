@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/components/shopkeeper/Sidebar";
 import MyRoom from "./_components/MyRoom";
-import { apiClient, setAuthToken } from "../../../../utils/apiClient";
+import { apiClient } from "../../../../utils/apiClient";
 import { getCookie } from "../../../../utils/cookieUtils";
 import type { RoomDetails } from "@/components/chat/types";
 
@@ -20,7 +20,6 @@ export default function RoomPage() {
       router.replace("/customer/login?tab=shopkeeper");
       return;
     }
-    setAuthToken(token);
 
     apiClient
       .get<RoomDetails>(`/api/rooms/${params.roomId}`)
