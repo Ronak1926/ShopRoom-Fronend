@@ -16,6 +16,9 @@ export const PUBLIC_PAGES: { path: string; changeFrequency: "weekly" | "monthly"
   { path: "/contact", changeFrequency: "yearly", priority: 0.5 },
   { path: "/security", changeFrequency: "yearly", priority: 0.5 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/pricing", changeFrequency: "monthly", priority: 0.7 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/refund-policy", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/community-guidelines", changeFrequency: "yearly", priority: 0.2 },
   { path: "/cookies", changeFrequency: "yearly", priority: 0.2 },
 ];

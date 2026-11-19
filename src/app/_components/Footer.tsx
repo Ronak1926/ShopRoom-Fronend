@@ -17,7 +17,7 @@ const COLUMNS = [
     links: [
       { label: "Features", href: "/#features" },
       { label: "How it Works", href: "/#how-it-works" },
-      { label: "Pricing", href: "/#pricing" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
@@ -38,6 +38,8 @@ const COLUMNS = [
     links: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
+      { label: "Refund Policy", href: "/refund-policy" },
+      { label: "Community Guidelines", href: "/community-guidelines" },
       { label: "Cookie Policy", href: "/cookies" },
       { label: "Security", href: "/security" },
     ],
