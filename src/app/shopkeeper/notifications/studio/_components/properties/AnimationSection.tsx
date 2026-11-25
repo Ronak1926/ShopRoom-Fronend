@@ -13,6 +13,10 @@ import {
 import type { AnimStep, CompositionNode } from "@/features/notifications/types";
 import { Row, Section, Slider } from "./fields";
 import { ANIM_ICONS } from "../animationIcons";
+import Link from "next/link";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { UPGRADE_HREF } from "@/features/notifications/plan";
+import { CUSTOM_ANIMATION_LOCKED, useStudioPlan } from "../StudioPlanContext";
 
 const SLOTS: { id: AnimSlot; label: string }[] = [
   { id: "entry", label: "Entrance" },
@@ -40,6 +44,26 @@ interface Props {
  * only non-default fields reach the design JSON.
  */
 export default function AnimationSection({ node, update, onPreview }: Props) {
+  const { canAnimate } = useStudioPlan();
+  if (!canAnimate) {
+    return (
+      <Section title="Animation">
+        <p className="flex items-start gap-2 text-[11.5px] leading-relaxed text-(--color-text-secondary)">
+          <LockOutlinedIcon sx={{ fontSize: 15 }} className="mt-0.5 shrink-0 text-(--color-brand-primary)" />
+          <span>
+            {CUSTOM_ANIMATION_LOCKED}{" "}
+            <Link href={UPGRADE_HREF} className="font-semibold text-(--color-brand-primary) hover:underline">
+              See plans
+            </Link>
+          </span>
+        </p>
+      </Section>
+    );
+  }
+  return <AnimationControls node={node} update={update} onPreview={onPreview} />;
+}
+
+function AnimationControls({ node, update, onPreview }: Props) {
   const setStep = (slot: AnimSlot, patch: Partial<AnimStep> | null) =>
     update((n) => {
       const existing = n.animation?.[slot] ?? undefined;

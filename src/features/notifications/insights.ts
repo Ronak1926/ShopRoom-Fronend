@@ -62,6 +62,7 @@ const FAILURE_TEXT: Record<string, string> = {
   QUIET_HOURS: "Skipped: it was due during your quiet hours.",
   WEEKEND_BLOCKED: "Skipped: weekend sending is switched off in your preferences.",
   PLAN_EXPIRED: "Not sent: your plan had ended. Renew it to send again.",
+  PLAN_AUDIENCE: "Not sent: it was set to reach only nearby customers, which your current plan doesn't include.",
   NO_RECIPIENTS: "Nobody could receive it: no member had a device set up for notifications.",
   DAILY_LIMIT_REACHED: "Not sent: your plan's daily limit had been reached.",
   ALL_DELIVERIES_FAILED: "The push service rejected every delivery. Members may have turned notifications off in their browser.",

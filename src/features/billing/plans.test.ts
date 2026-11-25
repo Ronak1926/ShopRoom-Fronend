@@ -4,7 +4,7 @@ import { COMMON_PERKS, PLAN_OFFERS } from "./plans.ts";
 
 // These are the amounts the API charges (ShopRoom-Backend services/plans.ts), in rupees.
 // If the backend prices change, this test and the catalogue must change with them.
-const CHARGED = { "1m": 399, "2m": 599, "3m": 899 } as const;
+const CHARGED = { "1m": 499, "2m": 899, "3m": 1199 } as const;
 const DAYS = { "1m": 30, "2m": 60, "3m": 90 } as const;
 
 describe("plan catalogue", () => {

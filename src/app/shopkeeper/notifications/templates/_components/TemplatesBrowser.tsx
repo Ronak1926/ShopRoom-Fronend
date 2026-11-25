@@ -23,6 +23,9 @@ import DesignCard from "./DesignCard";
 import TemplateGridSkeleton from "./TemplateGridSkeleton";
 import TemplatePreviewModal from "./TemplatePreviewModal";
 import { useFavouriteTemplates } from "@/hooks/useFavouriteTemplates";
+import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
+import { PLAN_NAMES, UPGRADE_HREF, meetsRequiredPlan } from "@/features/notifications/plan";
+import Link from "next/link";
 
 type Tab = "catalog" | "mine" | "drafts" | "favourites";
 type Sort = "popular" | "newest" | "name";
@@ -55,6 +58,8 @@ const GRID =
 export default function TemplatesBrowser() {
   const router = useRouter();
   const favourites = useFavouriteTemplates();
+  const plan = usePlanCapabilities();
+  const isLocked = (t: TemplateSummary) => !!plan && !meetsRequiredPlan(plan.planType, t.requiredPlan);
 
   const [tab, setTab] = useState<Tab>("catalog");
   const [categories, setCategories] = useState<NotificationCategory[]>([]);
@@ -436,6 +441,17 @@ export default function TemplatesBrowser() {
         </>
       )}
 
+      {tab === "catalog" && plan && plan.planType !== "3m" && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-(--color-border-default) bg-(--color-brand-primary-light) px-4 py-2.5 text-[12.5px] text-(--color-text-secondary)">
+          <span>
+            Your {PLAN_NAMES[plan.planType] ?? plan.planType} plan includes the templates listed first. Ones with a lock need a bigger plan.
+          </span>
+          <Link href={UPGRADE_HREF} className="font-semibold text-(--color-brand-primary) hover:underline">
+            See plans
+          </Link>
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 rounded-lg border border-(--color-danger) bg-(--color-danger-bg) px-4 py-2.5 text-[12.5px] text-(--color-danger-text)">
           {error}
@@ -462,7 +478,7 @@ export default function TemplatesBrowser() {
                     categoryName={categoryName(t.categoryId)}
                     favourite={favourites.has(t.id)}
                     busy={usingId === t.id}
-                    locked={false}
+                    locked={isLocked(t)}
                     onToggleFavourite={favourites.toggle}
                     onPreview={setPreviewing}
                     onUse={handleUse}
@@ -501,7 +517,7 @@ export default function TemplatesBrowser() {
           template={previewing}
           categoryName={categoryName(previewing.categoryId)}
           busy={usingId === previewing.id}
-          locked={false}
+          locked={isLocked(previewing)}
           onClose={() => setPreviewing(null)}
           onUse={handleUse}
         />

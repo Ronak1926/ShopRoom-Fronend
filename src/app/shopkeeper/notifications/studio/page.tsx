@@ -49,6 +49,12 @@ import ResizeHandle from "./_components/ResizeHandle";
 import { useResizable } from "./_hooks/useResizable";
 import { useNotificationDesign } from "./_hooks/useNotificationDesign";
 import { usePlaybackClock } from "./_hooks/usePlaybackClock";
+import QuickEditor from "./_components/QuickEditor";
+import { CUSTOM_ANIMATION_LOCKED, StudioPlanProvider } from "./_components/StudioPlanContext";
+import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
+import { UPGRADE_HREF } from "@/features/notifications/plan";
+import Link from "next/link";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createElement } from "@/features/notifications/elementFactory";
 import { getCookie } from "../../../../utils/cookieUtils";
 
@@ -62,6 +68,13 @@ export default function NotificationStudioPage() {
   const [bgBuilderWidth, resizeBgBuilder] = useResizable(320, 280, 440);
 
   const studio = useNotificationDesign();
+  const plan = usePlanCapabilities();
+  // Until the plan is known the full editor shows; the API still refuses any
+  // change outside the plan.
+  const quickEditOnly = plan ? !plan.capabilities.ADVANCED_TEMPLATE_EDITING : false;
+  const canAnimate = plan ? plan.capabilities.CUSTOM_ANIMATION : true;
+  const { setCanAnimate } = studio;
+  useEffect(() => setCanAnimate(canAnimate), [canAnimate, setCanAnimate]);
   const [activeTool, setActiveTool] = useState("add");
   const [previewOpen, setPreviewOpen] = useState(false);
   // The right rail is either the normal element inspector or the Background
@@ -434,6 +447,7 @@ export default function NotificationStudioPage() {
           <AssetLibraryPanel width={leftWidth} title="Decorations" groups={DECORATION_GROUPS} onInsert={handleInsertAsset} />
         );
       case "animation":
+        if (!canAnimate) return <LockedAnimationPanel width={leftWidth} />;
         return (
           <AnimationPanel
             width={leftWidth}
@@ -463,22 +477,43 @@ export default function NotificationStudioPage() {
     }
   }
 
+  const topBar = (
+    <StudioTopBar
+      designName={studio.design?.name ?? "Untitled"}
+      saveState={studio.saveState}
+      savedAt={studio.savedAt}
+      onUndo={studio.undo}
+      onRedo={studio.redo}
+      canUndo={studio.canUndo}
+      canRedo={studio.canRedo}
+      onSave={studio.saveVersionNow}
+      onPreview={() => setPreviewOpen(true)}
+    />
+  );
+  const previewModal = previewOpen && studio.design && (
+    <StudioPreviewModal design={studio.design} name={studio.design.name ?? "Untitled"} onClose={() => setPreviewOpen(false)} />
+  );
+
+  if (quickEditOnly) {
+    return (
+      <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+        <Sidebar />
+        <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+          {topBar}
+          <QuickEditor studio={studio} />
+        </div>
+        {previewModal}
+      </div>
+    );
+  }
+
   return (
+    <StudioPlanProvider value={{ canAnimate }}>
     <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
       <Sidebar />
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <StudioTopBar
-          designName={studio.design?.name ?? "Untitled"}
-          saveState={studio.saveState}
-          savedAt={studio.savedAt}
-          onUndo={studio.undo}
-          onRedo={studio.redo}
-          canUndo={studio.canUndo}
-          canRedo={studio.canRedo}
-          onSave={studio.saveVersionNow}
-          onPreview={() => setPreviewOpen(true)}
-        />
+        {topBar}
 
         <div className="flex flex-1 min-h-0 overflow-hidden">
           <StudioToolbar active={activeTool} onChange={setActiveTool} />
@@ -558,9 +593,24 @@ export default function NotificationStudioPage() {
         </div>
       </div>
 
-      {previewOpen && studio.design && (
-        <StudioPreviewModal design={studio.design} name={studio.design.name ?? "Untitled"} onClose={() => setPreviewOpen(false)} />
-      )}
+      {previewModal}
     </div>
+    </StudioPlanProvider>
+  );
+}
+
+/** The Animation tool on plans without custom animation. */
+function LockedAnimationPanel({ width }: { width: number }) {
+  return (
+    <aside style={{ width }} className="shrink-0 border-r border-(--color-border-default) bg-(--color-bg-surface) p-4">
+      <h2 className="text-[13px] font-semibold text-(--color-text-primary)">Animation</h2>
+      <p className="mt-3 flex items-start gap-2 text-[12px] leading-relaxed text-(--color-text-secondary)">
+        <LockOutlinedIcon sx={{ fontSize: 16 }} className="mt-0.5 shrink-0 text-(--color-brand-primary)" />
+        {CUSTOM_ANIMATION_LOCKED}
+      </p>
+      <Link href={UPGRADE_HREF} className="mt-3 inline-block text-[12px] font-semibold text-(--color-brand-primary) hover:underline">
+        See plans
+      </Link>
+    </aside>
   );
 }

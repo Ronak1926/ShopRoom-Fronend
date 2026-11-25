@@ -8,7 +8,10 @@ import NotificationsOffOutlinedIcon from "@mui/icons-material/NotificationsOffOu
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
-import type { ElementType } from "react";
+import { useEffect, type ElementType } from "react";
+import Link from "next/link";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { UPGRADE_HREF } from "@/features/notifications/plan";
 import type { ShopAudience } from "@/hooks/useShopAudience";
 import { MAX_RADIUS_KM, MIN_RADIUS_KM, RADIUS_PRESETS_KM } from "../../_schemas/schedule";
 
@@ -27,6 +30,8 @@ interface Props {
     skipNotificationsOff?: boolean;
   }) => void;
   fieldError?: string;
+  /** The plan reach in km (0 = room members only); undefined until known. */
+  maxRadiusKm?: number;
 }
 
 function AudienceCard({
@@ -140,8 +145,19 @@ export default function AudienceStep({
   shop,
   onChange,
   fieldError,
+  maxRadiusKm,
 }: Props) {
-  const canTargetByRadius = !shop || shop.hasCoordinates;
+  const hasLocation = !shop || shop.hasCoordinates;
+  const planReachesNearby = maxRadiusKm !== 0;
+  const canTargetByRadius = hasLocation && planReachesNearby;
+  const radiusMax = Math.min(MAX_RADIUS_KM, maxRadiusKm || MAX_RADIUS_KM);
+  const presets = RADIUS_PRESETS_KM.filter((km) => km <= radiusMax);
+
+  // Keep the choice inside what the plan allows once the plan is known.
+  useEffect(() => {
+    if (!planReachesNearby && includeNearby) onChange({ includeNearby: false, includeMembers: true });
+    else if (radiusKm > radiusMax) onChange({ radiusKm: radiusMax });
+  }, [planReachesNearby, includeNearby, radiusKm, radiusMax, onChange]);
 
   return (
     <div>
@@ -164,7 +180,7 @@ export default function AudienceStep({
           description="Anyone sharing their location near the shop, member or not."
           checked={includeNearby}
           disabled={!canTargetByRadius}
-          disabledHint="Add your shop location in Profile first"
+          disabledHint={planReachesNearby ? "Add your shop location in Profile first" : "Upgrade to 2 Months to reach customers nearby"}
           onToggle={() => onChange({ includeNearby: !includeNearby })}
         />
       </div>
@@ -195,14 +211,14 @@ export default function AudienceStep({
               type="range"
               aria-label="Radius in kilometres"
               min={MIN_RADIUS_KM}
-              max={MAX_RADIUS_KM}
+              max={radiusMax}
               step={1}
               value={radiusKm}
               onChange={(e) => onChange({ radiusKm: Number(e.target.value) })}
               className="flex-1 min-w-40 accent-(--color-brand-primary) cursor-pointer"
             />
             <div className="flex items-center gap-1.5">
-              {RADIUS_PRESETS_KM.map((km) => (
+              {presets.map((km) => (
                 <button
                   key={km}
                   type="button"
@@ -221,7 +237,28 @@ export default function AudienceStep({
         </div>
       )}
 
-      {!canTargetByRadius && (
+      {!planReachesNearby && (
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-(--color-brand-primary-light) px-3 py-2.5 text-[11.5px] leading-relaxed text-(--color-text-secondary)">
+          <LockOutlinedIcon sx={{ fontSize: 15, color: "var(--color-brand-primary)" }} />
+          Your 1 Month plan sends to your room members. Upgrade to reach customers within 5 km (2 Months) or 10 km (3 Months).
+          <Link href={UPGRADE_HREF} className="font-semibold text-(--color-brand-primary) hover:underline">
+            See plans
+          </Link>
+        </p>
+      )}
+
+      {includeNearby && canTargetByRadius && maxRadiusKm !== undefined && (
+        <p className="mt-2 text-[11px] text-(--color-text-hint)">
+          Your plan reaches up to {radiusMax} km.{" "}
+          {radiusMax < 10 && (
+            <Link href={UPGRADE_HREF} className="font-semibold text-(--color-brand-primary) hover:underline">
+              Upgrade for 10 km
+            </Link>
+          )}
+        </p>
+      )}
+
+      {!hasLocation && planReachesNearby && (
         <p className="mt-3 flex items-start gap-2 rounded-xl bg-(--color-brand-alert-light) px-3 py-2.5 text-[11.5px] leading-relaxed text-(--color-text-secondary)">
           <WarningAmberOutlinedIcon
             sx={{ fontSize: 15, color: "var(--color-brand-alert)" }}

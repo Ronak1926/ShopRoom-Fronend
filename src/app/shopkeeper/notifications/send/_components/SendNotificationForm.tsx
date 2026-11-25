@@ -25,6 +25,7 @@ import {
   type SendableNotification,
 } from "@/hooks/useSendableNotifications";
 import { useShopAudience } from "@/hooks/useShopAudience";
+import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
 import {
   DEFAULT_RADIUS_KM,
   SendNotificationSchema,
@@ -51,6 +52,7 @@ export default function SendNotificationForm() {
   const planExpired = usePlanStatus().billing?.active === false;
   const sources = useSendableNotifications();
   const { shop, loading: shopLoading } = useShopAudience();
+  const plan = usePlanCapabilities();
   const preferences = useNotificationPreferences();
 
   // Held beside the form: the id alone is not enough to draw the preview, and
@@ -159,6 +161,7 @@ export default function SendNotificationForm() {
               onModeChange={(mode) => setValue("audience", mode, { shouldValidate: true })}
               radiusKm={radiusKm}
               onRadiusChange={(km) => setValue("radiusKm", km, { shouldValidate: true })}
+              maxRadiusKm={plan?.capabilities.maxRadiusKm}
               shop={shop}
             />
 

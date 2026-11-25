@@ -263,6 +263,8 @@ export async function sendNotification(
 export interface PlanCapabilities {
   /** How many notifications the shop may send in a day on its plan. */
   dailyNotificationLimit: number;
+  /** How far beyond the room a send may reach, in km; 0 means room members only. */
+  maxRadiusKm: number;
   CUSTOM_TEMPLATE: boolean;
   ADVANCED_TEMPLATE_EDITING: boolean;
   CUSTOM_ANIMATION: boolean;
