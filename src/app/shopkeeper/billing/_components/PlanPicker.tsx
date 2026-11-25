@@ -1,62 +1,129 @@
+import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import type { Billing, PlanId } from "@/features/billing/api";
 import { formatInr } from "@/features/billing/format";
+import { PLAN_FEATURES, PLAN_OFFERS, pricePerMonth, savingVersusMonthly } from "@/features/billing/plans";
 
 interface PlanPickerProps {
   plans: Billing["plans"];
-  selected: PlanId | null;
-  onSelect: (id: PlanId) => void;
-  onPay: () => void;
-  paying: boolean;
+  currentPlan: string;
   active: boolean;
+  /** The plan whose payment is in progress, if any. */
+  paying: PlanId | null;
+  onChoose: (id: PlanId) => void;
 }
 
-const POPULAR: PlanId = "2m";
+const RANK: Record<string, number> = { "1m": 1, "2m": 2, "3m": 3 };
 
-export default function PlanPicker({ plans, selected, onSelect, onPay, paying, active }: PlanPickerProps) {
-  const chosen = plans.find((p) => p.id === selected);
+/** The rows shown on each card; the full list is in the comparison table below. */
+const CARD_ROWS = ["Notifications a day", "Who you can reach", "Ready-made templates", "Editing", "Design from a blank canvas", "Custom animations"];
+
+export default function PlanPicker({ plans, currentPlan, active, paying, onChoose }: PlanPickerProps) {
   return (
-    <section className="rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) p-6">
-      <h2 className="text-[16px] font-bold text-(--color-text-primary)">{active ? "Extend your plan" : "Renew your plan"}</h2>
-      <p className="mt-1 text-[13px] text-(--color-text-secondary)">
-        {active ? "Time you buy is added to the end of your current plan, so nothing is lost." : "Pick a length and pay securely with Razorpay."}
+    <section id="plans" className="scroll-mt-6">
+      <h2 className="text-[18px] font-bold text-(--color-text-primary)">{active ? "Extend or change your plan" : "Renew your plan"}</h2>
+      <p className="mt-1 flex items-start gap-1.5 text-[13px] leading-relaxed text-(--color-text-secondary)">
+        <InfoOutlinedIcon sx={{ fontSize: 16 }} className="mt-0.5 shrink-0" />
+        The plan you buy starts straight away, and its days are added on top of the time you have left. One-time
+        payment through Razorpay; nothing renews automatically.
       </p>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
         {plans.map((plan) => {
-          const isSelected = selected === plan.id;
+          const offer = PLAN_OFFERS.find((o) => o.id === plan.id);
+          const isCurrent = active && plan.id === currentPlan;
+          const isDowngrade = active && RANK[plan.id] < (RANK[currentPlan] ?? 1);
+          const saving = offer ? savingVersusMonthly(offer) : 0;
+          const featured = !!offer?.recommended;
+          const busy = paying === plan.id;
           return (
-            <button
+            <article
               key={plan.id}
-              type="button"
-              onClick={() => onSelect(plan.id)}
-              aria-pressed={isSelected}
-              className={`relative rounded-xl border-2 p-4 text-left transition ${
-                isSelected
-                  ? "border-(--color-brand-primary) bg-(--color-brand-primary-light)"
-                  : "border-(--color-border-default) hover:border-(--color-brand-primary)/50"
+              className={`relative flex flex-col rounded-2xl border-2 bg-(--color-bg-surface) p-5 ${
+                featured ? "border-(--color-brand-primary) shadow-(--shadow-brand-glow)" : "border-(--color-border-default)"
               }`}
             >
-              {plan.id === POPULAR && (
-                <span className="absolute -top-2.5 left-3 rounded-full bg-(--color-brand-primary) px-2 py-0.5 text-[9px] font-bold tracking-wide text-white uppercase">
-                  Popular
-                </span>
+              <div className="flex min-h-6 flex-wrap items-center gap-1.5">
+                {featured && (
+                  <span className="rounded-full bg-(--color-brand-primary) px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-(--color-text-on-brand) uppercase">
+                    Most popular
+                  </span>
+                )}
+                {isCurrent && (
+                  <span className="rounded-full bg-(--color-success-light) px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-(--color-success-text) uppercase">
+                    Your plan
+                  </span>
+                )}
+              </div>
+
+              <h3 className="mt-2 text-[17px] font-bold text-(--color-text-primary)">{plan.label}</h3>
+              <p className="text-[12px] text-(--color-text-hint)">{offer?.description}</p>
+
+              <p className="mt-4 flex items-baseline gap-1.5">
+                <span className="text-[30px] font-extrabold leading-none text-(--color-text-primary)">{formatInr(plan.priceInr)}</span>
+                <span className="text-[12px] text-(--color-text-hint)">for {plan.days} days</span>
+              </p>
+              <p className="mt-1.5 flex min-h-6 flex-wrap items-center gap-1.5 text-[12px] text-(--color-text-secondary)">
+                {offer && <span>{formatInr(pricePerMonth(offer))} a month</span>}
+                {saving > 0 && (
+                  <span className="rounded-full bg-(--color-success-light) px-2 py-0.5 text-[11px] font-semibold text-(--color-success-text)">
+                    Save {formatInr(saving)}
+                  </span>
+                )}
+              </p>
+
+              <ul className="mt-4 flex flex-1 flex-col gap-2.5 border-t border-(--color-border-default) pt-4">
+                {CARD_ROWS.map((label) => {
+                  const value = PLAN_FEATURES.find((f) => f.label === label)?.values[plan.id];
+                  const included = value !== false;
+                  return (
+                    <li key={label} className="flex items-start gap-2 text-[12.5px] leading-snug">
+                      {included ? (
+                        <CheckOutlinedIcon sx={{ fontSize: 16 }} className="mt-px shrink-0 text-(--color-success)" />
+                      ) : (
+                        <CloseOutlinedIcon sx={{ fontSize: 16 }} className="mt-px shrink-0 text-(--color-text-hint)" />
+                      )}
+                      <span className={included ? "text-(--color-text-primary)" : "text-(--color-text-hint) line-through"}>
+                        {typeof value === "string" ? (
+                          <>
+                            <span className="font-semibold">{value}</span>
+                            {label === "Notifications a day" ? " notification" + (value === "1" ? "" : "s") + " a day" : ""}
+                            {label === "Ready-made templates" ? " templates" : ""}
+                          </>
+                        ) : (
+                          label
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {isDowngrade && (
+                <p className="mt-4 flex items-start gap-1.5 rounded-lg bg-(--color-brand-alert-light) px-3 py-2 text-[11.5px] leading-snug text-(--color-brand-alert-text)">
+                  <LockOutlinedIcon sx={{ fontSize: 14 }} className="mt-px shrink-0" />
+                  Switches you to {plan.label} limits as soon as you pay.
+                </p>
               )}
-              <p className="text-[14px] font-semibold text-(--color-text-primary)">{plan.label}</p>
-              <p className="mt-1 text-[22px] font-extrabold text-(--color-text-primary)">{formatInr(plan.priceInr)}</p>
-              <p className="text-[11px] text-(--color-text-hint)">{plan.days} days · one-time</p>
-            </button>
+
+              <button
+                type="button"
+                onClick={() => onChoose(plan.id)}
+                disabled={paying !== null}
+                className={`mt-4 h-11 w-full rounded-xl text-[14px] font-semibold transition-colors cursor-pointer disabled:cursor-wait disabled:opacity-60 ${
+                  featured
+                    ? "bg-(--color-brand-primary) text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover)"
+                    : "border border-(--color-brand-primary) text-(--color-brand-primary) hover:bg-(--color-brand-primary-light)"
+                }`}
+              >
+                {busy ? "Processing…" : `${isCurrent ? "Extend" : active ? "Switch to" : "Get"} ${plan.label} · ${formatInr(plan.priceInr)}`}
+              </button>
+            </article>
           );
         })}
       </div>
-
-      <button
-        type="button"
-        onClick={onPay}
-        disabled={!chosen || paying}
-        className="mt-5 h-12 w-full rounded-lg bg-(--color-brand-primary) text-[15px] font-semibold text-white transition hover:bg-(--color-brand-primary-hover) disabled:opacity-60 sm:w-auto sm:px-8"
-      >
-        {paying ? "Processing…" : chosen ? `Pay ${formatInr(chosen.priceInr)}` : "Choose a plan"}
-      </button>
     </section>
   );
 }

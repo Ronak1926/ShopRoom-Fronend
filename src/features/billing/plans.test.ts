@@ -28,3 +28,13 @@ describe("plan catalogue", () => {
     assert.ok(!/free trial|7-day|free plan|auto-?renew(?!al)/.test(everything.replace("no auto-renewal", "")));
   });
 });
+
+describe("plan comparison", () => {
+  it("gives every feature a value for every plan, and the maths matches the prices", async () => {
+    const { PLAN_FEATURES, pricePerMonth, savingVersusMonthly } = await import("./plans.ts");
+    for (const row of PLAN_FEATURES) assert.deepEqual(Object.keys(row.values).sort(), ["1m", "2m", "3m"], row.label);
+    const by = Object.fromEntries(PLAN_OFFERS.map((p) => [p.id, p]));
+    assert.deepEqual([pricePerMonth(by["1m"]), pricePerMonth(by["2m"]), pricePerMonth(by["3m"])], [499, 450, 400]);
+    assert.deepEqual([savingVersusMonthly(by["1m"]), savingVersusMonthly(by["2m"]), savingVersusMonthly(by["3m"])], [0, 99, 298]);
+  });
+});

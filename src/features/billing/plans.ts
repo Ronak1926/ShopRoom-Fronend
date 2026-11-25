@@ -56,3 +56,47 @@ export const PLAN_OFFERS: PlanOffer[] = [
     perks: ["4 notifications a day", "Reach customers within 10 km", "All 1,400+ templates", "Custom templates and the full editor", "Custom animations"],
   },
 ];
+
+/** One row of the plan comparison: what each plan gets (true / false, or a short value). */
+export interface PlanFeature {
+  label: string;
+  /** Shown under the label in the comparison table. */
+  hint?: string;
+  values: Record<PlanId, string | boolean>;
+}
+
+/**
+ * What each plan includes, as enforced by the API (notificationPlan.service.ts
+ * and the template catalog's plan tiers). The billing page's plan cards and
+ * comparison table read this.
+ */
+export const PLAN_FEATURES: PlanFeature[] = [
+  { label: "Notifications a day", values: { "1m": "1", "2m": "2", "3m": "4" } },
+  {
+    label: "Who you can reach",
+    hint: "Nearby customers are those sharing their location in the app",
+    values: { "1m": "Room members", "2m": "Room + within 5 km", "3m": "Room + within 10 km" },
+  },
+  { label: "Ready-made templates", values: { "1m": "50+", "2m": "150+", "3m": "All 1,400+" } },
+  {
+    label: "Editing",
+    values: { "1m": "Quick edit: your words and photos", "2m": "Full editor", "3m": "Full editor" },
+  },
+  { label: "Design from a blank canvas", values: { "1m": false, "2m": true, "3m": true } },
+  { label: "Custom animations", values: { "1m": false, "2m": false, "3m": true } },
+  { label: "Scheduled and repeating sends", values: { "1m": true, "2m": true, "3m": true } },
+  { label: "Your room, members and chat", values: { "1m": true, "2m": true, "3m": true } },
+  { label: "Delivery, open and tap analytics", values: { "1m": true, "2m": true, "3m": true } },
+];
+
+/** What a plan works out to per month, rounded to the rupee. */
+export function pricePerMonth(offer: PlanOffer): number {
+  return Math.round(offer.price / (offer.days / 30));
+}
+
+/** How much a longer plan saves against buying 1 Month repeatedly for the same time. */
+export function savingVersusMonthly(offer: PlanOffer): number {
+  const monthly = PLAN_OFFERS.find((p) => p.id === "1m");
+  if (!monthly || offer.id === "1m") return 0;
+  return Math.max(0, Math.round(monthly.price * (offer.days / monthly.days)) - offer.price);
+}

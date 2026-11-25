@@ -15,6 +15,7 @@ import CurrentPlanCard from "./_components/CurrentPlanCard";
 import GstinCard from "./_components/GstinCard";
 import PaymentHistory from "./_components/PaymentHistory";
 import PlanPicker from "./_components/PlanPicker";
+import PlanComparison from "./_components/PlanComparison";
 
 /** After a payment we could not confirm, how often (and how far apart) to look for the webhook having applied it. */
 const WEBHOOK_CHECKS = 6;
@@ -26,8 +27,8 @@ export default function ShopkeeperBillingPage() {
   const [billing, setBilling] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [selected, setSelected] = useState<PlanId | null>(null);
-  const [paying, setPaying] = useState(false);
+  /** The plan whose payment window is open, if any. */
+  const [paying, setPaying] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [renewedUntil, setRenewedUntil] = useState<string | null>(null);
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
@@ -65,10 +66,10 @@ export default function ShopkeeperBillingPage() {
     }
   }
 
-  async function pay() {
-    const plan = billing?.plans.find((p) => p.id === selected);
+  async function pay(planId: PlanId) {
+    const plan = billing?.plans.find((p) => p.id === planId);
     if (!plan) return;
-    setPaying(true);
+    setPaying(plan.id);
     setError(null);
     setRenewedUntil(null);
     setPendingPaymentId(null);
@@ -78,18 +79,17 @@ export default function ShopkeeperBillingPage() {
         setBilling(updated);
         publishBilling(updated);
         setRenewedUntil(updated.planExpiresAt);
-        setSelected(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       if (err instanceof PaymentUnconfirmedError) {
         setPendingPaymentId(err.paymentId);
-        setSelected(null);
         void waitForWebhook(billing?.payments.length ?? 0);
         return;
       }
       setError(describePaymentFailure(err, "Payment failed. Please try again."));
     } finally {
-      setPaying(false);
+      setPaying(null);
     }
   }
 
@@ -98,8 +98,11 @@ export default function ShopkeeperBillingPage() {
       {loading ? (
         <BillingSkeleton />
       ) : billing ? (
-        <div className="mx-auto flex max-w-3xl flex-col gap-5">
-          <h1 className="text-[28px] font-bold text-(--color-text-primary)">Billing</h1>
+        <div className="mx-auto flex max-w-5xl flex-col gap-6">
+          <header>
+            <h1 className="text-[26px] font-bold text-(--color-text-primary) sm:text-[28px]">Billing</h1>
+            <p className="mt-1 text-[13.5px] text-(--color-text-secondary)">Your plan, what it includes, and your payments.</p>
+          </header>
 
           {renewedUntil && (
             <p role="status" className="flex items-center gap-2 rounded-xl bg-(--color-success-light) px-4 py-3 text-[13px] font-semibold text-(--color-success-text)">
@@ -120,7 +123,8 @@ export default function ShopkeeperBillingPage() {
           )}
 
           <CurrentPlanCard billing={billing} />
-          <PlanPicker plans={billing.plans} selected={selected} onSelect={setSelected} onPay={() => void pay()} paying={paying} active={billing.active} />
+          <PlanPicker plans={billing.plans} currentPlan={billing.planType} active={billing.active} paying={paying} onChoose={(id) => void pay(id)} />
+          <PlanComparison currentPlan={billing.planType} />
           <PaymentHistory payments={billing.payments} invoicesEnabled={billing.invoicesEnabled} />
           {billing.invoicesEnabled && <GstinCard initial={billing.gstin} />}
         </div>
