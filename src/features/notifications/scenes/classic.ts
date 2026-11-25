@@ -1,5 +1,5 @@
 /**
- * features/notifications/scenes/classic.ts — The original twelve ShopRoom
+ * features/notifications/scenes/classic.ts — The original twelve CounterCircle
  * scenes, unchanged. Kept verbatim (same ids, same geometry) so any design
  * already using one keeps rendering exactly as it was saved.
  */

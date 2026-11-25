@@ -7,9 +7,9 @@ const PRICES = PLAN_OFFERS.map((p) => `${p.label} ₹${p.price}`).join(", ");
 /** Shown in the landing FAQ and published as FAQPage structured data, so they must stay true. */
 export const FAQS: QA[] = [
   {
-    question: "What is ShopRoom?",
+    question: "What is CounterCircle?",
     answer:
-      "ShopRoom lets a local shopkeeper open a room for their shop, invite customers with a link, chat with them, and send animated notifications about new arrivals, offers and restocks.",
+      "CounterCircle lets a local shopkeeper open a room for their shop, invite customers with a link, chat with them, and send animated notifications about new arrivals, offers and restocks.",
   },
   {
     question: "How much does it cost?",
@@ -23,10 +23,10 @@ export const FAQS: QA[] = [
   {
     question: "How do customers receive updates?",
     answer:
-      "As push notifications on their phone or computer, and in the notification bell inside ShopRoom, where they can watch a banner again whenever they like.",
+      "As push notifications on their phone or computer, and in the notification bell inside CounterCircle, where they can watch a banner again whenever they like.",
   },
   {
-    question: "Can I use ShopRoom for any type of business?",
+    question: "Can I use CounterCircle for any type of business?",
     answer:
       "Yes. Fashion, groceries, electronics, books, beauty and more: it works for any shop that wants to stay in touch with the people who shop there.",
   },
@@ -43,6 +43,6 @@ export const FAQS: QA[] = [
   {
     question: "Is there a free trial?",
     answer:
-      "No. The 1 Month plan is the cheapest way to try ShopRoom, and customers can join and use ShopRoom for free.",
+      "No. The 1 Month plan is the cheapest way to try CounterCircle, and customers can join and use CounterCircle for free.",
   },
 ];

@@ -4,7 +4,7 @@ import { PRIVACY } from "./_content";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "What ShopRoom collects, why, who can see it, and how you stay in control of it.",
+  description: "What CounterCircle collects, why, who can see it, and how you stay in control of it.",
   alternates: { canonical: "/privacy" },
 };
 

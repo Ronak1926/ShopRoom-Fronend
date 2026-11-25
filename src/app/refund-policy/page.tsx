@@ -4,7 +4,7 @@ import { REFUND_POLICY } from "./_content";
 
 export const metadata: Metadata = {
   title: "Cancellation and Refund Policy",
-  description: "How ShopRoom plans are paid for, what happens if you stop, and when payments are refunded.",
+  description: "How CounterCircle plans are paid for, what happens if you stop, and when payments are refunded.",
   alternates: { canonical: "/refund-policy" },
 };
 

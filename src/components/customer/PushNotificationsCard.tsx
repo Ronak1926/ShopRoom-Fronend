@@ -42,13 +42,13 @@ export default function PushNotificationsCard() {
         </p>
       ) : permission === "denied" ? (
         <p className="text-sm text-(--color-text-secondary)">
-          Notifications are blocked for ShopRoom in your browser settings. Enable them from your
+          Notifications are blocked for CounterCircle in your browser settings. Enable them from your
           browser&apos;s site settings to receive updates from shops you&apos;ve joined.
         </p>
       ) : (
         <>
           <p className="text-sm text-(--color-text-secondary) mb-4">
-            Get notified when shops you&apos;ve joined send a new update, even when ShopRoom isn&apos;t open.
+            Get notified when shops you&apos;ve joined send a new update, even when CounterCircle isn&apos;t open.
           </p>
           <button
             type="button"

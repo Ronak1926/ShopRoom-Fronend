@@ -26,7 +26,7 @@ export async function downloadAccountData(endpoint: string, proof: ExportProof):
   } catch (err) {
     throw new Error(await messageFromFailure(err));
   }
-  const name = fileNameFrom(response.headers["content-disposition"] as string | undefined, "shoproom-data.json");
+  const name = fileNameFrom(response.headers["content-disposition"] as string | undefined, "countercircle-data.json");
   const url = URL.createObjectURL(response.data);
   const link = document.createElement("a");
   link.href = url;

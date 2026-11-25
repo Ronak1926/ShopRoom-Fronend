@@ -8,7 +8,7 @@ import { HELP_GROUPS } from "./_content";
 
 export const metadata: Metadata = {
   title: "Help Center",
-  description: "Answers to common questions for ShopRoom customers and shopkeepers.",
+  description: "Answers to common questions for CounterCircle customers and shopkeepers.",
   alternates: { canonical: "/help" },
 };
 

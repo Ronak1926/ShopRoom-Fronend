@@ -10,7 +10,7 @@ export const contentType = "image/png";
 // next/og renders this markup with its own engine, which only understands inline styles
 // and flexbox; Tailwind classes and CSS variables are not available here.
 export default async function OpenGraphImage() {
-  const logo = await readFile(path.join(process.cwd(), "public", "ShopRoomIcon.svg"));
+  const logo = await readFile(path.join(process.cwd(), "public", "CounterCircleIcon.svg"));
   const logoSrc = `data:image/svg+xml;base64,${logo.toString("base64")}`;
 
   return new ImageResponse(
@@ -30,7 +30,7 @@ export default async function OpenGraphImage() {
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 96, height: 96, borderRadius: 24, background: "#ffffff" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoSrc} width={58} height={52} alt="" />
+            <img src={logoSrc} width={64} height={64} alt="" />
           </div>
           <div style={{ fontSize: 56, fontWeight: 800 }}>{SITE_NAME}</div>
         </div>

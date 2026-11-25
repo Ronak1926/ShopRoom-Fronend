@@ -75,7 +75,7 @@ export default function Features() {
     <section id="features" className="w-full bg-(--color-bg-page) py-24 px-6">
       <div className="max-w-[1200px] mx-auto">
         <SectionHeader
-          eyebrow="Why ShopRoom?"
+          eyebrow="Why CounterCircle?"
           title="Everything you need to grow together"
           subtitle="Powerful tools to help you connect, engage and grow your business."
           className="mb-14"

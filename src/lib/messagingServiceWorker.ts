@@ -62,12 +62,12 @@ function tapTarget(data) {
 // explicit control over what's shown, including the large hero image.
 messaging.onBackgroundMessage((payload) => {
   const data = payload.data ?? {};
-  const title = data.title || "ShopRoom";
+  const title = data.title || "CounterCircle";
   return Promise.all([
     self.registration.showNotification(title, {
       body: data.body || "",
-      icon: "/ShopRoomIcon.svg",
-      badge: "/ShopRoomIcon.svg",
+      icon: "/CounterCircleIcon.svg",
+      badge: "/CounterCircleIcon.svg",
       image: data.imageUrl || undefined,
       data,
     }),

@@ -3,7 +3,7 @@
 /**
  * components/notifications/NotificationRenderer.tsx — Generic recursive renderer
  * for a NotificationDesign composition tree. Knows only element TYPES, never
- * template names — the same renderer draws every ShopRoom + custom design.
+ * template names — the same renderer draws every CounterCircle + custom design.
  */
 
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";

@@ -45,11 +45,11 @@ export default function UnsubscribeCard() {
 
   if (done) {
     return (
-      <AuthCard title="You're unsubscribed" subtitle="We've removed your address from the ShopRoom newsletter. You won't get any more updates from it.">
+      <AuthCard title="You're unsubscribed" subtitle="We've removed your address from the CounterCircle newsletter. You won't get any more updates from it.">
         <div className="flex flex-col items-center gap-5">
           <CheckCircleOutlinedIcon sx={{ fontSize: 44 }} className="text-(--color-success)" />
           <Link href="/" className="text-[13px] font-bold text-(--color-auth-primary)">
-            Back to ShopRoom
+            Back to CounterCircle
           </Link>
         </div>
       </AuthCard>
@@ -71,7 +71,7 @@ export default function UnsubscribeCard() {
   }
 
   return (
-    <AuthCard title="Unsubscribe from updates?" subtitle="You'll stop getting the ShopRoom newsletter. Your ShopRoom account, if you have one, is not affected.">
+    <AuthCard title="Unsubscribe from updates?" subtitle="You'll stop getting the CounterCircle newsletter. Your CounterCircle account, if you have one, is not affected.">
       <div className="flex flex-col gap-4">
         {error && (
           <p role="alert" className="rounded-lg bg-(--color-danger-bg) px-3 py-2 text-[12px] text-(--color-danger)">

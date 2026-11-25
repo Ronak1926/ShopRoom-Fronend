@@ -4,7 +4,7 @@ import { fileNameFrom } from "./fileName.ts";
 
 describe("fileNameFrom", () => {
   it("reads the name the server chose", () => {
-    assert.equal(fileNameFrom('attachment; filename="shoproom-customer-data-2026-11-07.json"', "x.json"), "shoproom-customer-data-2026-11-07.json");
+    assert.equal(fileNameFrom('attachment; filename="countercircle-customer-data-2026-11-07.json"', "x.json"), "countercircle-customer-data-2026-11-07.json");
   });
 
   it("falls back when there is no header or no name in it", () => {

@@ -25,7 +25,7 @@ export default function ShareModal({ inviteLink, onClose }: ShareModalProps) {
               Share Room Link
             </h2>
             <p className="text-[13px] text-(--color-text-secondary) mt-0.5">
-              Invite customers to join your ShopRoom
+              Invite customers to join your CounterCircle
             </p>
           </div>
           <button

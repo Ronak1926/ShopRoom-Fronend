@@ -35,7 +35,7 @@ export const PLAN_OFFERS: PlanOffer[] = [
     label: "1 Month",
     price: 399,
     days: 30,
-    description: "Try ShopRoom for a month",
+    description: "Try CounterCircle for a month",
     perks: ["1 notification a day", "Ready-made templates"],
   },
   {

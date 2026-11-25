@@ -4,7 +4,7 @@ import { SECURITY } from "./_content";
 
 export const metadata: Metadata = {
   title: "Security",
-  description: "How ShopRoom protects accounts, conversations and payments.",
+  description: "How CounterCircle protects accounts, conversations and payments.",
   alternates: { canonical: "/security" },
 };
 

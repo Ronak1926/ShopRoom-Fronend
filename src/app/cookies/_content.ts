@@ -4,7 +4,7 @@ export const COOKIES: LegalContent = {
   title: "Cookie Policy",
   updated: "2 November 2026",
   intro:
-    "ShopRoom keeps a small amount of information in your browser so that you stay signed in and the app remembers how you like it. We do not use advertising cookies or third-party analytics or tracking scripts.",
+    "CounterCircle keeps a small amount of information in your browser so that you stay signed in and the app remembers how you like it. We do not use advertising cookies or third-party analytics or tracking scripts.",
   sections: [
     {
       heading: "Cookies we set",
@@ -20,7 +20,7 @@ export const COOKIES: LegalContent = {
         "Your notification preferences (as a fast-loading copy of the ones saved to your account), and the design you were last editing in the Studio.",
         "A sign-up in progress, so you can continue after a refresh.",
         "For customers who allow it, the time location was last shared.",
-        "If you turn on notifications: a service worker and the push token your browser gives ShopRoom, so notifications can reach you.",
+        "If you turn on notifications: a service worker and the push token your browser gives CounterCircle, so notifications can reach you.",
       ],
     },
     {
@@ -35,7 +35,7 @@ export const COOKIES: LegalContent = {
       heading: "Your choices",
       bullets: [
         "You can clear cookies and site data in your browser at any time. You will be signed out and the preferences above will reset.",
-        "You can block cookies, but ShopRoom needs the sign-in cookie to work.",
+        "You can block cookies, but CounterCircle needs the sign-in cookie to work.",
         "You can turn notifications off in Settings, and in your browser's site settings.",
       ],
     },

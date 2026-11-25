@@ -62,10 +62,10 @@ export default function Sidebar() {
         }`}
       >
         <div className={`flex items-center gap-3 pt-6 pb-5 ${collapsed ? "justify-center px-0" : "px-5"}`}>
-          <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={20} height={18} />
+          <Image src="/CounterCircleIcon.svg" alt="CounterCircle" width={20} height={20} />
           {!collapsed && (
             <div>
-              <div className="text-[17px] leading-none font-bold text-(--color-text-primary)">ShopRoom</div>
+              <div className="text-[17px] leading-none font-bold text-(--color-text-primary)">CounterCircle</div>
               <div className="mt-1 text-[10px] tracking-[0.12em] text-(--color-text-secondary) uppercase">Management</div>
             </div>
           )}

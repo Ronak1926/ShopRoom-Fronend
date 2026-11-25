@@ -171,14 +171,14 @@ export default function SignupPage() {
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 text-(--color-auth-ink)">
                 <Image
-                  src="/ShopRoomIcon.svg"
-                  alt="ShopRoom"
+                  src="/CounterCircleIcon.svg"
+                  alt="CounterCircle"
                   width={26}
-                  height={23}
+                  height={26}
                   className="align-middle"
                 />
                 <div className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
-                  ShopRoom
+                  CounterCircle
                 </div>
               </div>
               <h1 className="mt-6 text-[26px] font-extrabold tracking-[-0.65px] text-(--color-auth-ink) text-center">
@@ -351,7 +351,7 @@ export default function SignupPage() {
             </div>
 
             <div className="mt-12 flex items-center justify-center gap-12 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
-              <span>© 2026 SHOPROOM</span>
+              <span>© 2026 COUNTERCIRCLE</span>
               <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
               <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
             </div>

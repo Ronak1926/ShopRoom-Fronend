@@ -3,7 +3,7 @@ import Navbar from "./_components/Navbar";
 import Hero from "./_components/Hero";
 import Features from "./_components/Features";
 import Industries from "./_components/Industries";
-import WhyShopRoom from "./_components/WhyShopRoom";
+import WhyCounterCircle from "./_components/WhyCounterCircle";
 import HowItWorks from "./_components/HowItWorks";
 import NotificationShowcase from "./_components/NotificationShowcase";
 import CommunitySection from "./_components/CommunitySection";
@@ -17,9 +17,9 @@ import { faqData, organizationData } from "@/components/seo/structuredData";
 import { FAQS } from "./_components/faqData";
 
 export const metadata: Metadata = {
-  title: "ShopRoom — Bring Your Shop Closer to Your Customers",
+  title: "CounterCircle — Bring Your Shop Closer to Your Customers",
   description:
-    "Create your own room, invite customers, share updates, and grow your business together on ShopRoom — the platform built for local shopkeepers.",
+    "Create your own room, invite customers, share updates, and grow your business together on CounterCircle — the platform built for local shopkeepers.",
   alternates: {
     canonical: "/",
   },
@@ -39,7 +39,7 @@ export default function LandingPage() {
         <Hero />
         <Features />
         <Industries />
-        <WhyShopRoom />
+        <WhyCounterCircle />
         <HowItWorks />
         <NotificationShowcase />
         <CommunitySection />

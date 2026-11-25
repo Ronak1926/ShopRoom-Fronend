@@ -279,7 +279,7 @@ export function useNotificationDesign() {
     [commit],
   );
 
-  // Applies a ShopRoom scene: swaps the background + a top-level "scene" GROUP of
+  // Applies a CounterCircle scene: swaps the background + a top-level "scene" GROUP of
   // editable decoration layers. A scene ships its own full product environment
   // (glow/shadow/pedestal), so every prior DECORATION node is dropped — only
   // non-decoration template content (text, product image, CTA, ...) is kept.

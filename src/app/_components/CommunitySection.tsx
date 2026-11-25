@@ -40,7 +40,7 @@ export default function CommunitySection() {
           eyebrow="Live Community"
           title="Your shop, buzzing with real conversations"
           highlight="real conversations"
-          subtitle="Members join, react and chat in real time — ShopRoom turns your customers into a community."
+          subtitle="Members join, react and chat in real time — CounterCircle turns your customers into a community."
           className="mb-14"
         />
 

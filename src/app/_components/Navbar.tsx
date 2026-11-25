@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { m, AnimatePresence } from "framer-motion";
-import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { getCookie } from "@/utils/cookieUtils";
@@ -54,13 +54,9 @@ export default function Navbar() {
     >
       <nav className="max-w-[1200px] mx-auto h-16 px-6 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-(--color-brand-primary)">
-            <StorefrontOutlinedIcon
-              sx={{ fontSize: 20, color: "var(--color-text-on-brand)" }}
-            />
-          </span>
+          <Image src="/CounterCircleIcon.svg" alt="" width={36} height={36} priority />
           <span className="text-[19px] font-extrabold text-(--color-text-primary) tracking-tight">
-            ShopRoom
+            CounterCircle
           </span>
         </Link>
 

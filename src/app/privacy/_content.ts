@@ -4,11 +4,11 @@ export const PRIVACY: LegalContent = {
   title: "Privacy Policy",
   updated: "7 November 2026",
   intro:
-    "ShopRoom connects customers with the local shops they like: customers join a shop's room, chat with the shop, and get its notifications. This policy explains what we collect when you use ShopRoom, why, who can see it, and how you stay in control of it.",
+    "CounterCircle connects customers with the local shops they like: customers join a shop's room, chat with the shop, and get its notifications. This policy explains what we collect when you use CounterCircle, why, who can see it, and how you stay in control of it.",
   sections: [
     {
       heading: "What we collect",
-      paragraphs: ["What we hold depends on how you use ShopRoom."],
+      paragraphs: ["What we hold depends on how you use CounterCircle."],
       bullets: [
         "Customers: your name, email address and a one-way hash of your password (we never store the password itself); the rooms you have joined and whether notifications are on for each; your messages in those rooms; and, only if you allow it, your location.",
         "Customers who turn on notifications: a push token for your browser or device, the type of browser, and what happened to each notification sent to you (delivered, opened, tapped).",
@@ -20,7 +20,7 @@ export const PRIVACY: LegalContent = {
     {
       heading: "What we never see",
       paragraphs: [
-        "Card, UPI and bank details are entered into Razorpay's payment window and go straight to Razorpay. ShopRoom never receives or stores them. We keep only the identifiers Razorpay gives us so we can match a payment to an account.",
+        "Card, UPI and bank details are entered into Razorpay's payment window and go straight to Razorpay. CounterCircle never receives or stores them. We keep only the identifiers Razorpay gives us so we can match a payment to an account.",
       ],
     },
     {
@@ -52,7 +52,7 @@ export const PRIVACY: LegalContent = {
       ],
     },
     {
-      heading: "Services that help us run ShopRoom",
+      heading: "Services that help us run CounterCircle",
       paragraphs: ["We share only what each service needs to do its job."],
       bullets: [
         "Razorpay: processes plan payments.",
@@ -95,7 +95,7 @@ export const PRIVACY: LegalContent = {
     },
     {
       heading: "Children",
-      paragraphs: ["ShopRoom is not directed at children, and we do not knowingly collect their personal data. If you believe a child has given us theirs, contact us and we will remove it."],
+      paragraphs: ["CounterCircle is not directed at children, and we do not knowingly collect their personal data. If you believe a child has given us theirs, contact us and we will remove it."],
     },
     {
       heading: "Changes to this policy",

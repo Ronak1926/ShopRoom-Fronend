@@ -111,7 +111,7 @@ export default function NotificationShowcase() {
               {/* Screen header */}
               <div className="px-5 pt-9 pb-4 bg-(--color-bg-surface) border-b border-(--color-border-default)">
                 <p className="text-[11px] font-semibold text-(--color-text-hint)">
-                  ShopRoom
+                  CounterCircle
                 </p>
                 <p className="text-[16px] font-bold text-(--color-text-primary)">
                   Notifications

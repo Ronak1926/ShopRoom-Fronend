@@ -1,5 +1,5 @@
 /**
- * features/notifications/scenes — ShopRoom scene catalog (data, not React).
+ * features/notifications/scenes — CounterCircle scene catalog (data, not React).
  *
  * A "scene" is the editable background composition of a notification: a canvas
  * background plus layered DECORATION nodes. Applying one inserts those as

@@ -49,9 +49,9 @@ export default function SignOutConfirmation({ role, redirectTo, description, onB
           <div className="px-8 py-9">
             {/* Brand */}
             <div className="flex items-center justify-center gap-2 mb-8">
-              <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={22} height={20} />
+              <Image src="/CounterCircleIcon.svg" alt="CounterCircle" width={22} height={22} />
               <span className="text-[20px] font-bold text-(--color-auth-ink) tracking-[-0.5px]">
-                ShopRoom
+                CounterCircle
               </span>
             </div>
 

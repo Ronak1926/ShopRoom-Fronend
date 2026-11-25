@@ -57,13 +57,13 @@ export default function LoginClient({ initialTab }: Props) {
         <div className="w-full max-w-120">
           <div className="flex items-center gap-2 text-(--color-auth-ink) mb-6 justify-center">
             <Image
-              src="/ShopRoomIcon.svg"
-              alt="ShopRoom"
+              src="/CounterCircleIcon.svg"
+              alt="CounterCircle"
               width={24}
-              height={21}
+              height={24}
             />
             <span className="text-[24px] leading-8 tracking-[-1.2px] font-bold">
-              ShopRoom
+              CounterCircle
             </span>
           </div>
 
@@ -92,7 +92,7 @@ export default function LoginClient({ initialTab }: Props) {
           </div>
 
           <div className="mt-8 flex items-center justify-center gap-8 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
-            <span>© 2026 SHOPROOM</span>
+            <span>© 2026 COUNTERCIRCLE</span>
             <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
             <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
           </div>

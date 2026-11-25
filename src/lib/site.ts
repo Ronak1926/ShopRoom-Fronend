@@ -1,7 +1,7 @@
 /** The public address of the web app, without a trailing slash. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://shoproom.in").replace(/\/+$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://countercircle.com").replace(/\/+$/, "");
 
-export const SITE_NAME = "ShopRoom";
+export const SITE_NAME = "CounterCircle";
 
 export const SITE_TAGLINE = "Bring your shop closer to your customers";
 

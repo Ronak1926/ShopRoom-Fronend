@@ -37,8 +37,8 @@ export default function MobileNavBar({ children, actions }: { children: ReactNod
         >
           <MenuOutlinedIcon />
         </button>
-        <Image src="/ShopRoomIcon.svg" alt="" width={20} height={18} />
-        <span className="text-[17px] font-bold text-(--color-text-primary)">ShopRoom</span>
+        <Image src="/CounterCircleIcon.svg" alt="" width={20} height={20} />
+        <span className="text-[17px] font-bold text-(--color-text-primary)">CounterCircle</span>
         {actions && <div className="ml-auto flex items-center">{actions}</div>}
       </header>
 

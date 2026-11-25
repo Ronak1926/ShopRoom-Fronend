@@ -40,7 +40,7 @@ const INDUSTRIES: Industry[] = [
   {
     image: "/industries/more.png",
     title: "And Many More",
-    description: "Any business. Any size. ShopRoom fits all.",
+    description: "Any business. Any size. CounterCircle fits all.",
   },
 ];
 
@@ -51,7 +51,7 @@ export default function Industries() {
         <SectionHeader
           title="One Platform. Endless Possibilities."
           highlight="Endless Possibilities."
-          subtitle="ShopRoom is perfect for every type of business."
+          subtitle="CounterCircle is perfect for every type of business."
           className="mb-14"
         />
 

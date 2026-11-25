@@ -24,10 +24,10 @@ export default function RecoveryCodesPanel({ codes, onDone }: Props) {
   }
 
   function download() {
-    const url = URL.createObjectURL(new Blob([`ShopRoom recovery codes\nEach works once. Keep them somewhere safe.\n\n${text}\n`], { type: "text/plain" }));
+    const url = URL.createObjectURL(new Blob([`CounterCircle recovery codes\nEach works once. Keep them somewhere safe.\n\n${text}\n`], { type: "text/plain" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = "shoproom-recovery-codes.txt";
+    link.download = "countercircle-recovery-codes.txt";
     document.body.appendChild(link);
     link.click();
     link.remove();

@@ -7,7 +7,7 @@ const PS = String.fromCharCode(0x2029);
 
 describe("serializeJsonLd", () => {
   it("round-trips ordinary data", () => {
-    const data = { "@type": "Question", name: "What is ShopRoom?", n: 3, nested: { ok: true } };
+    const data = { "@type": "Question", name: "What is CounterCircle?", n: 3, nested: { ok: true } };
     assert.deepEqual(JSON.parse(serializeJsonLd(data)), data);
   });
 

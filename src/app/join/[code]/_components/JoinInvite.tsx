@@ -28,8 +28,8 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="flex flex-1 items-center justify-center bg-(--color-bg-page) px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2 text-(--color-auth-ink)">
-          <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={24} height={21} />
-          <span className="text-[24px] leading-8 tracking-[-1.2px] font-bold">ShopRoom</span>
+          <Image src="/CounterCircleIcon.svg" alt="CounterCircle" width={24} height={24} />
+          <span className="text-[24px] leading-8 tracking-[-1.2px] font-bold">CounterCircle</span>
         </div>
         <div className="rounded-[14px] border border-(--color-border-default) bg-(--color-bg-surface) p-6 shadow-(--shadow-md) sm:p-8">{children}</div>
       </div>
@@ -102,7 +102,7 @@ export default function JoinInvite({ code }: { code: string }) {
             {load.kind === "invalid" ? "It may have been mistyped or is no longer valid. Ask the shop for a fresh link." : "Please check your connection and try again."}
           </p>
           <Link href="/" className="text-[13px] font-bold text-(--color-auth-primary)">
-            Go to ShopRoom
+            Go to CounterCircle
           </Link>
         </div>
       </Shell>

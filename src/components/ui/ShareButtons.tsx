@@ -47,8 +47,8 @@ export default function ShareButtons({ inviteLink }: ShareButtonsProps) {
   async function handleNativeShare() {
     try {
       await navigator.share({
-        title: "Join my ShopRoom",
-        text: "Join my shop's room on ShopRoom to get stock alerts and new arrivals!",
+        title: "Join my CounterCircle",
+        text: "Join my shop's room on CounterCircle to get stock alerts and new arrivals!",
         url: inviteLink,
       });
     } catch {
@@ -92,7 +92,7 @@ export default function ShareButtons({ inviteLink }: ShareButtonsProps) {
       <div className="flex gap-3">
         {/* WhatsApp */}
         <a
-          href={`https://wa.me/?text=${encodeURIComponent(`Hey! Join my shop on ShopRoom 🛍️\nTap the link to enter my room and get stock alerts, new arrivals & more:\n${inviteLink}`)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(`Hey! Join my shop on CounterCircle 🛍️\nTap the link to enter my room and get stock alerts, new arrivals & more:\n${inviteLink}`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 flex flex-col items-center gap-2.5 py-4 rounded-xl border border-(--color-border-default) hover:border-[#25D366] hover:bg-[#f0fdf4] transition-colors cursor-pointer no-underline"

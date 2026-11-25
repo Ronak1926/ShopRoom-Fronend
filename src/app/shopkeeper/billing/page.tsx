@@ -73,7 +73,7 @@ export default function ShopkeeperBillingPage() {
     setRenewedUntil(null);
     setPendingPaymentId(null);
     try {
-      const updated = await renewPlan(plan.id, `ShopRoom ${plan.label} plan`);
+      const updated = await renewPlan(plan.id, `CounterCircle ${plan.label} plan`);
       if (updated) {
         setBilling(updated);
         publishBilling(updated);

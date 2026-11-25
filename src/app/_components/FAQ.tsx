@@ -16,7 +16,7 @@ export default function FAQ() {
         <SectionHeader
           eyebrow="FAQ"
           title="Frequently asked questions"
-          subtitle="Everything you need to know about ShopRoom."
+          subtitle="Everything you need to know about CounterCircle."
           className="mb-12"
         />
 

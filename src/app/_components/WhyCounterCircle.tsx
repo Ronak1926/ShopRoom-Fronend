@@ -12,7 +12,7 @@ const CHECKLIST = [
   "Smart notifications",
 ] as const;
 
-export default function WhyShopRoom() {
+export default function WhyCounterCircle() {
   return (
     <section className="w-full bg-(--color-bg-page) py-24 px-6">
       <div className="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -36,7 +36,7 @@ export default function WhyShopRoom() {
             variants={fadeUp}
             className="text-[16px] text-(--color-text-secondary) leading-relaxed max-w-[460px]"
           >
-            ShopRoom is more than a chat platform — it&apos;s a complete growth
+            CounterCircle is more than a chat platform — it&apos;s a complete growth
             engine that keeps your customers coming back.
           </m.p>
           <m.ul

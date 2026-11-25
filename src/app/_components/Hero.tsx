@@ -54,7 +54,7 @@ export default function Hero() {
             className="hero-rise hero-rise-2 mt-6 text-[18px] text-(--color-text-secondary) max-w-[480px] leading-relaxed"
           >
             Create your own room, invite customers, share updates, and grow your
-            business together on ShopRoom.
+            business together on CounterCircle.
           </p>
 
           <div
@@ -94,7 +94,7 @@ export default function Hero() {
           <div className="relative w-full max-w-[560px] lg:max-w-none">
             <Image
               src="/hero_background.png"
-              alt="Shopkeepers and customers connecting on ShopRoom"
+              alt="Shopkeepers and customers connecting on CounterCircle"
               width={1250}
               height={1250}
               priority

@@ -4,7 +4,7 @@ import { COMMUNITY_GUIDELINES } from "./_content";
 
 export const metadata: Metadata = {
   title: "Community Guidelines",
-  description: "What is and is not acceptable in ShopRoom rooms and notifications.",
+  description: "What is and is not acceptable in CounterCircle rooms and notifications.",
   alternates: { canonical: "/community-guidelines" },
 };
 

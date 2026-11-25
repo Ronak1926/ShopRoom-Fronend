@@ -10,13 +10,13 @@ export default function ShopkeeperSuccessPage() {
       <div className="w-full max-w-[440px] rounded-[14px] bg-[var(--color-bg-surface)] px-8 py-10 shadow-(--shadow-md) border border-[var(--color-border-default)] text-center">
         <div className="flex items-center gap-2 justify-center mb-8 text-[var(--color-auth-ink)]">
           <Image
-            src="/ShopRoomIcon.svg"
-            alt="ShopRoom"
+            src="/CounterCircleIcon.svg"
+            alt="CounterCircle"
             width={24}
-            height={21}
+            height={24}
           />
           <span className="text-[22px] font-bold tracking-[-1px]">
-            ShopRoom
+            CounterCircle
           </span>
         </div>
 
@@ -39,7 +39,7 @@ export default function ShopkeeperSuccessPage() {
           You&apos;re all set!
         </h1>
         <p className="text-[14px] text-[var(--color-auth-ink-muted)] mb-6">
-          Your shop has been registered on ShopRoom. You can now log in to your
+          Your shop has been registered on CounterCircle. You can now log in to your
           shopkeeper dashboard and start connecting with customers.
         </p>
 

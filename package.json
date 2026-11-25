@@ -1,5 +1,5 @@
 {
-  "name": "shoproom-frontend",
+  "name": "countercircle-frontend",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.34.9",
@@ -28,7 +28,7 @@
     "firebase": "^12.19.0",
     "framer-motion": "^12.43.0",
     "leaflet": "^1.9.4",
-    "next": "^16.4.3",
+    "next": "^16.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-easy-crop": "^6.2.4",
@@ -49,7 +49,7 @@
     "@types/three": "^0.185.4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.4.3",
+    "eslint-config-next": "^16.4.6",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   },

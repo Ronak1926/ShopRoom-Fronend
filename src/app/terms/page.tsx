@@ -4,7 +4,7 @@ import { TERMS } from "./_content";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "The agreement between you and ShopRoom for customers and shopkeepers.",
+  description: "The agreement between you and CounterCircle for customers and shopkeepers.",
   alternates: { canonical: "/terms" },
 };
 

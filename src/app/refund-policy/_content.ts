@@ -4,20 +4,20 @@ export const REFUND_POLICY: LegalContent = {
   title: "Cancellation and Refund Policy",
   updated: "19 November 2026",
   intro:
-    "This page explains how paying for a ShopRoom plan works, what happens if you stop, and when your money is returned. It is part of our Terms of Service. Customers use ShopRoom free of charge, so this policy is about the plans shopkeepers buy.",
+    "This page explains how paying for a CounterCircle plan works, what happens if you stop, and when your money is returned. It is part of our Terms of Service. Customers use CounterCircle free of charge, so this policy is about the plans shopkeepers buy.",
   sections: [
     {
       heading: "What you are paying for",
       bullets: [
-        "A plan is a one-time, prepaid payment for 1, 2 or 3 months of ShopRoom for your shop. The price is shown before you pay, in Indian rupees.",
+        "A plan is a one-time, prepaid payment for 1, 2 or 3 months of CounterCircle for your shop. The price is shown before you pay, in Indian rupees.",
         "Plans do not renew automatically. We never charge you again unless you choose to buy another plan yourself.",
-        "ShopRoom is a digital service. Your plan starts as soon as your payment is confirmed, and nothing is shipped.",
+        "CounterCircle is a digital service. Your plan starts as soon as your payment is confirmed, and nothing is shipped.",
       ],
     },
     {
       heading: "Cancelling",
       paragraphs: [
-        "There is no subscription to cancel, because nothing renews. You can stop using ShopRoom whenever you like and your plan simply runs out on its end date. You can also delete your account from your profile page at any time.",
+        "There is no subscription to cancel, because nothing renews. You can stop using CounterCircle whenever you like and your plan simply runs out on its end date. You can also delete your account from your profile page at any time.",
         "Cancelling or deleting your account does not return the money for the part of a plan you have not used.",
       ],
     },

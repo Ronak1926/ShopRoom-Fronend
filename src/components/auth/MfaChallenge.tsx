@@ -45,7 +45,7 @@ export default function MfaChallenge({ role, mfaToken, onVerified, onCancel }: P
       <div className="flex flex-col items-center gap-2 text-center">
         <ShieldOutlinedIcon sx={{ fontSize: 40 }} className="text-(--color-auth-primary)" />
         <h2 className="text-[20px] font-extrabold text-(--color-auth-ink)">Two-step verification</h2>
-        <p className="text-[13px] text-(--color-auth-ink-muted)">Open your authenticator app and enter the 6-digit code for ShopRoom. Lost your phone? Use one of your recovery codes instead.</p>
+        <p className="text-[13px] text-(--color-auth-ink-muted)">Open your authenticator app and enter the 6-digit code for CounterCircle. Lost your phone? Use one of your recovery codes instead.</p>
       </div>
 
       <div className="flex flex-col gap-1">

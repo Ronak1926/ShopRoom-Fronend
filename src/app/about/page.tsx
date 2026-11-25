@@ -6,8 +6,8 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 import PublicPage from "@/components/public/PublicPage";
 
 export const metadata: Metadata = {
-  title: "About ShopRoom",
-  description: "ShopRoom brings local shops and the people who shop there closer together.",
+  title: "About CounterCircle",
+  description: "CounterCircle brings local shops and the people who shop there closer together.",
   alternates: { canonical: "/about" },
 };
 
@@ -35,7 +35,7 @@ export default function AboutPage() {
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <h1 className="text-[32px] font-extrabold tracking-[-0.8px] text-(--color-text-primary) sm:text-[44px]">Local shops, closer to their customers.</h1>
         <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-(--color-text-secondary)">
-          Most neighbourhood shops have loyal customers and no good way to reach them: a message gets lost in a group chat, a flyer gets thrown away. ShopRoom gives
+          Most neighbourhood shops have loyal customers and no good way to reach them: a message gets lost in a group chat, a flyer gets thrown away. CounterCircle gives
           every shop a place of its own, and gives customers a simple way to hear from the shops they care about, and only those.
         </p>
 
@@ -55,7 +55,7 @@ export default function AboutPage() {
           <h2 className="text-[22px] font-bold text-(--color-text-primary)">How we think about it</h2>
           <ul className="mt-4 flex list-disc flex-col gap-2 pl-5 text-[15px] leading-relaxed text-(--color-text-secondary)">
             <li>Customers choose which shops to hear from, and can turn any of them off.</li>
-            <li>Shops pay for a plan, and customers use ShopRoom free. There are no ads and we do not sell personal data.</li>
+            <li>Shops pay for a plan, and customers use CounterCircle free. There are no ads and we do not sell personal data.</li>
             <li>Location is optional, and used only to show nearby shops.</li>
           </ul>
         </section>

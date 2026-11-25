@@ -167,7 +167,7 @@ export default function CustomerProfilePage() {
               <ExportDataCard
                 endpoint="/api/customers/me/export"
                 usesGoogle={!data.hasPassword}
-                description="A copy of what ShopRoom holds about you as a file: your details, the rooms you've joined, your messages and reactions, and how notifications reached you. Passwords and sign-in tokens are never included."
+                description="A copy of what CounterCircle holds about you as a file: your details, the rooms you've joined, your messages and reactions, and how notifications reached you. Passwords and sign-in tokens are never included."
               />
             </div>
 

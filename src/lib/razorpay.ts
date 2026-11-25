@@ -100,7 +100,7 @@ export async function openCheckout(order: CheckoutOrder, details: { description:
       key: order.keyId,
       amount: order.amount,
       currency: order.currency,
-      name: "ShopRoom",
+      name: "CounterCircle",
       description: details.description,
       order_id: order.orderId,
       prefill: { email: details.email },

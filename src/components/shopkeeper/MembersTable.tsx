@@ -77,7 +77,7 @@ export default function MembersTable({ variant = "full", initialQuery = "" }: Me
     setExporting(true);
     setExportError(false);
     try {
-      downloadCsv("shoproom-members.csv", membersToCsv(await fetchAllMembers(filter)));
+      downloadCsv("countercircle-members.csv", membersToCsv(await fetchAllMembers(filter)));
     } catch {
       setExportError(true);
     } finally {

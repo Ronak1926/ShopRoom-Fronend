@@ -61,8 +61,8 @@ export default function Sidebar() {
         }`}
       >
         <div className={`flex items-center gap-3 pt-6 pb-5 ${collapsed ? "justify-center px-0" : "px-5"}`}>
-          <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={20} height={18} />
-          {!collapsed && <span className="text-[17px] leading-none font-bold text-(--color-text-primary)">ShopRoom</span>}
+          <Image src="/CounterCircleIcon.svg" alt="CounterCircle" width={20} height={20} />
+          {!collapsed && <span className="text-[17px] leading-none font-bold text-(--color-text-primary)">CounterCircle</span>}
         </div>
 
         <button

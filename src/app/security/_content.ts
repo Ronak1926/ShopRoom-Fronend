@@ -4,7 +4,7 @@ export const SECURITY: LegalContent = {
   title: "Security",
   updated: "2 November 2026",
   intro:
-    "Shops and customers trust ShopRoom with accounts, conversations and payments. Here is how we protect them, and what you can do to help.",
+    "Shops and customers trust CounterCircle with accounts, conversations and payments. Here is how we protect them, and what you can do to help.",
   sections: [
     {
       heading: "How we protect your account",
@@ -27,7 +27,7 @@ export const SECURITY: LegalContent = {
     {
       heading: "Payments",
       paragraphs: [
-        "Plan payments are handled by Razorpay. Your card, UPI or bank details never reach ShopRoom. Before a plan is activated we verify Razorpay's signature and check that the payment was for that shop and the right amount, and each payment can be used only once.",
+        "Plan payments are handled by Razorpay. Your card, UPI or bank details never reach CounterCircle. Before a plan is activated we verify Razorpay's signature and check that the payment was for that shop and the right amount, and each payment can be used only once.",
       ],
     },
     {
@@ -35,14 +35,14 @@ export const SECURITY: LegalContent = {
       bullets: [
         "Use a strong password that you do not use anywhere else.",
         "Sign out on shared computers, or use Sign out everywhere in Settings if you lose a device.",
-        "Be careful with links in emails. ShopRoom will never ask for your password by email.",
+        "Be careful with links in emails. CounterCircle will never ask for your password by email.",
         "Keep your browser up to date.",
       ],
     },
     {
       heading: "Reporting a problem",
       paragraphs: [
-        "If you think you have found a security problem in ShopRoom, please tell us through the contact page with enough detail to reproduce it, and give us reasonable time to fix it before sharing it publicly. We take every report seriously.",
+        "If you think you have found a security problem in CounterCircle, please tell us through the contact page with enough detail to reproduce it, and give us reasonable time to fix it before sharing it publicly. We take every report seriously.",
       ],
     },
   ],

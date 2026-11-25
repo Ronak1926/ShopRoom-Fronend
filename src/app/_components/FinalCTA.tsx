@@ -24,7 +24,7 @@ export default function FinalCTA() {
         <div className="absolute inset-y-0 right-0 w-[58%] hidden lg:block">
           <Image
             src="/industries/grow-bussiness.png"
-            alt="Two shopkeepers growing their business together on ShopRoom"
+            alt="Two shopkeepers growing their business together on CounterCircle"
             fill
             sizes="58vw"
             className="object-cover object-center"

@@ -37,7 +37,7 @@ export default function ForgotPasswordForm({ role }: { role: AccountRole }) {
     return (
       <AuthCard
         title="Check your email"
-        subtitle={`If ${sentTo} has a ShopRoom account, we've sent a link to reset the password. It works for 30 minutes.`}
+        subtitle={`If ${sentTo} has a CounterCircle account, we've sent a link to reset the password. It works for 30 minutes.`}
       >
         <div className="flex flex-col items-center gap-5 text-center">
           <MarkEmailReadOutlinedIcon sx={{ fontSize: 44 }} className="text-(--color-auth-primary)" />

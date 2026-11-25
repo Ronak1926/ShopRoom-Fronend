@@ -7,7 +7,7 @@ import { searchStockImages, type StockImageResult } from "@/features/notificatio
 import ImageGrid, { type ImageTile } from "./ImageGrid";
 
 // "Products" pre-fills the search query rather than hitting a separate data
-// source — ShopRoom has no product catalog to browse (see conversation).
+// source — CounterCircle has no product catalog to browse (see conversation).
 const CATEGORIES = [
   "All", "Products", "Nature", "Fashion", "Food", "Technology",
   "Business", "People", "Travel", "Abstract",

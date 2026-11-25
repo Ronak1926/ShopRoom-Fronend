@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { m } from "framer-motion";
-import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
@@ -70,13 +70,9 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 flex flex-col gap-4 max-w-[280px]">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-(--color-brand-primary)">
-                <StorefrontOutlinedIcon
-                  sx={{ fontSize: 20, color: "var(--color-text-on-brand)" }}
-                />
-              </span>
+              <Image src="/CounterCircleIcon.svg" alt="" width={36} height={36} priority />
               <span className="text-[19px] font-extrabold text-(--color-text-primary)">
-                ShopRoom
+                CounterCircle
               </span>
             </Link>
             <p className="text-[13px] text-(--color-text-secondary) leading-relaxed">
@@ -139,7 +135,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-(--color-border-default) py-6 text-center">
           <span className="text-[12px] text-(--color-text-hint)">
-            © 2026 ShopRoom. All rights reserved.
+            © 2026 CounterCircle. All rights reserved.
           </span>
         </div>
       </div>

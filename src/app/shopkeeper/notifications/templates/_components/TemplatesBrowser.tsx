@@ -28,7 +28,7 @@ type Tab = "catalog" | "mine" | "drafts" | "favourites";
 type Sort = "popular" | "newest" | "name";
 
 const TABS: { id: Tab; label: string; icon: typeof GridViewOutlinedIcon }[] = [
-  { id: "catalog", label: "ShopRoom Templates", icon: GridViewOutlinedIcon },
+  { id: "catalog", label: "CounterCircle Templates", icon: GridViewOutlinedIcon },
   { id: "mine", label: "My Templates", icon: PersonOutlineOutlinedIcon },
   { id: "drafts", label: "Drafts", icon: EditNoteOutlinedIcon },
   { id: "favourites", label: "Favourites", icon: FavoriteBorderOutlinedIcon },

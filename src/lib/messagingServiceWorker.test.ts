@@ -109,7 +109,7 @@ describe("service worker: tapping a notification", () => {
     assert.deepEqual(parseTapHash(fragment), { sendId: "send_abc123", receiptToken: TOKEN });
   });
 
-  it("reuses an open ShopRoom tab: focuses it and points it at the same fragment", async () => {
+  it("reuses an open CounterCircle tab: focuses it and points it at the same fragment", async () => {
     const worker = loadWorker({ openClients: [{ url: `${ORIGIN}/customer/home` }] });
     await worker.tap(PUSH);
     assert.deepEqual(worker.focused, [`${ORIGIN}/customer/home`]);

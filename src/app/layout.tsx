@@ -48,13 +48,13 @@ const notifPlusJakarta = Plus_Jakarta_Sans({ variable: "--font-notif-plus-jakart
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  applicationName: "ShopRoom",
+  applicationName: "CounterCircle",
   title: {
-    default: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
-    template: "%s | ShopRoom",
+    default: "CounterCircle — Your Neighbourhood Shop, Delivered to Your Feed",
+    template: "%s | CounterCircle",
   },
   description:
-    "ShopRoom connects customers to their favourite local shops — real-time stock updates, personalised alerts, and hyper-local discovery. No algorithms, just your street.",
+    "CounterCircle connects customers to their favourite local shops — real-time stock updates, personalised alerts, and hyper-local discovery. No algorithms, just your street.",
   keywords: [
     "local shop discovery",
     "neighbourhood shops",
@@ -62,14 +62,14 @@ export const metadata: Metadata = {
     "shop stock alerts",
     "local business platform",
     "shopkeeper app",
-    "ShopRoom",
+    "CounterCircle",
     "near me shops",
     "real-time stock updates",
     "local retail",
   ],
-  authors: [{ name: "ShopRoom", url: SITE_URL }],
-  creator: "ShopRoom",
-  publisher: "ShopRoom",
+  authors: [{ name: "CounterCircle", url: SITE_URL }],
+  creator: "CounterCircle",
+  publisher: "CounterCircle",
   robots: {
     index: true,
     follow: true,
@@ -85,17 +85,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     url: SITE_URL,
-    siteName: "ShopRoom",
-    title: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
+    siteName: "CounterCircle",
+    title: "CounterCircle — Your Neighbourhood Shop, Delivered to Your Feed",
     description:
-      "Discover local shops, get real-time stock alerts, and stay ahead of the rush. ShopRoom is the hyper-local platform built for physical retail.",
+      "Discover local shops, get real-time stock alerts, and stay ahead of the rush. CounterCircle is the hyper-local platform built for physical retail.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ShopRoom — Your Neighbourhood Shop, Delivered to Your Feed",
+    title: "CounterCircle — Your Neighbourhood Shop, Delivered to Your Feed",
     description:
       "Discover local shops, get real-time stock alerts, and stay ahead of the rush.",
-    creator: "@shoproom_in",
   },
   manifest: "/site.webmanifest",
   category: "shopping",

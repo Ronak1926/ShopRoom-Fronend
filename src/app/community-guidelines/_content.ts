@@ -4,7 +4,7 @@ export const COMMUNITY_GUIDELINES: LegalContent = {
   title: "Community Guidelines",
   updated: "19 November 2026",
   intro:
-    "ShopRoom works because people trust the rooms they join. These guidelines say what is and is not acceptable for customers and shopkeepers. They explain our Terms of Service in plain words; if the two ever differ, the Terms apply.",
+    "CounterCircle works because people trust the rooms they join. These guidelines say what is and is not acceptable for customers and shopkeepers. They explain our Terms of Service in plain words; if the two ever differ, the Terms apply.",
   sections: [
     {
       heading: "For everyone",
@@ -12,7 +12,7 @@ export const COMMUNITY_GUIDELINES: LegalContent = {
         "Be honest about who you are. Do not pretend to be another person, shop or business.",
         "Be respectful. No harassment, threats, hate, or abuse, in chat or in notifications.",
         "Do not post anything illegal, or anything you do not have the right to share.",
-        "Do not try to break, overload or get around ShopRoom's security, or to reach another person's data.",
+        "Do not try to break, overload or get around CounterCircle's security, or to reach another person's data.",
       ],
     },
     {

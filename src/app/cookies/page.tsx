@@ -4,7 +4,7 @@ import { COOKIES } from "./_content";
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
-  description: "The cookies and browser storage ShopRoom uses, and why.",
+  description: "The cookies and browser storage CounterCircle uses, and why.",
   alternates: { canonical: "/cookies" },
 };
 

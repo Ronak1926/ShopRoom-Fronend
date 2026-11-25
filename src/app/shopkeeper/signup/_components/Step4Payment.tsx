@@ -55,7 +55,7 @@ export function Step4Payment({ draftId, userEmail, onSuccess, onError, onBack }:
       const { data: order } = await apiClient.post<CheckoutOrder>("/api/shopkeeper/payment/create-order", { draftId, planType: plan.id });
       const account = await runCheckout({
         order,
-        description: `ShopRoom ${plan.label} plan`,
+        description: `CounterCircle ${plan.label} plan`,
         email: userEmail,
         confirm: async (payment) =>
           (
