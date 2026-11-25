@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SmartphoneOutlinedIcon from "@mui/icons-material/SmartphoneOutlined";
 import DesktopWindowsOutlinedIcon from "@mui/icons-material/DesktopWindowsOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
@@ -92,6 +92,16 @@ export default function StudioCanvas({
   const [view, setView] = useState<"mobile" | "desktop">("mobile");
   const [zoom, setZoom] = useState(1);
   const [showCropGuide, setShowCropGuide] = useState(false);
+  // The stage width, so the banner shrinks to fit a phone screen instead of overflowing.
+  const [stageWidth, setStageWidth] = useState(0);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setStageWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const dragOrigin = useRef<Frame | null>(null);
 
   // Resolve the selection anywhere in the tree. Nodes laid out by a flex parent
@@ -128,7 +138,7 @@ export default function StudioCanvas({
   return (
     <div className="flex-1 min-w-0 flex flex-col bg-(--color-bg-page)">
       {/* Canvas top controls */}
-      <div className="shrink-0 flex items-center justify-center gap-4 px-6 py-3 relative">
+      <div className="shrink-0 flex flex-wrap items-center justify-center gap-2 px-3 py-2 relative sm:gap-4 sm:px-6 sm:py-3">
         <div className="flex items-center gap-1 p-1 rounded-xl bg-(--color-bg-surface) border border-(--color-border-default)">
           {VIEWS.map(({ id, label, icon: Icon }) => (
             <button
@@ -142,7 +152,7 @@ export default function StudioCanvas({
               }`}
             >
               <Icon sx={{ fontSize: 16 }} />
-              {label}
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
         </div>
@@ -163,7 +173,7 @@ export default function StudioCanvas({
           </button>
         )}
 
-        <div className="absolute right-6 flex items-center gap-1 h-8 px-1 rounded-lg bg-(--color-bg-surface) border border-(--color-border-default)">
+        <div className="flex items-center gap-1 h-8 px-1 rounded-lg lg:absolute lg:right-6 bg-(--color-bg-surface) border border-(--color-border-default)">
           <button
             type="button"
             title="Zoom out"
@@ -187,9 +197,9 @@ export default function StudioCanvas({
       </div>
 
       {/* Stage */}
-      <div className="flex-1 min-h-0 overflow-auto flex items-start justify-center py-8 px-6">
+      <div ref={stageRef} className="flex-1 min-h-0 overflow-auto flex items-start justify-center py-3 px-3 sm:py-8 sm:px-6">
         {loading && (
-          <div className="w-[560px] h-[160px] rounded-2xl bg-(--color-bg-surface-hover) animate-pulse" />
+          <div className="w-full max-w-[560px] aspect-2/1 rounded-2xl bg-(--color-bg-surface-hover) animate-pulse" />
         )}
         {!loading && error && (
           <div className="text-[13px] text-(--color-danger) mt-16">{error}</div>
@@ -198,11 +208,12 @@ export default function StudioCanvas({
           const target = PREVIEW_TARGETS[view];
           // Logical design size is fixed; each platform just renders it at its
           // own width, so the preview scales rather than reflows.
-          const fit = (target.width / design.canvas.width) * zoom;
+          const room = stageWidth > 0 ? Math.min(target.width, stageWidth) : target.width;
+          const fit = (room / design.canvas.width) * zoom;
           const inset = target.safeInsetPct;
           return (
           <div className="shrink-0 flex flex-col items-center gap-4">
-            <p className="text-[11px] text-(--color-text-hint)">
+            <p className="hidden text-[11px] text-(--color-text-hint) sm:block">
               Design your notification content. Outer notification UI is handled by the system.
             </p>
             {/* Only the banner itself — no phone frame, no app row, no system
@@ -262,7 +273,7 @@ export default function StudioCanvas({
               )}
             </div>
 
-            <div className="w-full max-w-[560px] rounded-xl border border-(--color-border-default) bg-(--color-bg-surface) px-4 py-3">
+            <div className="hidden w-full max-w-[560px] rounded-xl border border-(--color-border-default) bg-(--color-bg-surface) px-4 py-3 sm:block">
               <p className="text-[12px] font-semibold text-(--color-text-primary) mb-1.5">
                 {target.label} notification · this is your content
               </p>

@@ -50,6 +50,7 @@ import { useResizable } from "./_hooks/useResizable";
 import { useNotificationDesign } from "./_hooks/useNotificationDesign";
 import { usePlaybackClock } from "./_hooks/usePlaybackClock";
 import QuickEditor from "./_components/QuickEditor";
+import { useCompactLayout } from "./_hooks/useCompactLayout";
 import { CUSTOM_ANIMATION_LOCKED, StudioPlanProvider } from "./_components/StudioPlanContext";
 import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
 import { UPGRADE_HREF } from "@/features/notifications/plan";
@@ -66,6 +67,12 @@ export default function NotificationStudioPage() {
   const [bottomHeight, resizeBottom] = useResizable(224, 150, 440);
   const [layersWidth, resizeLayers] = useResizable(240, 180, 380);
   const [bgBuilderWidth, resizeBgBuilder] = useResizable(320, 280, 440);
+  // Phones and tablets get one full-width panel at a time under the canvas.
+  const { compact, width: screenWidth } = useCompactLayout();
+  // Panels are designed for a narrow rail, so on tablets they stay phone-width and centred.
+  const sheetWidth = Math.min(screenWidth, 560);
+  const panelWidth = compact ? sheetWidth : leftWidth;
+  const [sheet, setSheet] = useState<MobileSheet>("tool");
 
   const studio = useNotificationDesign();
   const plan = usePlanCapabilities();
@@ -380,7 +387,7 @@ export default function NotificationStudioPage() {
       case "background":
         return (
           <BackgroundScenesPanel
-            width={leftWidth}
+            width={panelWidth}
             design={studio.design}
             appliedSceneId={studio.appliedSceneId}
             selectedId={studio.selectedId}
@@ -391,7 +398,7 @@ export default function NotificationStudioPage() {
             onInsertIntoScene={handleInsertIntoScene}
             onSetSceneStyle={studio.setSceneStyle}
             onNewBlankScene={studio.startBlankScene}
-            onOpenBackgroundBuilder={() => setRightPanel("background")}
+            onOpenBackgroundBuilder={() => { setRightPanel("background"); setSheet("edit"); }}
             onToggleLock={studio.toggleLock}
             copyTone={studio.copyTone}
             onSetCopyTone={studio.setCopyTone}
@@ -402,7 +409,7 @@ export default function NotificationStudioPage() {
       case "text":
         return (
           <TextPanel
-            width={leftWidth}
+            width={panelWidth}
             design={studio.design}
             selectedId={studio.selectedId}
             onAddPreset={handleAddTextPreset}
@@ -413,7 +420,7 @@ export default function NotificationStudioPage() {
         const replaceTarget = imageReplaceTargetId && studio.design ? findNode(studio.design.elements, imageReplaceTargetId) : null;
         return (
           <ImagesPanel
-            width={leftWidth}
+            width={panelWidth}
             replaceTargetName={replaceTarget ? nodeLabel(replaceTarget) : null}
             onAdd={handleAddImage}
             onCancelReplace={() => setImageReplaceTargetId(null)}
@@ -423,7 +430,7 @@ export default function NotificationStudioPage() {
       case "buttons":
         return (
           <ButtonsPanel
-            width={leftWidth}
+            width={panelWidth}
             design={studio.design}
             selectedId={studio.selectedId}
             onPick={handlePickButton}
@@ -433,7 +440,7 @@ export default function NotificationStudioPage() {
       case "icons":
         return (
           <IconsPanel
-            width={leftWidth}
+            width={panelWidth}
             design={studio.design}
             selectedId={studio.selectedId}
             onPick={handlePickIcon}
@@ -441,16 +448,16 @@ export default function NotificationStudioPage() {
           />
         );
       case "shapes":
-        return <ShapesPanel width={leftWidth} onInsert={handleInsertAsset} />;
+        return <ShapesPanel width={panelWidth} onInsert={handleInsertAsset} />;
       case "elements":
         return (
-          <AssetLibraryPanel width={leftWidth} title="Decorations" groups={DECORATION_GROUPS} onInsert={handleInsertAsset} />
+          <AssetLibraryPanel width={panelWidth} title="Decorations" groups={DECORATION_GROUPS} onInsert={handleInsertAsset} />
         );
       case "animation":
-        if (!canAnimate) return <LockedAnimationPanel width={leftWidth} />;
+        if (!canAnimate) return <LockedAnimationPanel width={panelWidth} />;
         return (
           <AnimationPanel
-            width={leftWidth}
+            width={panelWidth}
             design={studio.design}
             selectedId={studio.selectedId}
             onApply={handleApplyAnimation}
@@ -458,13 +465,13 @@ export default function NotificationStudioPage() {
         );
       case "effects":
         return (
-          <AssetLibraryPanel width={leftWidth} title="Effects" groups={EFFECT_GROUPS} onInsert={handleInsertAsset} />
+          <AssetLibraryPanel width={panelWidth} title="Effects" groups={EFFECT_GROUPS} onInsert={handleInsertAsset} />
         );
       default:
         if (addView === "badges-labels") {
           return (
             <BadgesLabelsPanel
-              width={leftWidth}
+              width={panelWidth}
               kind={blKind}
               onKindChange={setBlKind}
               onBack={handleBackFromBadgesLabels}
@@ -473,7 +480,7 @@ export default function NotificationStudioPage() {
             />
           );
         }
-        return <AddElementsPanel width={leftWidth} onAdd={handleAdd} onUploadImage={() => setActiveTool("images")} />;
+        return <AddElementsPanel width={panelWidth} onAdd={handleAdd} onUploadImage={() => setActiveTool("images")} />;
     }
   }
 
@@ -507,6 +514,110 @@ export default function NotificationStudioPage() {
     );
   }
 
+  const propertiesPanel = (width: number) => (
+    <PropertiesPanel
+      width={width}
+      design={studio.design}
+      selectedId={studio.selectedId}
+      updateElement={studio.updateElement}
+      onDelete={studio.deleteElement}
+      onDuplicate={studio.duplicateElement}
+      onMoveLayer={studio.moveLayer}
+      onToggleLock={studio.toggleLock}
+      onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
+      onReplaceImage={openImagesForReplace}
+      onChangeButtonPreset={handleChangeButtonPreset}
+      onChangeIcon={handleChangeIcon}
+      onPreviewAnimation={previewElement}
+    />
+  );
+  const layersPanel = (width: number) => (
+    <LayersPanel
+      width={width}
+      design={studio.design}
+      selectedId={studio.selectedId}
+      onSelect={(id) => studio.setSelectedId(id)}
+      onToggleVisible={(id) => studio.updateElement(id, (n) => ({ ...n, visible: n.visible === false }))}
+      onToggleLock={studio.toggleLock}
+    />
+  );
+  const timelinePanel = (
+    <TimelinePanel design={studio.design} playbackTime={playbackTime} isPlaying={isPlaying} onPlay={handlePlay} />
+  );
+  const canvas = (
+    <StudioCanvas
+      design={studio.design}
+      loading={studio.loading}
+      error={studio.error}
+      selectedId={studio.selectedId}
+      onSelect={(id) => {
+        studio.setSelectedId(id || null);
+        // On a phone, tapping an element opens its settings below the canvas.
+        if (compact && id) setSheet("edit");
+      }}
+      onBeginInteraction={studio.beginInteraction}
+      onUpdateLive={studio.updateElementLive}
+      onEndInteraction={studio.endInteraction}
+      isPlaying={isPlaying}
+      previewId={previewId}
+    />
+  );
+
+  if (compact) {
+    const showBuilder = rightPanel === "background" && !!studio.design;
+    return (
+      <StudioPlanProvider value={{ canAnimate }}>
+        <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
+          <Sidebar />
+          {topBar}
+          <div className="h-[38dvh] min-h-56 shrink-0 flex border-b border-(--color-border-default)">{canvas}</div>
+          <StudioToolbar
+            orientation="horizontal"
+            active={sheet === "tool" ? activeTool : ""}
+            onChange={(id) => {
+              setActiveTool(id);
+              setRightPanel("properties");
+              setSheet(id === "layers" ? "layers" : "tool");
+            }}
+          />
+          <nav className="flex shrink-0 border-b border-(--color-border-default) bg-(--color-bg-surface)" aria-label="Studio panels">
+            {MOBILE_SHEETS.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setSheet(id)}
+                className={`flex-1 h-10 text-[12px] font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
+                  sheet === id
+                    ? "border-(--color-brand-primary) text-(--color-brand-primary)"
+                    : "border-transparent text-(--color-text-secondary)"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+          <div className="flex flex-1 min-h-0 justify-center overflow-hidden [&>*]:max-w-full">
+            {sheet === "tool" && renderLeftPanel()}
+            {sheet === "edit" &&
+              (showBuilder ? (
+                <BackgroundBuilderPanel
+                  width={sheetWidth}
+                  background={studio.design!.canvas.background}
+                  onSet={studio.setBackground}
+                  onClose={() => setRightPanel("properties")}
+                />
+              ) : (
+                propertiesPanel(sheetWidth)
+              ))}
+            {sheet === "layers" && layersPanel(sheetWidth)}
+            {sheet === "timeline" && <div className="flex flex-1 min-w-0">{timelinePanel}</div>}
+          </div>
+          {previewModal}
+        </div>
+      </StudioPlanProvider>
+    );
+  }
+
   return (
     <StudioPlanProvider value={{ canAnimate }}>
     <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
@@ -522,40 +633,15 @@ export default function NotificationStudioPage() {
             <div className="flex flex-1 min-h-0">
               {renderLeftPanel()}
               <ResizeHandle orientation="vertical" onResize={resizeLeft} />
-              <StudioCanvas
-                design={studio.design}
-                loading={studio.loading}
-                error={studio.error}
-                selectedId={studio.selectedId}
-                onSelect={(id) => studio.setSelectedId(id || null)}
-                onBeginInteraction={studio.beginInteraction}
-                onUpdateLive={studio.updateElementLive}
-                onEndInteraction={studio.endInteraction}
-                isPlaying={isPlaying}
-                previewId={previewId}
-              />
+              {canvas}
             </div>
 
             <ResizeHandle orientation="horizontal" onResize={(d) => resizeBottom(-d)} />
 
             <div className="flex shrink-0" style={{ height: bottomHeight }}>
-              <LayersPanel
-                width={layersWidth}
-                design={studio.design}
-                selectedId={studio.selectedId}
-                onSelect={(id) => studio.setSelectedId(id)}
-                onToggleVisible={(id) =>
-                  studio.updateElement(id, (n) => ({ ...n, visible: n.visible === false }))
-                }
-                onToggleLock={studio.toggleLock}
-              />
+              {layersPanel(layersWidth)}
               <ResizeHandle orientation="vertical" onResize={resizeLayers} />
-              <TimelinePanel
-                design={studio.design}
-                playbackTime={playbackTime}
-                isPlaying={isPlaying}
-                onPlay={handlePlay}
-              />
+              {timelinePanel}
             </div>
           </div>
 
@@ -573,21 +659,7 @@ export default function NotificationStudioPage() {
           {rightPanel === "properties" && (
             <>
               <ResizeHandle orientation="vertical" onResize={(d) => resizeRight(-d)} />
-              <PropertiesPanel
-                width={rightWidth}
-                design={studio.design}
-                selectedId={studio.selectedId}
-                updateElement={studio.updateElement}
-                onDelete={studio.deleteElement}
-                onDuplicate={studio.duplicateElement}
-                onMoveLayer={studio.moveLayer}
-                onToggleLock={studio.toggleLock}
-                onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
-                onReplaceImage={openImagesForReplace}
-                onChangeButtonPreset={handleChangeButtonPreset}
-                onChangeIcon={handleChangeIcon}
-                onPreviewAnimation={previewElement}
-              />
+              {propertiesPanel(rightWidth)}
             </>
           )}
         </div>
@@ -598,6 +670,16 @@ export default function NotificationStudioPage() {
     </StudioPlanProvider>
   );
 }
+
+type MobileSheet = "tool" | "edit" | "layers" | "timeline";
+
+/** What the panel under the canvas shows on phones and tablets. */
+const MOBILE_SHEETS: { id: MobileSheet; label: string }[] = [
+  { id: "tool", label: "Tools" },
+  { id: "edit", label: "Edit" },
+  { id: "layers", label: "Layers" },
+  { id: "timeline", label: "Timeline" },
+];
 
 /** The Animation tool on plans without custom animation. */
 function LockedAnimationPanel({ width }: { width: number }) {

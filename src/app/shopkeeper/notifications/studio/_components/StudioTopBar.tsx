@@ -34,23 +34,23 @@ export default function StudioTopBar({
   onPreview,
 }: Props) {
   return (
-    <header className="h-14 shrink-0 flex items-center gap-4 px-5 bg-(--color-bg-surface) border-b border-(--color-border-default)">
+    <header className="h-14 shrink-0 flex items-center gap-2 px-3 bg-(--color-bg-surface) border-b border-(--color-border-default) sm:gap-4 sm:px-5">
       <div className="flex items-center gap-2 min-w-0">
-        <span className="text-[13px] font-medium text-(--color-text-secondary)">
+        <span className="hidden text-[13px] font-medium text-(--color-text-secondary) md:inline">
           Notification Studio
         </span>
-        <ChevronRightOutlinedIcon
-          sx={{ fontSize: 16, color: "var(--color-text-hint)" }}
-        />
+        <span className="hidden md:inline-flex">
+          <ChevronRightOutlinedIcon sx={{ fontSize: 16, color: "var(--color-text-hint)" }} />
+        </span>
         <span className="text-[13px] font-semibold text-(--color-text-primary) truncate">
           {designName}
         </span>
-        <span className="w-6 h-6 flex items-center justify-center rounded-md text-(--color-text-hint)">
+        <span className="hidden w-6 h-6 items-center justify-center rounded-md text-(--color-text-hint) sm:flex">
           <EditOutlinedIcon sx={{ fontSize: 14 }} />
         </span>
       </div>
 
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex shrink-0 items-center gap-1.5 ml-auto sm:gap-3">
         <SaveStatus state={saveState} savedAt={savedAt} />
 
         <div className="flex items-center border border-(--color-border-default) rounded-lg overflow-hidden">
@@ -78,18 +78,20 @@ export default function StudioTopBar({
         <button
           type="button"
           onClick={onPreview}
-          className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-(--color-border-default) text-[13px] font-medium text-(--color-text-primary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer"
+          title="Preview"
+          className="flex items-center gap-1.5 h-9 px-2.5 rounded-lg border border-(--color-border-default) text-[13px] font-medium text-(--color-text-primary) hover:bg-(--color-bg-surface-hover) transition-colors cursor-pointer sm:px-3.5"
         >
           <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />
-          Preview
+          <span className="hidden sm:inline">Preview</span>
         </button>
 
         <button
           type="button"
           onClick={onSave}
-          className="h-9 px-4 rounded-lg bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-(--color-text-on-brand) text-[13px] font-semibold transition-colors cursor-pointer"
+          className="h-9 px-3 rounded-lg bg-(--color-brand-primary) hover:bg-(--color-brand-primary-hover) text-(--color-text-on-brand) text-[13px] font-semibold whitespace-nowrap transition-colors cursor-pointer sm:px-4"
         >
-          Save Template
+          <span className="sm:hidden">Save</span>
+          <span className="hidden sm:inline">Save Template</span>
         </button>
       </div>
     </header>
@@ -106,14 +108,14 @@ function SaveStatus({
   if (state === "saving") {
     return (
       <span className="flex items-center gap-1.5 text-[12px] font-medium text-(--color-text-secondary)">
-        <CloudSyncOutlinedIcon sx={{ fontSize: 15 }} /> Saving…
+        <CloudSyncOutlinedIcon sx={{ fontSize: 15 }} /> <span className="hidden sm:inline">Saving…</span>
       </span>
     );
   }
   if (state === "error") {
     return (
       <span className="flex items-center gap-1.5 text-[12px] font-medium text-(--color-danger)">
-        <ErrorOutlineOutlinedIcon sx={{ fontSize: 15 }} /> Save failed
+        <ErrorOutlineOutlinedIcon sx={{ fontSize: 15 }} /> <span className="hidden sm:inline">Save failed</span>
       </span>
     );
   }
@@ -123,8 +125,8 @@ function SaveStatus({
       : "";
     return (
       <span className="flex items-center gap-1.5 text-[12px] font-medium text-(--color-success)">
-        <CheckCircleOutlinedIcon sx={{ fontSize: 15 }} /> Saved
-        {t ? ` ${t}` : ""}
+        <CheckCircleOutlinedIcon sx={{ fontSize: 15 }} />
+        <span className="hidden sm:inline">Saved{t ? ` ${t}` : ""}</span>
       </span>
     );
   }
