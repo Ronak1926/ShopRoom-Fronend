@@ -3,12 +3,14 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import type { Billing, PlanId } from "@/features/billing/api";
-import { formatInr } from "@/features/billing/format";
+import { formatDate, formatInr } from "@/features/billing/format";
 import { PLAN_FEATURES, PLAN_OFFERS, pricePerMonth, savingVersusMonthly } from "@/features/billing/plans";
 
 interface PlanPickerProps {
   plans: Billing["plans"];
   currentPlan: string;
+  /** When the running plan ends (ISO). */
+  expiresAt: string;
   active: boolean;
   /** The plan whose payment is in progress, if any. */
   paying: PlanId | null;
@@ -20,21 +22,23 @@ const RANK: Record<string, number> = { "1m": 1, "2m": 2, "3m": 3 };
 /** The rows shown on each card; the full list is in the comparison table below. */
 const CARD_ROWS = ["Notifications a day", "Who you can reach", "Ready-made templates", "Editing", "Design from a blank canvas", "Custom animations"];
 
-export default function PlanPicker({ plans, currentPlan, active, paying, onChoose }: PlanPickerProps) {
+export default function PlanPicker({ plans, currentPlan, expiresAt, active, paying, onChoose }: PlanPickerProps) {
   return (
     <section id="plans" className="scroll-mt-6">
       <h2 className="text-[18px] font-bold text-(--color-text-primary)">{active ? "Extend or change your plan" : "Renew your plan"}</h2>
       <p className="mt-1 flex items-start gap-1.5 text-[13px] leading-relaxed text-(--color-text-secondary)">
         <InfoOutlinedIcon sx={{ fontSize: 16 }} className="mt-0.5 shrink-0" />
-        The plan you buy starts straight away, and its days are added on top of the time you have left. One-time
-        payment through Razorpay; nothing renews automatically.
+        The plan you buy starts straight away, and its days are added on top of the time you have left, so you can
+        extend or upgrade any time. A shorter plan becomes available once your current one ends. One-time payment
+        through Razorpay; nothing renews automatically.
       </p>
 
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         {plans.map((plan) => {
           const offer = PLAN_OFFERS.find((o) => o.id === plan.id);
           const isCurrent = active && plan.id === currentPlan;
-          const isDowngrade = active && RANK[plan.id] < (RANK[currentPlan] ?? 1);
+          // The API refuses a lower plan while a higher one is running (it would shrink days already paid for).
+          const locked = active && RANK[plan.id] < (RANK[currentPlan] ?? 1);
           const saving = offer ? savingVersusMonthly(offer) : 0;
           const featured = !!offer?.recommended;
           const busy = paying === plan.id;
@@ -101,24 +105,24 @@ export default function PlanPicker({ plans, currentPlan, active, paying, onChoos
                 })}
               </ul>
 
-              {isDowngrade && (
-                <p className="mt-4 flex items-start gap-1.5 rounded-lg bg-(--color-brand-alert-light) px-3 py-2 text-[11.5px] leading-snug text-(--color-brand-alert-text)">
+              {locked && (
+                <p className="mt-4 flex items-start gap-1.5 rounded-lg bg-(--color-bg-page) px-3 py-2 text-[11.5px] leading-snug text-(--color-text-secondary)">
                   <LockOutlinedIcon sx={{ fontSize: 14 }} className="mt-px shrink-0" />
-                  Switches you to {plan.label} limits as soon as you pay.
+                  Your plan has higher limits until {formatDate(expiresAt)}, so this one can be bought after that.
                 </p>
               )}
 
               <button
                 type="button"
                 onClick={() => onChoose(plan.id)}
-                disabled={paying !== null}
+                disabled={paying !== null || locked}
                 className={`mt-4 h-11 w-full rounded-xl text-[14px] font-semibold transition-colors cursor-pointer disabled:cursor-wait disabled:opacity-60 ${
                   featured
                     ? "bg-(--color-brand-primary) text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover)"
                     : "border border-(--color-brand-primary) text-(--color-brand-primary) hover:bg-(--color-brand-primary-light)"
                 }`}
               >
-                {busy ? "Processing…" : `${isCurrent ? "Extend" : active ? "Switch to" : "Get"} ${plan.label} · ${formatInr(plan.priceInr)}`}
+                {busy ? "Processing…" : locked ? `Available after ${formatDate(expiresAt)}` : `${isCurrent ? "Extend" : active ? "Switch to" : "Get"} ${plan.label} · ${formatInr(plan.priceInr)}`}
               </button>
             </article>
           );

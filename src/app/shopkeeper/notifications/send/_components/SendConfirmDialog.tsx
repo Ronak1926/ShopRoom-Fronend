@@ -2,22 +2,27 @@
 
 import { useEffect } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import { SAMPLE_PHOTO_WARNING } from "@/features/notifications/sampleContent";
 import { AUDIENCE_LABELS, usesRadius, type AudienceMode } from "../_schemas/sendNotification";
 
 interface Props {
   name: string;
   mode: AudienceMode;
   radiusKm: number;
+  /** The banner still shows a template's placeholder photo. */
+  samplePhoto?: boolean;
   sending: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-/** Shown when "Confirm before sending" is on in Preferences. */
+/** Shown when "Confirm before sending" is on in Preferences, and always when the banner still has a sample photo. */
 export default function SendConfirmDialog({
   name,
   mode,
   radiusKm,
+  samplePhoto = false,
   sending,
   onCancel,
   onConfirm,
@@ -54,6 +59,13 @@ export default function SendConfirmDialog({
           {usesRadius(mode) ? ` within ${radiusKm} km of your shop` : ""}. This cannot be undone.
         </p>
 
+        {samplePhoto && (
+          <p role="alert" className="mt-3 flex items-start gap-2 rounded-xl bg-(--color-brand-alert-light) px-3 py-2.5 text-[12px] leading-relaxed text-(--color-brand-alert-text)">
+            <WarningAmberOutlinedIcon sx={{ fontSize: 16 }} className="mt-0.5 shrink-0" />
+            {SAMPLE_PHOTO_WARNING}
+          </p>
+        )}
+
         <div className="mt-5 flex items-center justify-end gap-2">
           <button
             type="button"
@@ -70,7 +82,7 @@ export default function SendConfirmDialog({
             className="flex items-center gap-1.5 h-9 px-5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <SendOutlinedIcon sx={{ fontSize: 15 }} />
-            {sending ? "Sending…" : "Send Now"}
+            {sending ? "Sending…" : samplePhoto ? "Send anyway" : "Send Now"}
           </button>
         </div>
       </div>

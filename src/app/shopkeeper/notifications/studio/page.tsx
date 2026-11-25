@@ -5,26 +5,12 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/components/shopkeeper/Sidebar";
 import StudioTopBar from "./_components/StudioTopBar";
 import StudioToolbar from "./_components/StudioToolbar";
-import AddElementsPanel from "./_components/AddElementsPanel";
-import BackgroundScenesPanel from "./_components/BackgroundScenesPanel";
-import AssetLibraryPanel from "./_components/AssetLibraryPanel";
-import TextPanel from "./_components/TextPanel";
-import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
-import ImagesPanel from "./_components/ImagesPanel";
 import StudioPreviewModal from "./_components/StudioPreviewModal";
-import ButtonsPanel from "./_components/ButtonsPanel";
-import IconsPanel from "./_components/IconsPanel";
-import ShapesPanel from "./_components/ShapesPanel";
-import AnimationPanel from "./_components/AnimationPanel";
 import { animationLengthMs, compactStep, type AnimSlot } from "@/features/notifications/animationPresets";
 import type { ButtonPreset } from "@/features/notifications/buttonPresets";
 import { iconLabel } from "@/features/notifications/iconLibrary";
 import type { ImageTile } from "./_components/images/ImageGrid";
-import {
-  DECORATION_GROUPS,
-  EFFECT_GROUPS,
-  type LibraryItem,
-} from "@/features/notifications/sceneLibrary";
+import type { LibraryItem } from "@/features/notifications/sceneLibrary";
 import {
   createDecoration,
   createImageElement,
@@ -36,7 +22,7 @@ import {
   applyButtonPreset,
   createIconElement,
 } from "@/features/notifications/elementFactory";
-import { findNode, flattenNodes, nodeLabel } from "@/features/notifications/tree";
+import { findNode, flattenNodes } from "@/features/notifications/tree";
 import { pushRecentlyUsedImage } from "@/features/notifications/recentlyUsedImages";
 import { TEXT_CONTENT_PRESETS, TEXT_PRESET_LINKS, type TextStylePreset } from "@/features/notifications/textPresets";
 import type { BadgeLabelKind, BadgeLabelPreset } from "@/features/notifications/badgeLabelPresets";
@@ -45,39 +31,30 @@ import PropertiesPanel from "./_components/PropertiesPanel";
 import BackgroundBuilderPanel from "./_components/BackgroundBuilderPanel";
 import LayersPanel from "./_components/LayersPanel";
 import TimelinePanel from "./_components/TimelinePanel";
-import ResizeHandle from "./_components/ResizeHandle";
-import { useResizable } from "./_hooks/useResizable";
 import { useNotificationDesign } from "./_hooks/useNotificationDesign";
 import { usePlaybackClock } from "./_hooks/usePlaybackClock";
 import QuickEditor from "./_components/QuickEditor";
 import { useCompactLayout } from "./_hooks/useCompactLayout";
-import { CUSTOM_ANIMATION_LOCKED, StudioPlanProvider } from "./_components/StudioPlanContext";
+import { StudioPlanProvider } from "./_components/StudioPlanContext";
+import StudioDesktopLayout from "./_components/StudioDesktopLayout";
+import StudioCompactLayout, { type MobileSheet } from "./_components/StudioCompactLayout";
+import StudioSkeleton from "./_components/StudioSkeleton";
+import StudioToolPanel from "./_components/StudioToolPanel";
 import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
-import { UPGRADE_HREF } from "@/features/notifications/plan";
-import Link from "next/link";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createElement } from "@/features/notifications/elementFactory";
 import { getCookie } from "../../../../utils/cookieUtils";
 
 export default function NotificationStudioPage() {
   const router = useRouter();
 
-  const [leftWidth, resizeLeft] = useResizable(240, 200, 420);
-  const [rightWidth, resizeRight] = useResizable(288, 240, 460);
-  const [bottomHeight, resizeBottom] = useResizable(224, 150, 440);
-  const [layersWidth, resizeLayers] = useResizable(240, 180, 380);
-  const [bgBuilderWidth, resizeBgBuilder] = useResizable(320, 280, 440);
   // Phones and tablets get one full-width panel at a time under the canvas.
-  const { compact, width: screenWidth } = useCompactLayout();
-  // Panels are designed for a narrow rail, so on tablets they stay phone-width and centred.
-  const sheetWidth = Math.min(screenWidth, 560);
-  const panelWidth = compact ? sheetWidth : leftWidth;
+  const { ready: layoutReady, compact, width: screenWidth } = useCompactLayout();
   const [sheet, setSheet] = useState<MobileSheet>("tool");
 
   const studio = useNotificationDesign();
-  const plan = usePlanCapabilities();
-  // Until the plan is known the full editor shows; the API still refuses any
-  // change outside the plan.
+  const { plan, loading: planLoading } = usePlanCapabilities();
+  // Read only once the plan is known (a skeleton shows until then). If the plan could not be loaded
+  // the full editor shows, and the API still refuses any change outside the plan.
   const quickEditOnly = plan ? !plan.capabilities.ADVANCED_TEMPLATE_EDITING : false;
   const canAnimate = plan ? plan.capabilities.CUSTOM_ANIMATION : true;
   const { setCanAnimate } = studio;
@@ -382,106 +359,38 @@ export default function NotificationStudioPage() {
     }
   }
 
-  function renderLeftPanel() {
-    switch (activeTool) {
-      case "background":
-        return (
-          <BackgroundScenesPanel
-            width={panelWidth}
-            design={studio.design}
-            appliedSceneId={studio.appliedSceneId}
-            selectedId={studio.selectedId}
-            onSelectElement={(id) => studio.setSelectedId(id)}
-            onApplyScene={studio.applyScene}
-            onDetachScene={studio.detachScene}
-            onSetBackground={studio.setBackground}
-            onInsertIntoScene={handleInsertIntoScene}
-            onSetSceneStyle={studio.setSceneStyle}
-            onNewBlankScene={studio.startBlankScene}
-            onOpenBackgroundBuilder={() => { setRightPanel("background"); setSheet("edit"); }}
-            onToggleLock={studio.toggleLock}
-            copyTone={studio.copyTone}
-            onSetCopyTone={studio.setCopyTone}
-            onClearElements={studio.clearElements}
-            onSetPhotoBackground={studio.setPhotoBackground}
-          />
-        );
-      case "text":
-        return (
-          <TextPanel
-            width={panelWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onAddPreset={handleAddTextPreset}
-            onApplyStyle={handleApplyTextStyle}
-          />
-        );
-      case "images": {
-        const replaceTarget = imageReplaceTargetId && studio.design ? findNode(studio.design.elements, imageReplaceTargetId) : null;
-        return (
-          <ImagesPanel
-            width={panelWidth}
-            replaceTargetName={replaceTarget ? nodeLabel(replaceTarget) : null}
-            onAdd={handleAddImage}
-            onCancelReplace={() => setImageReplaceTargetId(null)}
-          />
-        );
-      }
-      case "buttons":
-        return (
-          <ButtonsPanel
-            width={panelWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onPick={handlePickButton}
-            changeMode={!!buttonChangeTargetId}
-          />
-        );
-      case "icons":
-        return (
-          <IconsPanel
-            width={panelWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onPick={handlePickIcon}
-            changeMode={!!iconChangeTargetId}
-          />
-        );
-      case "shapes":
-        return <ShapesPanel width={panelWidth} onInsert={handleInsertAsset} />;
-      case "elements":
-        return (
-          <AssetLibraryPanel width={panelWidth} title="Decorations" groups={DECORATION_GROUPS} onInsert={handleInsertAsset} />
-        );
-      case "animation":
-        if (!canAnimate) return <LockedAnimationPanel width={panelWidth} />;
-        return (
-          <AnimationPanel
-            width={panelWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onApply={handleApplyAnimation}
-          />
-        );
-      case "effects":
-        return (
-          <AssetLibraryPanel width={panelWidth} title="Effects" groups={EFFECT_GROUPS} onInsert={handleInsertAsset} />
-        );
-      default:
-        if (addView === "badges-labels") {
-          return (
-            <BadgesLabelsPanel
-              width={panelWidth}
-              kind={blKind}
-              onKindChange={setBlKind}
-              onBack={handleBackFromBadgesLabels}
-              onPick={handlePickBadgeLabel}
-              changeMode={!!blChangeTargetId}
-            />
-          );
-        }
-        return <AddElementsPanel width={panelWidth} onAdd={handleAdd} onUploadImage={() => setActiveTool("images")} />;
-    }
+  function renderLeftPanel(width: number) {
+    return (
+      <StudioToolPanel
+        width={width}
+        tool={activeTool}
+        studio={studio}
+        canAnimate={canAnimate}
+        addView={addView}
+        badgeLabelKind={blKind}
+        onBadgeLabelKindChange={setBlKind}
+        changing={{ badgeLabel: !!blChangeTargetId, button: !!buttonChangeTargetId, icon: !!iconChangeTargetId, imageTargetId: imageReplaceTargetId }}
+        actions={{
+          add: handleAdd,
+          insertAsset: handleInsertAsset,
+          insertIntoScene: handleInsertIntoScene,
+          addTextPreset: handleAddTextPreset,
+          applyTextStyle: handleApplyTextStyle,
+          addImage: handleAddImage,
+          cancelImageReplace: () => setImageReplaceTargetId(null),
+          pickButton: handlePickButton,
+          pickIcon: handlePickIcon,
+          pickBadgeLabel: handlePickBadgeLabel,
+          backFromBadgesLabels: handleBackFromBadgesLabels,
+          applyAnimation: handleApplyAnimation,
+          openBackgroundBuilder: () => {
+            setRightPanel("background");
+            setSheet("edit");
+          },
+          openImages: () => setActiveTool("images"),
+        }}
+      />
+    );
   }
 
   const topBar = (
@@ -500,11 +409,16 @@ export default function NotificationStudioPage() {
   const previewModal = previewOpen && studio.design && (
     <StudioPreviewModal design={studio.design} name={studio.design.name ?? "Untitled"} onClose={() => setPreviewOpen(false)} />
   );
+  const sidebar = <Sidebar />;
+
+  // The screen size and the plan decide which editor opens, so wait for both rather than showing
+  // one editor and swapping to another.
+  if (!layoutReady || planLoading) return <StudioSkeleton sidebar={sidebar} />;
 
   if (quickEditOnly) {
     return (
       <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
-        <Sidebar />
+        {sidebar}
         <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
           {topBar}
           <QuickEditor studio={studio} />
@@ -514,10 +428,11 @@ export default function NotificationStudioPage() {
     );
   }
 
+  const design = studio.design;
   const propertiesPanel = (width: number) => (
     <PropertiesPanel
       width={width}
-      design={studio.design}
+      design={design}
       selectedId={studio.selectedId}
       updateElement={studio.updateElement}
       onDelete={studio.deleteElement}
@@ -531,10 +446,22 @@ export default function NotificationStudioPage() {
       onPreviewAnimation={previewElement}
     />
   );
+  // Shown in the right rail (desktop) or the Edit tab (phone) instead of the inspector.
+  const backgroundBuilder =
+    rightPanel === "background" && design
+      ? (width: number) => (
+          <BackgroundBuilderPanel
+            width={width}
+            background={design.canvas.background}
+            onSet={studio.setBackground}
+            onClose={() => setRightPanel("properties")}
+          />
+        )
+      : null;
   const layersPanel = (width: number) => (
     <LayersPanel
       width={width}
-      design={studio.design}
+      design={design}
       selectedId={studio.selectedId}
       onSelect={(id) => studio.setSelectedId(id)}
       onToggleVisible={(id) => studio.updateElement(id, (n) => ({ ...n, visible: n.visible === false }))}
@@ -542,11 +469,11 @@ export default function NotificationStudioPage() {
     />
   );
   const timelinePanel = (
-    <TimelinePanel design={studio.design} playbackTime={playbackTime} isPlaying={isPlaying} onPlay={handlePlay} />
+    <TimelinePanel design={design} playbackTime={playbackTime} isPlaying={isPlaying} onPlay={handlePlay} />
   );
   const canvas = (
     <StudioCanvas
-      design={studio.design}
+      design={design}
       loading={studio.loading}
       error={studio.error}
       selectedId={studio.selectedId}
@@ -563,136 +490,47 @@ export default function NotificationStudioPage() {
     />
   );
 
-  if (compact) {
-    const showBuilder = rightPanel === "background" && !!studio.design;
-    return (
-      <StudioPlanProvider value={{ canAnimate }}>
-        <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-          <Sidebar />
-          {topBar}
-          <div className="h-[38dvh] min-h-56 shrink-0 flex border-b border-(--color-border-default)">{canvas}</div>
-          <StudioToolbar
-            orientation="horizontal"
-            active={sheet === "tool" ? activeTool : ""}
-            onChange={(id) => {
-              setActiveTool(id);
-              setRightPanel("properties");
-              setSheet(id === "layers" ? "layers" : "tool");
-            }}
-          />
-          <nav className="flex shrink-0 border-b border-(--color-border-default) bg-(--color-bg-surface)" aria-label="Studio panels">
-            {MOBILE_SHEETS.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setSheet(id)}
-                className={`flex-1 h-10 text-[12px] font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
-                  sheet === id
-                    ? "border-(--color-brand-primary) text-(--color-brand-primary)"
-                    : "border-transparent text-(--color-text-secondary)"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
-          <div className="flex flex-1 min-h-0 justify-center overflow-hidden [&>*]:max-w-full">
-            {sheet === "tool" && renderLeftPanel()}
-            {sheet === "edit" &&
-              (showBuilder ? (
-                <BackgroundBuilderPanel
-                  width={sheetWidth}
-                  background={studio.design!.canvas.background}
-                  onSet={studio.setBackground}
-                  onClose={() => setRightPanel("properties")}
-                />
-              ) : (
-                propertiesPanel(sheetWidth)
-              ))}
-            {sheet === "layers" && layersPanel(sheetWidth)}
-            {sheet === "timeline" && <div className="flex flex-1 min-w-0">{timelinePanel}</div>}
-          </div>
-          {previewModal}
-        </div>
-      </StudioPlanProvider>
-    );
-  }
-
   return (
     <StudioPlanProvider value={{ canAnimate }}>
-    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
-      <Sidebar />
-
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        {topBar}
-
-        <div className="flex flex-1 min-h-0 overflow-hidden">
-          <StudioToolbar active={activeTool} onChange={setActiveTool} />
-
-          <div className="flex flex-1 flex-col min-w-0">
-            <div className="flex flex-1 min-h-0">
-              {renderLeftPanel()}
-              <ResizeHandle orientation="vertical" onResize={resizeLeft} />
-              {canvas}
-            </div>
-
-            <ResizeHandle orientation="horizontal" onResize={(d) => resizeBottom(-d)} />
-
-            <div className="flex shrink-0" style={{ height: bottomHeight }}>
-              {layersPanel(layersWidth)}
-              <ResizeHandle orientation="vertical" onResize={resizeLayers} />
-              {timelinePanel}
-            </div>
-          </div>
-
-          {rightPanel === "background" && studio.design && (
-            <>
-              <ResizeHandle orientation="vertical" onResize={(d) => resizeBgBuilder(-d)} />
-              <BackgroundBuilderPanel
-                width={bgBuilderWidth}
-                background={studio.design.canvas.background}
-                onSet={studio.setBackground}
-                onClose={() => setRightPanel("properties")}
-              />
-            </>
-          )}
-          {rightPanel === "properties" && (
-            <>
-              <ResizeHandle orientation="vertical" onResize={(d) => resizeRight(-d)} />
-              {propertiesPanel(rightWidth)}
-            </>
-          )}
-        </div>
-      </div>
-
-      {previewModal}
-    </div>
+      {compact ? (
+        <StudioCompactLayout
+          sidebar={sidebar}
+          topBar={topBar}
+          canvas={canvas}
+          timeline={timelinePanel}
+          overlay={previewModal}
+          screenWidth={screenWidth}
+          toolbar={
+            <StudioToolbar
+              orientation="horizontal"
+              active={sheet === "tool" ? activeTool : ""}
+              onChange={(id) => {
+                setActiveTool(id);
+                setRightPanel("properties");
+                setSheet(id === "layers" ? "layers" : "tool");
+              }}
+            />
+          }
+          sheet={sheet}
+          onSheetChange={setSheet}
+          toolPanel={renderLeftPanel}
+          editPanel={(width) => (backgroundBuilder ? backgroundBuilder(width) : propertiesPanel(width))}
+          layersPanel={layersPanel}
+        />
+      ) : (
+        <StudioDesktopLayout
+          sidebar={sidebar}
+          topBar={topBar}
+          toolbar={<StudioToolbar active={activeTool} onChange={setActiveTool} />}
+          canvas={canvas}
+          timeline={timelinePanel}
+          overlay={previewModal}
+          leftPanel={renderLeftPanel}
+          layersPanel={layersPanel}
+          propertiesPanel={propertiesPanel}
+          backgroundBuilder={backgroundBuilder}
+        />
+      )}
     </StudioPlanProvider>
-  );
-}
-
-type MobileSheet = "tool" | "edit" | "layers" | "timeline";
-
-/** What the panel under the canvas shows on phones and tablets. */
-const MOBILE_SHEETS: { id: MobileSheet; label: string }[] = [
-  { id: "tool", label: "Tools" },
-  { id: "edit", label: "Edit" },
-  { id: "layers", label: "Layers" },
-  { id: "timeline", label: "Timeline" },
-];
-
-/** The Animation tool on plans without custom animation. */
-function LockedAnimationPanel({ width }: { width: number }) {
-  return (
-    <aside style={{ width }} className="shrink-0 border-r border-(--color-border-default) bg-(--color-bg-surface) p-4">
-      <h2 className="text-[13px] font-semibold text-(--color-text-primary)">Animation</h2>
-      <p className="mt-3 flex items-start gap-2 text-[12px] leading-relaxed text-(--color-text-secondary)">
-        <LockOutlinedIcon sx={{ fontSize: 16 }} className="mt-0.5 shrink-0 text-(--color-brand-primary)" />
-        {CUSTOM_ANIMATION_LOCKED}
-      </p>
-      <Link href={UPGRADE_HREF} className="mt-3 inline-block text-[12px] font-semibold text-(--color-brand-primary) hover:underline">
-        See plans
-      </Link>
-    </aside>
   );
 }

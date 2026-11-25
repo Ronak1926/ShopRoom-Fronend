@@ -1,6 +1,8 @@
 "use client";
 
 import type { ElementType, ReactNode } from "react";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import { SAMPLE_PHOTO_WARNING, usesSamplePhoto } from "@/features/notifications/sampleContent";
 import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
@@ -86,6 +88,12 @@ export default function ReviewStep({
 
   return (
     <div className="flex flex-col gap-3">
+      {usesSamplePhoto(selected?.design) && (
+        <p role="alert" className="flex items-start gap-2 rounded-xl bg-(--color-brand-alert-light) px-4 py-3 text-[12px] leading-relaxed text-(--color-brand-alert-text)">
+          <WarningAmberOutlinedIcon sx={{ fontSize: 16 }} className="mt-0.5 shrink-0" />
+          {SAMPLE_PHOTO_WARNING}
+        </p>
+      )}
       <Card
         icon={MailOutlineOutlinedIcon}
         step={1}

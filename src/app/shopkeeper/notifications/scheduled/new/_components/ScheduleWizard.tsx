@@ -83,7 +83,7 @@ export default function ScheduleWizard() {
   const { shop } = useShopAudience();
   const preferences = useNotificationPreferences();
   const planExpired = usePlanStatus().billing?.active === false;
-  const plan = usePlanCapabilities();
+  const { plan } = usePlanCapabilities();
 
   const [openStep, setOpenStep] = useState<WizardStep>("notification");
   const [completed, setCompleted] = useState<WizardStep[]>([]);

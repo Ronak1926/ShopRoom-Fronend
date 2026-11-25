@@ -10,21 +10,25 @@ export interface PlanState {
 
 /**
  * The shop's plan and what it allows, for locking UI the plan doesn't include.
- * Null while loading or if the request fails: callers then show the full UI
- * and the API still refuses anything outside the plan.
+ *
+ * `loading` is true until the request settles. If it fails, `plan` stays null and `loading` turns
+ * false: callers then show the full UI, and the API still refuses anything outside the plan.
+ * A screen whose layout depends on the plan (the Studio) waits for `loading` to end.
  */
-export function usePlanCapabilities(): PlanState | null {
-  const [plan, setPlan] = useState<PlanState | null>(null);
+export function usePlanCapabilities(): { plan: PlanState | null; loading: boolean } {
+  const [state, setState] = useState<{ plan: PlanState | null; loading: boolean }>({ plan: null, loading: true });
   useEffect(() => {
     let cancelled = false;
     getCapabilities()
       .then(({ planType, capabilities }) => {
-        if (!cancelled) setPlan({ planType, capabilities });
+        if (!cancelled) setState({ plan: { planType, capabilities }, loading: false });
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!cancelled) setState({ plan: null, loading: false });
+      });
     return () => {
       cancelled = true;
     };
   }, []);
-  return plan;
+  return state;
 }

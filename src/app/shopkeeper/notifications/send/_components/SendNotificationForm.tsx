@@ -26,6 +26,7 @@ import {
 } from "@/hooks/useSendableNotifications";
 import { useShopAudience } from "@/hooks/useShopAudience";
 import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
+import { usesSamplePhoto } from "@/features/notifications/sampleContent";
 import {
   DEFAULT_RADIUS_KM,
   SendNotificationSchema,
@@ -52,7 +53,7 @@ export default function SendNotificationForm() {
   const planExpired = usePlanStatus().billing?.active === false;
   const sources = useSendableNotifications();
   const { shop, loading: shopLoading } = useShopAudience();
-  const plan = usePlanCapabilities();
+  const { plan } = usePlanCapabilities();
   const preferences = useNotificationPreferences();
 
   // Held beside the form: the id alone is not enough to draw the preview, and
@@ -77,6 +78,7 @@ export default function SendNotificationForm() {
   const audience = useWatch({ control, name: "audience" });
   const radiusKm = useWatch({ control, name: "radiusKm" });
   const message = useWatch({ control, name: "message" });
+  const samplePhoto = usesSamplePhoto(selected?.design);
 
   function handlePick(item: SendableNotification) {
     setSelected(item);
@@ -108,8 +110,9 @@ export default function SendNotificationForm() {
 
   const onSubmit = handleSubmit((values) => {
     setOutcome(null);
-    // "Confirm before sending" is a Preferences setting; honour it here.
-    if (preferences.values.confirmBeforeSending) {
+    // "Confirm before sending" is a Preferences setting; honour it here. A banner that still
+    // shows a template's sample photo is always confirmed, whatever that setting says.
+    if (preferences.values.confirmBeforeSending || samplePhoto) {
       setConfirming(true);
       return;
     }
@@ -226,6 +229,7 @@ export default function SendNotificationForm() {
           name={selected?.name ?? "This notification"}
           mode={audience}
           radiusKm={radiusKm}
+          samplePhoto={samplePhoto}
           sending={sending}
           onCancel={() => setConfirming(false)}
           onConfirm={() => void confirmSend()}

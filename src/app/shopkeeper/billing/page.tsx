@@ -123,7 +123,7 @@ export default function ShopkeeperBillingPage() {
           )}
 
           <CurrentPlanCard billing={billing} />
-          <PlanPicker plans={billing.plans} currentPlan={billing.planType} active={billing.active} paying={paying} onChoose={(id) => void pay(id)} />
+          <PlanPicker plans={billing.plans} currentPlan={billing.planType} expiresAt={billing.planExpiresAt} active={billing.active} paying={paying} onChoose={(id) => void pay(id)} />
           <PlanComparison currentPlan={billing.planType} />
           <PaymentHistory payments={billing.payments} invoicesEnabled={billing.invoicesEnabled} />
           {billing.invoicesEnabled && <GstinCard initial={billing.gstin} />}

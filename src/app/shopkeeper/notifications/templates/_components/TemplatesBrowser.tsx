@@ -58,7 +58,7 @@ const GRID =
 export default function TemplatesBrowser() {
   const router = useRouter();
   const favourites = useFavouriteTemplates();
-  const plan = usePlanCapabilities();
+  const { plan } = usePlanCapabilities();
   const isLocked = (t: TemplateSummary) => !!plan && !meetsRequiredPlan(plan.planType, t.requiredPlan);
 
   const [tab, setTab] = useState<Tab>("catalog");
