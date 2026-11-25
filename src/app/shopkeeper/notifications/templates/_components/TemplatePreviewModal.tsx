@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import Link from "next/link";
 import DesignPreview from "@/components/notifications/DesignPreview";
 import type { TemplateSummary } from "@/features/notifications/api";
+import { PLAN_NAMES, UPGRADE_HREF } from "@/features/notifications/plan";
 
 interface Props {
   template: TemplateSummary;
@@ -78,7 +80,7 @@ export default function TemplatePreviewModal({
             title and body around it.
           </p>
           <p className="mt-1 text-[10.5px] text-(--color-text-hint)">
-            {design.canvas.width} × {design.canvas.height} · {design.elements.length} layers
+            {design.canvas ? `${design.canvas.width} × ${design.canvas.height}` : "Unknown size"} · {design.elements?.length ?? 0} layers
           </p>
         </div>
 
@@ -90,15 +92,23 @@ export default function TemplatePreviewModal({
           >
             Close
           </button>
-          <button
-            type="button"
-            disabled={busy || locked}
-            title={locked ? "Upgrade your plan to use this template" : undefined}
-            onClick={() => onUse(template)}
-            className="h-9 px-5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {busy ? "Opening…" : "Use Template"}
-          </button>
+          {locked ? (
+            <Link
+              href={UPGRADE_HREF}
+              className="h-9 px-5 flex items-center gap-1.5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors"
+            >
+              Upgrade to {PLAN_NAMES[template.requiredPlan ?? ""] ?? "a bigger plan"} to use this
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onUse(template)}
+              className="h-9 px-5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {busy ? "Opening…" : "Use Template"}
+            </button>
+          )}
         </div>
       </div>
     </div>

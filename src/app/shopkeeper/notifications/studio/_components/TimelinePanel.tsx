@@ -158,7 +158,7 @@ export default function TimelinePanel({ design, playbackTime, isPlaying, onPlay 
                   {row.bars.map((bar) => (
                     <div
                       key={bar.id}
-                      className={`absolute top-0 h-7 flex items-center px-2.5 rounded-md text-[11px] font-medium ${SLOT_TONE[bar.slot]} ${bar.loops ? "opacity-70 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(0,0,0,0.06)_4px,rgba(0,0,0,0.06)_8px)]" : ""}`}
+                      className={`absolute top-0 h-7 flex items-center px-2.5 rounded-md text-[11px] font-medium whitespace-nowrap overflow-hidden ${SLOT_TONE[bar.slot]} ${bar.loops ? "opacity-70 bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(0,0,0,0.06)_4px,rgba(0,0,0,0.06)_8px)]" : ""}`}
                       style={{ left: `${bar.offsetPct}%`, width: `${bar.widthPct}%` }}
                     >
                       {bar.label}

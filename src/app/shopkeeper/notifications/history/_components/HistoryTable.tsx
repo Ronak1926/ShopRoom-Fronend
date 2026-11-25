@@ -9,16 +9,19 @@ import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import { rate, type HistoryRow, type HistoryStatus } from "../_data/sampleHistory";
+import type { SendOutcome } from "@/features/notifications/insights";
+import { rate, type HistoryRow } from "../_utils/historyRows";
 
-const STATUS_STYLE: Record<HistoryStatus, string> = {
+const STATUS_STYLE: Record<SendOutcome, string> = {
+  SENDING: "bg-(--color-bg-surface-hover) text-(--color-text-secondary)",
   DELIVERED: "bg-(--color-success-light) text-(--color-success-text)",
   OPENED: "bg-(--color-brand-primary-light) text-(--color-brand-primary)",
   CLICKED: "bg-(--color-avatar-indigo-bg) text-(--color-avatar-1)",
   FAILED: "bg-(--color-danger-bg) text-(--color-danger)",
 };
 
-const STATUS_LABEL: Record<HistoryStatus, string> = {
+const STATUS_LABEL: Record<SendOutcome, string> = {
+  SENDING: "Sending",
   DELIVERED: "Delivered",
   OPENED: "Opened",
   CLICKED: "Clicked",
@@ -74,12 +77,7 @@ interface Props {
 /** The history list, with a row that opens to show the full breakdown. */
 export default function HistoryTable({ rows, onOpenDesign }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  // "Today" is relative to the newest row, keeping the labels stable rather
-  // than reading the clock during render.
-  const newest = rows.reduce(
-    (latest, row) => (row.sentAt > latest ? row.sentAt : latest),
-    rows[0]?.sentAt ?? new Date(0),
-  );
+  const [today] = useState(() => new Date());
 
   return (
     <div className="overflow-x-auto">
@@ -92,7 +90,7 @@ export default function HistoryTable({ rows, onOpenDesign }: Props) {
             Notification
           </span>
           <span role="columnheader" className={HEAD}>
-            Template
+            Source
           </span>
           <span role="columnheader" className={HEAD}>
             Audience
@@ -144,7 +142,7 @@ export default function HistoryTable({ rows, onOpenDesign }: Props) {
 
                 <span role="cell" className="min-w-0">
                   <span className="inline-flex max-w-full h-6 px-2.5 rounded-full bg-(--color-brand-primary-light) text-[10.5px] font-semibold text-(--color-brand-primary) items-center truncate">
-                    {row.template}
+                    {row.source}
                   </span>
                 </span>
 
@@ -167,7 +165,7 @@ export default function HistoryTable({ rows, onOpenDesign }: Props) {
 
                 <span role="cell" className="min-w-0">
                   <span className="block text-[12px] text-(--color-text-primary) truncate">
-                    {dayLabel(row.sentAt, newest)}
+                    {dayLabel(row.sentAt, today)}
                   </span>
                   <span className="block text-[10.5px] text-(--color-text-hint)">
                     {TIME.format(row.sentAt)}

@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSocket, type Role } from "@/lib/socket";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
+import { apiClient } from "@/utils/apiClient";
 
 export interface ReplyPreviewData {
   id: string;
@@ -39,10 +38,6 @@ export interface TypingUser {
 const TYPING_IDLE_MS = 1200;
 const TYPING_SAFETY_TIMEOUT_MS = 3000;
 const READ_DEBOUNCE_MS = 800;
-const COOKIE_BY_ROLE: Record<Role, string> = {
-  customer: "token",
-  shopkeeper: "shopkeeper_token",
-};
 
 /**
  * Shared real-time chat state for a room — used by both the shopkeeper's
@@ -79,9 +74,6 @@ export function useRoomChat(roomId: string | undefined, role: Role) {
   useEffect(() => {
     if (!roomId) return;
     let cancelled = false;
-
-    const token = getCookie(COOKIE_BY_ROLE[role]);
-    if (token) setAuthToken(token);
 
     apiClient
       .get<{ messages: ChatMessage[] }>(`/api/rooms/${roomId}/messages`, {

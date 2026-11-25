@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import Image from "next/image";
+import { m } from "framer-motion";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
@@ -15,28 +15,22 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
-      { label: "How it Works", href: "#how-it-works" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Updates", href: "#" },
+      { label: "Features", href: "/#features" },
+      { label: "How it Works", href: "/#how-it-works" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Blog", href: "#" },
-      { label: "Help Center", href: "#" },
-      { label: "Guides", href: "#" },
+      { label: "Help Center", href: "/help" },
       { label: "Contact Us", href: "/contact" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Success Stories", href: "#testimonials" },
-      { label: "Community", href: "#" },
+      { label: "About Us", href: "/about" },
     ],
   },
   {
@@ -44,23 +38,27 @@ const COLUMNS = [
     links: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
+      { label: "Refund Policy", href: "/refund-policy" },
+      { label: "Community Guidelines", href: "/community-guidelines" },
       { label: "Cookie Policy", href: "/cookies" },
-      { label: "Security", href: "#" },
+      { label: "Security", href: "/security" },
     ],
   },
 ] as const;
 
+// Profile addresses come from the environment, so an icon shows only once there is a real page behind it.
+// (NEXT_PUBLIC_* values must be read by their literal names for Next to inline them.)
 const SOCIALS = [
-  { Icon: FacebookIcon, label: "Facebook" },
-  { Icon: InstagramIcon, label: "Instagram" },
-  { Icon: TwitterIcon, label: "Twitter" },
-  { Icon: YouTubeIcon, label: "YouTube" },
-  { Icon: LinkedInIcon, label: "LinkedIn" },
-] as const;
+  { Icon: FacebookIcon, label: "Facebook", href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK },
+  { Icon: InstagramIcon, label: "Instagram", href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM },
+  { Icon: TwitterIcon, label: "Twitter", href: process.env.NEXT_PUBLIC_SOCIAL_TWITTER },
+  { Icon: YouTubeIcon, label: "YouTube", href: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE },
+  { Icon: LinkedInIcon, label: "LinkedIn", href: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN },
+].filter((social): social is typeof social & { href: string } => Boolean(social.href));
 
 export default function Footer() {
   return (
-    <motion.footer
+    <m.footer
       variants={fadeUp}
       initial="hidden"
       whileInView="visible"
@@ -72,13 +70,9 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 flex flex-col gap-4 max-w-[280px]">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-(--color-brand-primary)">
-                <StorefrontOutlinedIcon
-                  sx={{ fontSize: 20, color: "var(--color-text-on-brand)" }}
-                />
-              </span>
+              <Image src="/CounterCircleIcon.png" alt="" width={36} height={36} priority />
               <span className="text-[19px] font-extrabold text-(--color-text-primary)">
-                ShopRoom
+                CounterCircle
               </span>
             </Link>
             <p className="text-[13px] text-(--color-text-secondary) leading-relaxed">
@@ -86,10 +80,12 @@ export default function Footer() {
               together.
             </p>
             <div className="flex items-center gap-2">
-              {SOCIALS.map(({ Icon, label }) => (
+              {SOCIALS.map(({ Icon, label, href }) => (
                 <a
                   key={label}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="flex items-center justify-center w-9 h-9 rounded-full bg-(--color-bg-page) text-(--color-text-secondary) hover:bg-(--color-brand-primary) hover:text-(--color-text-on-brand) transition-colors duration-150"
                 >
@@ -139,10 +135,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-(--color-border-default) py-6 text-center">
           <span className="text-[12px] text-(--color-text-hint)">
-            © 2026 ShopRoom. All rights reserved.
+            © 2026 CounterCircle. All rights reserved.
           </span>
         </div>
       </div>
-    </motion.footer>
+    </m.footer>
   );
 }

@@ -5,8 +5,7 @@ import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import SampleBadge from "@/components/ui/SampleBadge";
-import type { SendRow } from "../_data/sampleMetrics";
+import type { SendRow } from "../_data/metrics";
 
 /** Must match STORAGE_KEY in useNotificationDesign — the Studio opens whatever
  *  design id it finds here. */
@@ -15,11 +14,6 @@ const STUDIO_DESIGN_KEY = "studio_design_id";
 const TH =
   "text-[10px] font-semibold tracking-widest uppercase text-(--color-text-hint) pb-2 border-b border-(--color-border-default) text-left";
 const TD = "border-b border-(--color-border-default) h-16 align-middle text-[12px]";
-
-const TYPE_STYLE: Record<string, string> = {
-  Promotional: "bg-(--color-brand-primary-light) text-(--color-brand-primary)",
-  "Restock Alert": "bg-(--color-success-light) text-(--color-success-text)",
-};
 
 const SENT_ON = new Intl.DateTimeFormat("en-IN", {
   day: "numeric",
@@ -47,15 +41,18 @@ export default function RecentNotificationsTable({ sends }: { sends: SendRow[] }
         <h2 className="text-[14px] font-bold text-(--color-text-primary)">
           Recent Notifications
         </h2>
-        <SampleBadge />
       </header>
 
+      {sends.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-dashed border-(--color-border-strong) py-10 text-center text-[12.5px] text-(--color-text-secondary)">
+          No notifications sent yet. Send your first one and its results show up here.
+        </p>
+      ) : (
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse">
+        <table className="w-full min-w-180 border-collapse">
           <thead>
             <tr>
               <th className={`${TH} w-[30%]`}>Title</th>
-              <th className={TH}>Type</th>
               <th className={TH}>Audience</th>
               <th className={TH}>Sent on</th>
               <th className={TH}>Delivery</th>
@@ -86,15 +83,6 @@ export default function RecentNotificationsTable({ sends }: { sends: SendRow[] }
                         {send.body}
                       </span>
                     </span>
-                  </span>
-                </td>
-                <td className={TD}>
-                  <span
-                    className={`inline-flex h-6 px-2.5 rounded-full text-[10.5px] font-semibold items-center ${
-                      TYPE_STYLE[send.type] ?? TYPE_STYLE.Promotional
-                    }`}
-                  >
-                    {send.type}
                   </span>
                 </td>
                 <td className={`${TD} text-(--color-text-secondary) tabular-nums`}>
@@ -136,6 +124,7 @@ export default function RecentNotificationsTable({ sends }: { sends: SendRow[] }
           </tbody>
         </table>
       </div>
+      )}
 
       <button
         type="button"

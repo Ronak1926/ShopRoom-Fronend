@@ -4,12 +4,7 @@
  */
 
 import { apiClient } from "@/utils/apiClient";
-import { getCookie } from "@/utils/cookieUtils";
 import type { DesignRecord, NotificationDesign } from "./types";
-
-function authConfig() {
-  return { headers: { Authorization: `Bearer ${getCookie("shopkeeper_token")}` } };
-}
 
 interface Envelope<T> {
   data: T;
@@ -60,7 +55,6 @@ export interface ListDesignsParams {
 
 export async function listDesigns(params: ListDesignsParams = {}): Promise<DesignPage> {
   const { data } = await apiClient.get<Envelope<DesignPage>>("/api/notifications/designs", {
-    ...authConfig(),
     params: {
       ...params,
       ...(params.archived === undefined ? {} : { archived: String(params.archived) }),
@@ -72,7 +66,6 @@ export async function listDesigns(params: ListDesignsParams = {}): Promise<Desig
 export async function getDesign(id: string): Promise<DesignRecord> {
   const { data } = await apiClient.get<Envelope<DesignRecord>>(
     `/api/notifications/designs/${id}`,
-    authConfig(),
   );
   return data.data;
 }
@@ -81,7 +74,6 @@ export async function createBlankDesign(name: string, category: string): Promise
   const { data } = await apiClient.post<Envelope<DesignRecord>>(
     "/api/notifications/designs",
     { name, category },
-    authConfig(),
   );
   return data.data;
 }
@@ -93,7 +85,6 @@ export async function autosaveDesign(
   const { data } = await apiClient.patch<Envelope<{ id: string; version: number; updatedAt: string; status: string }>>(
     `/api/notifications/designs/${id}`,
     { design },
-    authConfig(),
   );
   return data.data;
 }
@@ -106,14 +97,13 @@ export async function autosaveDesign(
  * behind `isArchived` and POST /designs/:id/restore brings it back.
  */
 export async function archiveDesign(id: string): Promise<void> {
-  await apiClient.post(`/api/notifications/designs/${id}/archive`, {}, authConfig());
+  await apiClient.post(`/api/notifications/designs/${id}/archive`, {});
 }
 
 export async function saveVersion(id: string): Promise<{ id: string; version: number }> {
   const { data } = await apiClient.post<Envelope<{ id: string; version: number }>>(
     `/api/notifications/designs/${id}/versions`,
     {},
-    authConfig(),
   );
   return data.data;
 }
@@ -130,6 +120,8 @@ export interface TemplatePage {
 
 export interface ListTemplatesParams {
   categoryId?: string;
+  /** Only these templates — at most 24 (one page), as the API enforces. */
+  ids?: string[];
   q?: string;
   sort?: "popular" | "newest" | "name";
   page?: number;
@@ -137,9 +129,9 @@ export interface ListTemplatesParams {
 }
 
 export async function listTemplates(params: ListTemplatesParams = {}): Promise<TemplatePage> {
+  const { ids, ...rest } = params;
   const { data } = await apiClient.get<Envelope<TemplatePage>>("/api/notifications/templates", {
-    ...authConfig(),
-    params,
+    params: { ...rest, ...(ids ? { ids: ids.join(",") } : {}) },
   });
   return data.data;
 }
@@ -154,7 +146,6 @@ export interface NotificationCategory {
 export async function listCategories(): Promise<NotificationCategory[]> {
   const { data } = await apiClient.get<Envelope<NotificationCategory[]>>(
     "/api/notifications/categories",
-    authConfig(),
   );
   return data.data;
 }
@@ -163,7 +154,6 @@ export async function cloneTemplate(templateId: string): Promise<DesignRecord> {
   const { data } = await apiClient.post<Envelope<DesignRecord>>(
     `/api/notifications/templates/${templateId}/use`,
     {},
-    authConfig(),
   );
   return data.data;
 }
@@ -187,7 +177,6 @@ export async function uploadAsset(
     "/api/notifications/assets",
     { image: imageDataUri, ...meta },
     {
-      ...authConfig(),
       onUploadProgress: onProgress
         ? (e) => onProgress(e.total ? Math.round((e.loaded / e.total) * 100) : 0)
         : undefined,
@@ -199,7 +188,6 @@ export async function uploadAsset(
 export async function listAssets(): Promise<AssetSummary[]> {
   const { data } = await apiClient.get<Envelope<AssetSummary[]>>(
     "/api/notifications/assets",
-    authConfig(),
   );
   return data.data;
 }
@@ -234,7 +222,7 @@ export async function searchStockImages(params: {
 }): Promise<StockImageSearchResult> {
   const { data } = await apiClient.get<Envelope<StockImageSearchResult>>(
     "/api/notifications/stock-images",
-    { ...authConfig(), params },
+    { params },
   );
   return data.data;
 }
@@ -266,7 +254,6 @@ export async function sendNotification(
   const { data } = await apiClient.post<Envelope<SendNotificationResult>>(
     "/api/notifications/send",
     body,
-    authConfig(),
   );
   return data.data;
 }
@@ -276,6 +263,8 @@ export async function sendNotification(
 export interface PlanCapabilities {
   /** How many notifications the shop may send in a day on its plan. */
   dailyNotificationLimit: number;
+  /** How far beyond the room a send may reach, in km; 0 means room members only. */
+  maxRadiusKm: number;
   CUSTOM_TEMPLATE: boolean;
   ADVANCED_TEMPLATE_EDITING: boolean;
   CUSTOM_ANIMATION: boolean;
@@ -284,10 +273,12 @@ export interface PlanCapabilities {
 export async function getCapabilities(): Promise<{
   planType: string;
   capabilities: PlanCapabilities;
+  /** Notifications already sent today, counted against the daily limit. */
+  usedToday: number;
 }> {
   const { data } = await apiClient.get<
-    Envelope<{ planType: string; capabilities: PlanCapabilities }>
-  >("/api/notifications/capabilities", authConfig());
+    Envelope<{ planType: string; capabilities: PlanCapabilities; usedToday: number }>
+  >("/api/notifications/capabilities");
   return data.data;
 }
 
@@ -330,7 +321,108 @@ export async function createSchedule(
   const { data } = await apiClient.post<Envelope<ScheduledNotificationResult>>(
     "/api/notifications/schedules",
     body,
-    authConfig(),
   );
+  return data.data;
+}
+
+export interface ScheduleView {
+  id: string;
+  status: "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED";
+  /** ISO instant of the next run; null once the series has finished. */
+  nextRunAt: string | null;
+  lastRunAt: string | null;
+  runCount: number;
+  message: string | null;
+  recurrence: ScheduleNotificationBody["schedule"]["recurrence"];
+  repeatEvery: number;
+  weekdays: number[];
+  endMode: ScheduleNotificationBody["schedule"]["endMode"];
+  endDate: string | null;
+  endAfter: number | null;
+  deliverySpeed: ScheduleNotificationBody["schedule"]["deliverySpeed"];
+  timeZone: string;
+  includeMembers: boolean;
+  includeNearby: boolean;
+  radiusKm: number;
+  designName: string;
+  designJson: NotificationDesign;
+}
+
+export interface SchedulePage {
+  items: ScheduleView[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export async function listSchedules(
+  state: "upcoming" | "completed",
+  params: { page?: number; limit?: number } = {},
+): Promise<SchedulePage> {
+  const { data } = await apiClient.get<Envelope<SchedulePage>>("/api/notifications/schedules", {
+    params: { state, ...params },
+  });
+  return data.data;
+}
+
+export async function setScheduleStatus(
+  id: string,
+  status: "ACTIVE" | "PAUSED",
+): Promise<ScheduleView> {
+  const { data } = await apiClient.patch<Envelope<ScheduleView>>(
+    `/api/notifications/schedules/${id}`,
+    { status },
+  );
+  return data.data;
+}
+
+export async function cancelSchedule(id: string): Promise<void> {
+  await apiClient.delete(`/api/notifications/schedules/${id}`);
+}
+
+// ── Send history ─────────────────────────────────────────────────────────────
+
+export interface SendHistoryItem {
+  id: string;
+  designId: string;
+  createdAt: string;
+  sentAt: string | null;
+  status: "PENDING" | "SENT" | "FAILED";
+  failureReason: string | null;
+  audience: "ROOM_MEMBERS" | "NEARBY" | "MEMBERS_NEARBY" | "MEMBERS_AND_NEARBY";
+  radiusKm: number | null;
+  message: string | null;
+  designName: string;
+  scheduled: boolean;
+  recipientCount: number;
+  successCount: number;
+  failureCount: number;
+  deliveredCount: number;
+  openedCount: number;
+  clickedCount: number;
+}
+
+export interface SendHistoryPage {
+  items: SendHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface SendHistoryParams {
+  page?: number;
+  limit?: number;
+  outcome?: "all" | "delivered" | "opened" | "clicked" | "failed";
+  sort?: "latest" | "oldest" | "opens" | "clicks";
+  /** Matches the message or the design's name. */
+  q?: string;
+  /** Only sends from the last N days. */
+  days?: number;
+}
+
+export async function listSends(params: SendHistoryParams = {}): Promise<SendHistoryPage> {
+  const { data } = await apiClient.get<Envelope<SendHistoryPage>>("/api/notifications/sends", {
+    params,
+  });
   return data.data;
 }

@@ -6,7 +6,8 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
+import "leaflet/dist/leaflet.css";
 import { getCookie } from "@/utils/cookieUtils";
 import type { MapPin } from "@/components/map/MiniMap";
 import Avatar, { getAvatarColor, getInitials } from "@/components/ui/Avatar";
@@ -147,7 +148,6 @@ export default function FullMapPage() {
       const token =
         getCookie("token");
       if (!token) return;
-      setAuthToken(token);
 
       // Claim a sequence slot — any response with a lower seq is stale
       const seq = ++fetchSeqRef.current;
@@ -274,18 +274,7 @@ export default function FullMapPage() {
     if (mapRef.current) return;
     if (!mapDivRef.current) return;
 
-    const token =
-      getCookie("token");
-    if (token) setAuthToken(token);
-
     import("leaflet").then(async (L) => {
-      if (!document.getElementById("leaflet-css")) {
-        const link = document.createElement("link");
-        link.id = "leaflet-css";
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(link);
-      }
       if (!document.getElementById("shoproom-map-style")) {
         const style = document.createElement("style");
         style.id = "shoproom-map-style";

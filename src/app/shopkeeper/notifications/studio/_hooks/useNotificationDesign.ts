@@ -55,6 +55,11 @@ export function useNotificationDesign() {
   const idRef = useRef<string | null>(null);
   const history = useRef<{ past: NotificationDesign[]; future: NotificationDesign[] }>({ past: [], future: [] });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Whether the plan allows custom animation; set by the page once the plan is known. */
+  const canAnimateRef = useRef(true);
+  const setCanAnimate = useCallback((allowed: boolean) => {
+    canAnimateRef.current = allowed;
+  }, []);
 
   useEffect(() => {
     designRef.current = design;
@@ -82,9 +87,10 @@ export function useNotificationDesign() {
             localStorage.removeItem(STORAGE_KEY);
           }
         }
-        // Only the default starter is needed here, so ask for one page.
-        const { items } = await listTemplates({ q: "New Arrival Classic", limit: 5 });
-        const tpl = items.find((t) => t.slug === "new-arrival-classic") ?? items[0];
+        // The catalog lists templates every plan can use first, so the first
+        // one is always a starter this shop is allowed to open.
+        const { items } = await listTemplates({ limit: 1 });
+        const tpl = items[0];
         const rec = tpl
           ? await cloneTemplate(tpl.id)
           : await createBlankDesign("Untitled notification", "CUSTOM");
@@ -202,7 +208,9 @@ export function useNotificationDesign() {
       if (!prev) return;
       const node = findNode(prev.elements, id);
       if (!node) return;
-      const copy = cloneWithNewIds(node);
+      // Without custom animation a new element may not carry one (the API
+      // refuses it), so the copy is made still.
+      const copy = canAnimateRef.current ? cloneWithNewIds(node) : withoutAnimation(cloneWithNewIds(node));
       copy.name = `${copy.name ?? "Element"} copy`;
       copy.frame = { ...copy.frame, x: copy.frame.x + 12, y: copy.frame.y + 12 };
       commit({ ...prev, elements: insertAfter(prev.elements, id, copy) });
@@ -279,7 +287,7 @@ export function useNotificationDesign() {
     [commit],
   );
 
-  // Applies a ShopRoom scene: swaps the background + a top-level "scene" GROUP of
+  // Applies a CounterCircle scene: swaps the background + a top-level "scene" GROUP of
   // editable decoration layers. A scene ships its own full product environment
   // (glow/shadow/pedestal), so every prior DECORATION node is dropped — only
   // non-decoration template content (text, product image, CTA, ...) is kept.
@@ -500,7 +508,16 @@ export function useNotificationDesign() {
     canUndo: history.current.past.length > 0,
     canRedo: history.current.future.length > 0,
     saveVersionNow,
+    setCanAnimate,
   };
+}
+
+/** A copy of a node (and its children) with every animation removed. */
+function withoutAnimation(node: CompositionNode): CompositionNode {
+  const copy: CompositionNode = { ...node };
+  delete copy.animation;
+  if (node.children) copy.children = node.children.map(withoutAnimation);
+  return copy;
 }
 
 function readError(e: unknown, fallback: string): string {

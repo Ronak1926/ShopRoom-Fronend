@@ -3,8 +3,10 @@
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Link from "next/link";
 import DesignPreview from "@/components/notifications/DesignPreview";
 import type { TemplateSummary } from "@/features/notifications/api";
+import { PLAN_NAMES, UPGRADE_HREF } from "@/features/notifications/plan";
 
 interface Props {
   template: TemplateSummary;
@@ -50,7 +52,7 @@ export default function TemplateCard({
         {locked && (
           <span className="absolute top-2 left-2 flex items-center gap-1 h-6 px-2 rounded-full bg-(--color-bg-surface) shadow-(--shadow-sm) text-[10px] font-semibold text-(--color-text-secondary)">
             <LockOutlinedIcon sx={{ fontSize: 12 }} />
-            {template.requiredPlan?.toUpperCase()} plan
+            {PLAN_NAMES[template.requiredPlan ?? ""] ?? template.requiredPlan} plan
           </span>
         )}
       </div>
@@ -74,15 +76,24 @@ export default function TemplateCard({
         >
           Preview
         </button>
-        <button
-          type="button"
-          disabled={busy || locked}
-          title={locked ? "Upgrade your plan to use this template" : undefined}
-          onClick={() => onUse(template)}
-          className="h-8 rounded-lg bg-(--color-brand-primary) text-[11.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {busy ? "Opening…" : "Use Template"}
-        </button>
+        {locked ? (
+          <Link
+            href={UPGRADE_HREF}
+            className="h-8 flex items-center justify-center gap-1 rounded-lg border border-(--color-brand-primary) text-[11.5px] font-semibold text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors"
+          >
+            <LockOutlinedIcon sx={{ fontSize: 13 }} />
+            Upgrade
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onUse(template)}
+            className="h-8 rounded-lg bg-(--color-brand-primary) text-[11.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {busy ? "Opening…" : "Use Template"}
+          </button>
+        )}
       </div>
     </article>
   );

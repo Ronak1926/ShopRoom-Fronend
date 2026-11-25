@@ -124,6 +124,7 @@ export default function SelectionOverlay({
       <div
         onPointerDown={locked ? undefined : (e) => beginDrag(e, (dx, dy) => onMove(dx, dy))}
         style={{
+          touchAction: "none",
           position: "absolute",
           inset: 0,
           // A locked node (often the full-canvas scene background) still
@@ -142,6 +143,7 @@ export default function SelectionOverlay({
             onPointerDown={beginRotate}
             title="Rotate"
             style={{
+              touchAction: "none",
               position: "absolute",
               left: "50%",
               top: -26,
@@ -159,6 +161,7 @@ export default function SelectionOverlay({
               key={h}
               onPointerDown={(e) => beginDrag(e, (dx, dy) => onResize(h, dx, dy))}
               style={{
+          touchAction: "none",
                 position: "absolute",
                 left: `${cx * 100}%`,
                 top: `${cy * 100}%`,

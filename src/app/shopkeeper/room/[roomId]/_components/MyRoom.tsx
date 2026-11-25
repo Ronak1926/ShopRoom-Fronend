@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import ChatHeader from "@/components/chat/ChatHeader";
 import RoomInfoPanel from "@/components/chat/RoomInfoPanel";
@@ -8,28 +9,17 @@ import MembersPanel from "@/components/chat/MembersPanel";
 import MessageFeed from "@/components/chat/MessageFeed";
 import Composer from "@/components/chat/Composer";
 import { useRoomChat, type ChatMessage } from "@/hooks/useRoomChat";
-import { getCookie } from "@/utils/cookieUtils";
+import { signedInAccountId } from "@/utils/session";
 import type { ChatTab, RoomDetails } from "@/components/chat/types";
 
 interface MyRoomProps {
   room: RoomDetails;
 }
 
-function decodeShopkeeperId(): string | null {
-  const token = getCookie("shopkeeper_token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1])) as { sub?: unknown };
-    return typeof payload.sub === "string" ? payload.sub : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function MyRoom({ room }: MyRoomProps) {
   const [activeTab, setActiveTab] = useState<ChatTab>("chat");
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
-  const myShopkeeperId = useMemo(() => decodeShopkeeperId(), []);
+  const myShopkeeperId = useMemo(() => signedInAccountId("shopkeeper"), []);
   const {
     messages,
     typingUsers,
@@ -69,10 +59,13 @@ export default function MyRoom({ room }: MyRoomProps) {
             replyingTo={replyingTo}
             onCancelReply={() => setReplyingTo(null)}
             extraAction={
-              <button className="h-9 px-4 rounded-xl text-[13px] font-bold text-white border-0 cursor-pointer transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)">
+              <Link
+                href="/shopkeeper/notifications/send"
+                className="h-9 px-4 rounded-xl text-[13px] font-bold text-white transition-opacity hover:opacity-90 shrink-0 flex items-center gap-1.5 bg-(--color-brand-alert)"
+              >
                 <BoltOutlinedIcon sx={{ fontSize: 16 }} />
                 Send Alert
-              </button>
+              </Link>
             }
           />
         </>

@@ -1,0 +1,72 @@
+/**
+ * features/push/pushApi.ts — Typed client for push-notification device
+ * registration and resolving a received push's design. The customer's
+ * HttpOnly session cookie travels with every apiClient call.
+ */
+
+import { apiClient } from "@/utils/apiClient";
+import type { NotificationDesign, RenderContext } from "@/features/notifications/types";
+
+interface Envelope<T> {
+  data: T;
+  message?: string;
+}
+
+export async function registerDevice(fcmToken: string, platform: "WEB" = "WEB"): Promise<void> {
+  await apiClient.post("/api/customers/me/devices", { fcmToken, platform });
+}
+
+export async function unregisterDevice(fcmToken: string): Promise<void> {
+  await apiClient.delete("/api/customers/me/devices", { data: { fcmToken } });
+}
+
+/** Stores the customer's current position for radius-based notifications. */
+export async function reportLocation(position: { latitude: number; longitude: number }): Promise<void> {
+  await apiClient.put("/api/customers/me/location", position);
+}
+
+export interface SendDesignResponse {
+  designJson: NotificationDesign;
+  message: string | null;
+  roomId: string;
+  context: RenderContext;
+}
+
+export async function getSendDesign(sendId: string): Promise<SendDesignResponse> {
+  const { data } = await apiClient.get<Envelope<SendDesignResponse>>(`/api/notifications/sends/${sendId}/design`);
+  return data.data;
+}
+
+export type ReceiptEvent = "DELIVERED" | "OPENED" | "CLICKED";
+
+/**
+ * Tells the server what this device did with a push. Fire-and-forget by
+ * design: analytics must never delay or break showing the notification, so a
+ * failed report is dropped rather than surfaced.
+ */
+export function reportReceipt(receiptToken: string | undefined, event: ReceiptEvent): void {
+  if (!receiptToken) return;
+  apiClient.post("/api/notifications/receipts", { token: receiptToken, event }).catch(() => {});
+}
+
+export interface FeedItem {
+  sendId: string;
+  roomId: string;
+  shopName: string;
+  message: string | null;
+  sentAt: string;
+  read: boolean;
+  /** Presented back when the banner is replayed, so the open is counted. */
+  receiptToken: string;
+}
+
+export interface Feed {
+  items: FeedItem[];
+  unread: number;
+}
+
+/** The customer's recent notifications, newest first. */
+export async function getFeed(): Promise<Feed> {
+  const { data } = await apiClient.get<Envelope<Feed>>("/api/notifications/feed");
+  return data.data;
+}

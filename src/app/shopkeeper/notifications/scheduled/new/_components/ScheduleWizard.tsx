@@ -12,6 +12,8 @@ import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import NotificationsShell from "../../../_components/NotificationsShell";
 import { createSchedule } from "@/features/notifications/api";
+import { usePlanStatus } from "@/features/billing/usePlanStatus";
+import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
 import { TYPE_LABELS, timeZoneLabel } from "@/features/notifications/preferences";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import {
@@ -80,6 +82,8 @@ export default function ScheduleWizard() {
   const sources = useSendableNotifications();
   const { shop } = useShopAudience();
   const preferences = useNotificationPreferences();
+  const planExpired = usePlanStatus().billing?.active === false;
+  const { plan } = usePlanCapabilities();
 
   const [openStep, setOpenStep] = useState<WizardStep>("notification");
   const [completed, setCompleted] = useState<WizardStep[]>([]);
@@ -145,13 +149,16 @@ export default function ScheduleWizard() {
     setOutcome(null);
     try {
       const sendAt = new Date(`${input.date}T${input.time}`).toISOString();
+      // Never ask for more reach than the plan has (the API would refuse it).
+      const maxRadiusKm = plan?.capabilities.maxRadiusKm;
+      const includeNearby = input.includeNearby && maxRadiusKm !== 0;
       await createSchedule({
         source: input.source,
         notificationId: input.notificationId,
         audience: {
-          includeMembers: input.includeMembers,
-          includeNearby: input.includeNearby,
-          radiusKm: input.radiusKm,
+          includeMembers: input.includeMembers || !includeNearby,
+          includeNearby,
+          radiusKm: maxRadiusKm ? Math.min(input.radiusKm, maxRadiusKm) : input.radiusKm,
           includeFutureMembers: input.includeFutureMembers,
           skipNotificationsOff: input.skipNotificationsOff,
         },
@@ -257,6 +264,7 @@ export default function ScheduleWizard() {
                   skipNotificationsOff={values.skipNotificationsOff}
                   shop={shop}
                   fieldError={formState.errors.includeMembers?.message}
+                  maxRadiusKm={plan?.capabilities.maxRadiusKm}
                   onChange={(patch) => {
                     for (const [key, value] of Object.entries(patch)) {
                       setValue(key as keyof ScheduleInput, value as never, {
@@ -321,7 +329,8 @@ export default function ScheduleWizard() {
                 {step.id === "review" ? (
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={saving || planExpired}
+                    title={planExpired ? "Renew your plan to schedule notifications" : undefined}
                     className="flex items-center gap-2 h-10 px-5 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} />

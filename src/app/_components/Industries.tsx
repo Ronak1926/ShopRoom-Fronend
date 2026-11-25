@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { fadeUp, staggerContainer, VIEWPORT } from "./motion";
 import SectionHeader from "./ui/SectionHeader";
 
@@ -40,7 +40,7 @@ const INDUSTRIES: Industry[] = [
   {
     image: "/industries/more.png",
     title: "And Many More",
-    description: "Any business. Any size. ShopRoom fits all.",
+    description: "Any business. Any size. CounterCircle fits all.",
   },
 ];
 
@@ -51,11 +51,11 @@ export default function Industries() {
         <SectionHeader
           title="One Platform. Endless Possibilities."
           highlight="Endless Possibilities."
-          subtitle="ShopRoom is perfect for every type of business."
+          subtitle="CounterCircle is perfect for every type of business."
           className="mb-14"
         />
 
-        <motion.div
+        <m.div
           variants={staggerContainer(0.07)}
           initial="hidden"
           whileInView="visible"
@@ -63,7 +63,7 @@ export default function Industries() {
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5"
         >
           {INDUSTRIES.map(({ image, title, description }) => (
-            <motion.article
+            <m.article
               key={title}
               variants={fadeUp}
               whileHover={{ y: -8 }}
@@ -89,9 +89,9 @@ export default function Industries() {
                   {description}
                 </p>
               </div>
-            </motion.article>
+            </m.article>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

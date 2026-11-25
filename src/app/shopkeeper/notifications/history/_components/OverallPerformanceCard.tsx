@@ -5,9 +5,8 @@ import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import MarkEmailReadOutlinedIcon from "@mui/icons-material/MarkEmailReadOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import AdsClickOutlinedIcon from "@mui/icons-material/AdsClickOutlined";
-import SampleBadge from "@/components/ui/SampleBadge";
 import Dropdown from "@/components/ui/Dropdown";
-import { rate, type HistoryTotals } from "../_data/sampleHistory";
+import { rate, type HistoryTotals } from "../_utils/historyRows";
 
 const RANGE_OPTIONS = [
   { value: 7, label: "This week" },
@@ -54,7 +53,6 @@ export default function OverallPerformanceCard({ totals, rangeDays, onRangeChang
           <h2 className="text-[13.5px] font-bold text-(--color-text-primary)">
             Overall performance
           </h2>
-          <SampleBadge />
         </div>
         <Dropdown
           value={rangeDays}
@@ -68,15 +66,15 @@ export default function OverallPerformanceCard({ totals, rangeDays, onRangeChang
       <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Tile
           icon={SendOutlinedIcon}
-          value={totals.sent.toLocaleString()}
-          label="Sent"
+          value={totals.notifications.toLocaleString()}
+          label="Notifications"
           hint={`${totals.failed} failed`}
         />
         <Tile
           icon={MarkEmailReadOutlinedIcon}
           value={totals.delivered.toLocaleString()}
           label="Delivered"
-          hint={`${rate(totals.delivered, totals.delivered + totals.failed || 1)}% of sends`}
+          hint={`${totals.deliveryRate}% delivery rate`}
         />
         <Tile
           icon={VisibilityOutlinedIcon}

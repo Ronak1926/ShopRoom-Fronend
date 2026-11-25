@@ -1,13 +1,15 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import { apiClient, setAuthToken } from "../../utils/apiClient";
-import { getCookie, setCookie, deleteCookie } from "../../utils/cookieUtils";
+import { apiClient } from "../../utils/apiClient";
+import { getCookie } from "../../utils/cookieUtils";
+import { markSignedIn, markSignedOut } from "../../utils/session";
 
 import type {
   Customer,
   GoogleAuthRequest,
   LoginRequest,
   LoginResponse,
+  MfaRequiredResponse,
   RegisterRequest,
 } from "./authTypes";
 
@@ -42,11 +44,11 @@ export const registerCustomer = createAsyncThunk<
   }
 });
 
-export const loginCustomer = createAsyncThunk<LoginResponse, LoginRequest>(
+export const loginCustomer = createAsyncThunk<LoginResponse | MfaRequiredResponse, LoginRequest>(
   "auth/loginCustomer",
   async (payload, thunkApi) => {
     try {
-      const res = await apiClient.post<LoginResponse>(
+      const res = await apiClient.post<LoginResponse | MfaRequiredResponse>(
         "/api/customers/login",
         payload,
       );
@@ -60,11 +62,11 @@ export const loginCustomer = createAsyncThunk<LoginResponse, LoginRequest>(
 );
 
 export const googleAuthCustomer = createAsyncThunk<
-  LoginResponse,
+  LoginResponse | MfaRequiredResponse,
   GoogleAuthRequest
 >("auth/googleAuthCustomer", async (payload, thunkApi) => {
   try {
-    const res = await apiClient.post<LoginResponse>(
+    const res = await apiClient.post<LoginResponse | MfaRequiredResponse>(
       "/api/customers/google-auth",
       payload,
     );
@@ -83,15 +85,20 @@ export const authSlice = createSlice({
     hydrateToken(state) {
       const token = getCookie("token");
       state.token = token;
-      setAuthToken(token);
+    },
+    /** The second step of signing in finished: start the session. */
+    sessionStarted(state, action: PayloadAction<string>) {
+      state.status = "succeeded";
+      markSignedIn("customer", action.payload);
+      state.token = getCookie("token");
+      state.error = null;
     },
     logout(state) {
       state.token = null;
       state.customer = null;
       state.status = "idle";
       state.error = null;
-      deleteCookie("token");
-      setAuthToken(null);
+      markSignedOut("customer");
     },
   },
   extraReducers: (builder) => {
@@ -101,12 +108,16 @@ export const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginCustomer.fulfilled, (state, action) => {
+        if ("mfaRequired" in action.payload) {
+          // Password accepted, code still needed: no session yet.
+          state.status = "idle";
+          return;
+        }
         state.status = "succeeded";
-        state.token = action.payload.token;
+        markSignedIn("customer", action.payload.customerId);
+        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        setCookie("token", action.payload.token);
-        setAuthToken(action.payload.token);
       })
       .addCase(loginCustomer.rejected, (state, action) => {
         state.status = "failed";
@@ -117,12 +128,15 @@ export const authSlice = createSlice({
         state.error = null;
       })
       .addCase(googleAuthCustomer.fulfilled, (state, action) => {
+        if ("mfaRequired" in action.payload) {
+          state.status = "idle";
+          return;
+        }
         state.status = "succeeded";
-        state.token = action.payload.token;
+        markSignedIn("customer", action.payload.customerId);
+        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        setCookie("token", action.payload.token);
-        setAuthToken(action.payload.token);
       })
       .addCase(googleAuthCustomer.rejected, (state, action) => {
         state.status = "failed";
@@ -134,11 +148,10 @@ export const authSlice = createSlice({
       })
       .addCase(registerCustomer.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.token = action.payload.token;
+        markSignedIn("customer", action.payload.customerId);
+        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
-        setCookie("token", action.payload.token);
-        setAuthToken(action.payload.token);
       })
       .addCase(registerCustomer.rejected, (state, action) => {
         state.status = "failed";
@@ -147,5 +160,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { hydrateToken, logout } = authSlice.actions;
+export const { hydrateToken, logout, sessionStarted } = authSlice.actions;
 export const authReducer = authSlice.reducer;

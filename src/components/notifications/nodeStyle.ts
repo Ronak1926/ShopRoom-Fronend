@@ -239,6 +239,8 @@ export function buildNodeStyle(node: CompositionNode, inFlow: boolean): CSSPrope
   if (s.fontWeight) st.fontWeight = s.fontWeight;
   if (s.letterSpacing) st.letterSpacing = s.letterSpacing;
   if (s.textTransform) st.textTransform = s.textTransform;
+  if (s.textDecoration) st.textDecoration = s.textDecoration;
+  if (s.fontStyle) st.fontStyle = s.fontStyle;
   if (s.textAlign) st.textAlign = s.textAlign;
   if (s.lineHeight) st.lineHeight = s.lineHeight;
   if (s.whiteSpace) st.whiteSpace = s.whiteSpace;

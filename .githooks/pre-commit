@@ -1,0 +1,17 @@
+#!/bin/sh
+# Runs before every commit (enabled by `pnpm install`, which sets core.hooksPath).
+# 1. No NEW lint errors in the files you are committing (existing ones are tolerated).
+# 2. The whole project still type-checks.
+# Skip in an emergency with `git commit --no-verify`; CI runs the same checks.
+set -e
+
+staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^src/.*\.(ts|tsx)$' || true)
+
+if [ -n "$staged" ]; then
+  echo "pre-commit: lint ratchet on staged files…"
+  # shellcheck disable=SC2086
+  node scripts/lintRatchet.mjs $staged
+fi
+
+echo "pre-commit: type-checking…"
+pnpm exec tsc --noEmit

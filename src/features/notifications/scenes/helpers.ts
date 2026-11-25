@@ -22,7 +22,7 @@ export const CANVAS_W = 400;
 export const CANVAS_H = 200;
 
 /**
- * Centre of the right-hand product zone every ShopRoom template leaves free.
+ * Centre of the right-hand product zone every CounterCircle template leaves free.
  * Scene artwork frames the product and the left-hand text column (x 22–220);
  * it never takes them over.
  */

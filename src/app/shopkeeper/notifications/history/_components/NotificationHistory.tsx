@@ -1,46 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
-import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import NotificationsShell from "../../_components/NotificationsShell";
 import Dropdown from "@/components/ui/Dropdown";
-import SampleBadge from "@/components/ui/SampleBadge";
 import DesignPreview from "@/components/notifications/DesignPreview";
-import { listDesigns, type DesignSummary } from "@/features/notifications/api";
-import { useShopAudience } from "@/hooks/useShopAudience";
+import { listSends, type DesignSummary, type SendHistoryParams } from "@/features/notifications/api";
+import { downloadCsv, toCsv } from "@/lib/csv";
 import HistoryTable from "./HistoryTable";
+import HistoryPagination from "./HistoryPagination";
 import OverallPerformanceCard from "./OverallPerformanceCard";
 import TopTemplateCard from "./TopTemplateCard";
 import DeliverySummaryCard from "./DeliverySummaryCard";
 import HistoryTips from "./HistoryTips";
 import HistorySkeleton from "./HistorySkeleton";
-import {
-  buildSampleHistory,
-  rate,
-  totalsOf,
-  type HistoryRow,
-  type HistoryStatus,
-} from "../_data/sampleHistory";
+import { useDesigns, useSendRows, useSummary } from "../_hooks/useHistoryData";
+import { toHistoryRow, type HistoryRow } from "../_utils/historyRows";
 
-type Tab = "all" | HistoryStatus | "drafts";
-type Sort = "latest" | "oldest" | "opens" | "clicks";
+type Outcome = NonNullable<SendHistoryParams["outcome"]>;
+type Sort = NonNullable<SendHistoryParams["sort"]>;
+type Tab = Outcome | "drafts";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "DELIVERED", label: "Delivered" },
-  { id: "OPENED", label: "Opened" },
-  { id: "CLICKED", label: "Clicked" },
-  { id: "FAILED", label: "Failed" },
+  { id: "delivered", label: "Delivered" },
+  { id: "opened", label: "Opened" },
+  { id: "clicked", label: "Clicked" },
+  { id: "failed", label: "Failed" },
   { id: "drafts", label: "Drafts" },
 ];
 
-const SORT_OPTIONS = [
+const SORT_OPTIONS: { value: Sort; label: string }[] = [
   { value: "latest", label: "Latest" },
   { value: "oldest", label: "Oldest" },
   { value: "opens", label: "Best open rate" },
@@ -48,132 +42,76 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
+const EXPORT_PAGE_SIZE = 50;
+/** A hard stop so an export can never become an endless run of requests. */
+const EXPORT_MAX_PAGES = 40;
+const SEARCH_DEBOUNCE_MS = 300;
 
-/** Must match STORAGE_KEY in useNotificationDesign — the Studio opens whatever
- *  design id it finds here. */
+/** Must match STORAGE_KEY in useNotificationDesign — the Studio opens whatever design id it finds here. */
 const STUDIO_DESIGN_KEY = "studio_design_id";
 
 export default function NotificationHistory() {
   const router = useRouter();
-  const { shop } = useShopAudience();
-  const [drafts, setDrafts] = useState<DesignSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const designs = useDesigns();
 
   const [tab, setTab] = useState<Tab>("all");
+  const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("latest");
   const [rangeDays, setRangeDays] = useState(7);
   const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    listDesigns({ archived: false, limit: 12 })
-      .then((res) => {
-        if (!cancelled) setDrafts(res.items);
-      })
-      .catch(() => {
-        // The table still renders; rows simply fall back to generic banners.
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    const timer = setTimeout(() => {
+      setQuery(queryInput.trim());
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [queryInput]);
 
-  const history = useMemo(
-    () => buildSampleHistory(shop?.membersCount ?? 0, drafts),
-    [shop?.membersCount, drafts],
-  );
+  const outcome: Outcome = tab === "drafts" ? "all" : tab;
+  const filters = { outcome, sort, q: query, days: rangeDays, page, pageSize: PAGE_SIZE };
+  const sends = useSendRows(filters, designs);
+  const summary = useSummary(rangeDays);
 
-  // Anchored to the newest row rather than the clock: the window then depends
-  // only on the data it filters, and stays stable across re-renders.
-  const inRange = useMemo(() => {
-    const newest = history.reduce((max, row) => Math.max(max, row.sentAt.getTime()), 0);
-    const cutoff = newest - (rangeDays - 1) * 86_400_000;
-    return history.filter((row) => row.sentAt.getTime() >= cutoff);
-  }, [history, rangeDays]);
+  const drafts = designs.filter((d) => d.status === "DRAFT");
+  const topDesign = summary?.analytics.topDesigns[0] ?? null;
 
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const rows = inRange.filter((row) => {
-      if (tab !== "all" && tab !== "drafts" && row.status !== tab) return false;
-      if (!needle) return true;
-      return (
-        row.title.toLowerCase().includes(needle) ||
-        row.template.toLowerCase().includes(needle)
-      );
-    });
-
-    const sorted = [...rows];
-    if (sort === "latest") sorted.sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
-    if (sort === "oldest") sorted.sort((a, b) => a.sentAt.getTime() - b.sentAt.getTime());
-    if (sort === "opens")
-      sorted.sort((a, b) => rate(b.opened, b.delivered) - rate(a.opened, a.delivered));
-    if (sort === "clicks") sorted.sort((a, b) => b.clicked - a.clicked);
-    return sorted;
-  }, [inRange, tab, query, sort]);
-
-  const totals = useMemo(() => totalsOf(inRange), [inRange]);
-  const topRow = useMemo(() => {
-    const candidates = inRange.filter((row) => row.status !== "FAILED" && row.delivered > 0);
-    return candidates.length
-      ? candidates.reduce((best, row) =>
-          rate(row.opened, row.delivered) > rate(best.opened, best.delivered) ? row : best,
-        )
-      : null;
-  }, [inRange]);
-
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
-  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-
-  function openInStudio(row: HistoryRow) {
-    if (!row.design) return;
+  function openInStudio(design: DesignSummary | null) {
+    if (!design) return;
     try {
-      localStorage.setItem(STUDIO_DESIGN_KEY, row.design.id);
+      localStorage.setItem(STUDIO_DESIGN_KEY, design.id);
     } catch {
       // Private mode: the Studio opens on its own last design instead.
     }
     router.push("/shopkeeper/notifications/studio");
   }
 
-  /** Exports what is on screen, so the download always matches the filters. */
-  function exportCsv() {
-    const header = [
-      "Title",
-      "Template",
-      "Audience",
-      "Status",
-      "Sent at",
-      "Delivered",
-      "Opened",
-      "Clicked",
-    ];
-    const lines = filtered.map((row) =>
-      [
-        row.title,
-        row.template,
-        row.audience,
-        row.status,
-        row.sentAt.toISOString(),
-        row.delivered,
-        row.opened,
-        row.clicked,
-      ]
-        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
-        .join(","),
-    );
-    const blob = new Blob([[header.join(","), ...lines].join("\n")], {
-      type: "text/csv;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `notification-history-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  /** Exports everything matching the current filters, not just the visible page. */
+  async function exportCsv() {
+    setExporting(true);
+    setExportError(false);
+    try {
+      const rows: HistoryRow[] = [];
+      for (let p = 1; p <= EXPORT_MAX_PAGES; p += 1) {
+        const result = await listSends({ page: p, limit: EXPORT_PAGE_SIZE, outcome, sort, days: rangeDays, ...(query ? { q: query } : {}) });
+        rows.push(...result.items.map((item) => toHistoryRow(item, designs)));
+        if (p * EXPORT_PAGE_SIZE >= result.total) break;
+      }
+      downloadCsv(
+        `notification-history-${new Date().toISOString().slice(0, 10)}.csv`,
+        toCsv([
+          ["Notification", "Message", "Source", "Audience", "Status", "Sent at", "Devices addressed", "Delivered", "Opened", "Clicked"],
+          ...rows.map((r) => [r.title, r.body, r.source, r.audienceLabel, r.status.toLowerCase(), r.sentAt.toISOString(), String(r.audience), String(r.delivered), String(r.opened), String(r.clicked)]),
+        ]),
+      );
+    } catch {
+      setExportError(true);
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -184,24 +122,27 @@ export default function NotificationHistory() {
       headerAside={
         <button
           type="button"
-          onClick={exportCsv}
-          className="flex items-center gap-1.5 h-10 px-4 rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) text-[12.5px] font-semibold text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) transition-colors cursor-pointer"
+          onClick={() => void exportCsv()}
+          disabled={exporting || sends.total === 0}
+          className="flex items-center gap-1.5 h-10 px-4 rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) text-[12.5px] font-semibold text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />
-          Export CSV
+          {exporting ? "Exporting…" : "Export CSV"}
         </button>
       }
     >
-      {loading ? (
+      {!sends.loaded && sends.loading ? (
         <HistorySkeleton />
       ) : (
         <div className="flex flex-col gap-5">
+          {exportError && (
+            <p role="alert" className="rounded-xl bg-(--color-danger-bg) px-4 py-3 text-[13px] text-(--color-danger)">
+              Could not export the history. Please try again.
+            </p>
+          )}
+
           <div className="flex flex-col gap-4 min-w-0">
-            <div
-              role="tablist"
-              aria-label="Delivery status"
-              className="flex flex-wrap items-center gap-1 border-b border-(--color-border-default)"
-            >
+            <div role="tablist" aria-label="Delivery status" className="flex flex-wrap items-center gap-1 border-b border-(--color-border-default)">
               {TABS.map(({ id, label }) => (
                 <button
                   key={id}
@@ -225,14 +166,13 @@ export default function NotificationHistory() {
 
             <div className="flex flex-wrap items-center gap-3">
               <label className="flex-1 min-w-56 flex items-center gap-2 h-10 px-3.5 rounded-xl border border-(--color-border-default) bg-(--color-bg-surface) transition-colors focus-within:border-(--color-brand-primary)">
-                <SearchOutlinedIcon sx={{ fontSize: 17, color: "var(--color-text-hint)" }} />
+                <SearchOutlinedIcon sx={{ fontSize: 17 }} className="text-(--color-text-hint)" />
                 <input
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setPage(1);
-                  }}
-                  placeholder="Search by title or template…"
+                  value={queryInput}
+                  onChange={(e) => setQueryInput(e.target.value)}
+                  maxLength={100}
+                  aria-label="Search notifications"
+                  placeholder="Search by title or message…"
                   className="flex-1 min-w-0 bg-transparent border-0 outline-none text-[12.5px] text-(--color-text-primary) placeholder:text-(--color-text-hint)"
                 />
               </label>
@@ -242,7 +182,10 @@ export default function NotificationHistory() {
                 <Dropdown
                   value={sort}
                   options={SORT_OPTIONS}
-                  onChange={(value) => setSort(value as Sort)}
+                  onChange={(value) => {
+                    setSort(value as Sort);
+                    setPage(1);
+                  }}
                   ariaLabel="Sort history"
                   className="w-44"
                 />
@@ -251,13 +194,8 @@ export default function NotificationHistory() {
 
             {tab === "drafts" ? (
               <section className="rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) p-5">
-                <h2 className="text-[14px] font-bold text-(--color-text-primary)">
-                  Drafts not yet sent
-                </h2>
-                <p className="text-[11.5px] text-(--color-text-hint) mt-0.5">
-                  Your saved designs. These are real — everything else on this page is sample
-                  data until sends are recorded.
-                </p>
+                <h2 className="text-[14px] font-bold text-(--color-text-primary)">Drafts not yet sent</h2>
+                <p className="text-[11.5px] text-(--color-text-hint) mt-0.5">Your saved drafts. Open one in the Studio to finish it.</p>
 
                 {drafts.length === 0 ? (
                   <p className="mt-4 rounded-xl border border-dashed border-(--color-border-strong) py-10 text-center text-[12.5px] text-(--color-text-secondary)">
@@ -269,19 +207,14 @@ export default function NotificationHistory() {
                       <button
                         key={draft.id}
                         type="button"
-                        onClick={() =>
-                          openInStudio({ design: draft } as HistoryRow)
-                        }
+                        onClick={() => openInStudio(draft)}
                         className="flex flex-col text-left rounded-xl border border-(--color-border-default) overflow-hidden hover:border-(--color-brand-primary) transition-colors cursor-pointer"
                       >
                         <DesignPreview design={draft.designJson} />
                         <span className="px-2.5 py-2">
-                          <span className="block text-[12px] font-semibold text-(--color-text-primary) truncate">
-                            {draft.name}
-                          </span>
+                          <span className="block text-[12px] font-semibold text-(--color-text-primary) truncate">{draft.name}</span>
                           <span className="block text-[10.5px] text-(--color-text-hint) mt-0.5">
-                            {draft.status === "DRAFT" ? "draft" : `v${draft.version}`} ·{" "}
-                            {new Date(draft.updatedAt).toLocaleDateString()}
+                            draft · {new Date(draft.updatedAt).toLocaleDateString()}
                           </span>
                         </span>
                       </button>
@@ -293,99 +226,52 @@ export default function NotificationHistory() {
               <section className="rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) overflow-hidden">
                 <header className="flex items-center gap-2 px-4 pt-4">
                   <h2 className="text-[13px] font-bold text-(--color-text-primary)">
-                    {filtered.length.toLocaleString()} notification
-                    {filtered.length === 1 ? "" : "s"}
+                    {sends.total.toLocaleString()} notification{sends.total === 1 ? "" : "s"}
                   </h2>
-                  <SampleBadge title="Sends are not recorded on the server yet." />
                 </header>
 
-                {visible.length === 0 ? (
+                {sends.error ? (
+                  <p role="alert" className="py-16 px-6 text-center text-[12.5px] text-(--color-danger)">
+                    Could not load your history. Please refresh to try again.
+                  </p>
+                ) : sends.rows.length === 0 ? (
                   <div className="flex flex-col items-center gap-3 py-16 px-6 text-center">
-                    <EventBusyOutlinedIcon
-                      sx={{ fontSize: 24, color: "var(--color-text-hint)" }}
-                    />
+                    <EventBusyOutlinedIcon sx={{ fontSize: 24 }} className="text-(--color-text-hint)" />
                     <p className="text-[12.5px] text-(--color-text-secondary)">
-                      Nothing matches these filters.
+                      {sends.loading ? "Loading…" : query || tab !== "all" ? "Nothing matches these filters." : "No notifications sent in this period."}
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-3">
-                    <HistoryTable rows={visible} onOpenDesign={openInStudio} />
+                  <div className={`mt-3 ${sends.loading ? "opacity-50 transition-opacity" : ""}`}>
+                    <HistoryTable rows={sends.rows} onOpenDesign={(row) => openInStudio(row.design)} />
                   </div>
                 )}
 
-                {filtered.length > 0 && (
-                  <footer className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 border-t border-(--color-border-default)">
-                    <p className="text-[11.5px] text-(--color-text-hint)">
-                      Showing {(currentPage - 1) * PAGE_SIZE + 1} to{" "}
-                      {Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
-                    </p>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        title="Previous page"
-                        disabled={currentPage === 1}
-                        onClick={() => setPage(currentPage - 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />
-                      </button>
-
-                      {Array.from({ length: pageCount }, (_, i) => i + 1)
-                        .filter(
-                          (number) =>
-                            number === 1 ||
-                            number === pageCount ||
-                            Math.abs(number - currentPage) <= 1,
-                        )
-                        .map((number, index, list) => (
-                          <span key={number} className="flex items-center gap-1.5">
-                            {index > 0 && number - list[index - 1] > 1 && (
-                              <span className="text-[11.5px] text-(--color-text-hint)">…</span>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => setPage(number)}
-                              className={`w-8 h-8 rounded-lg text-[12px] font-semibold transition-colors cursor-pointer ${
-                                number === currentPage
-                                  ? "bg-(--color-brand-primary) text-(--color-text-on-brand)"
-                                  : "border border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary)"
-                              }`}
-                            >
-                              {number}
-                            </button>
-                          </span>
-                        ))}
-
-                      <button
-                        type="button"
-                        title="Next page"
-                        disabled={currentPage === pageCount}
-                        onClick={() => setPage(currentPage + 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} />
-                      </button>
-                    </div>
-                  </footer>
-                )}
+                {sends.total > 0 && <HistoryPagination page={page} pageSize={PAGE_SIZE} total={sends.total} onPage={setPage} />}
               </section>
             )}
           </div>
 
-          <OverallPerformanceCard
-            totals={totals}
-            rangeDays={rangeDays}
-            onRangeChange={(days) => {
-              setRangeDays(days);
-              setPage(1);
-            }}
-          />
+          {summary && (
+            <OverallPerformanceCard
+              totals={summary.totals}
+              rangeDays={rangeDays}
+              onRangeChange={(days) => {
+                setRangeDays(days);
+                setPage(1);
+              }}
+            />
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
-            <TopTemplateCard row={topRow} onOpenDesign={openInStudio} />
-            <DeliverySummaryCard totals={totals} />
+            {summary && (
+              <TopTemplateCard
+                top={topDesign}
+                design={designs.find((d) => d.id === topDesign?.designId) ?? null}
+                onOpenDesign={openInStudio}
+              />
+            )}
+            {summary && <DeliverySummaryCard totals={summary.totals} />}
             <HistoryTips />
           </div>
         </div>

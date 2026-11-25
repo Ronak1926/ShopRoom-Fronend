@@ -23,12 +23,15 @@ import DesignCard from "./DesignCard";
 import TemplateGridSkeleton from "./TemplateGridSkeleton";
 import TemplatePreviewModal from "./TemplatePreviewModal";
 import { useFavouriteTemplates } from "@/hooks/useFavouriteTemplates";
+import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
+import { PLAN_NAMES, UPGRADE_HREF, meetsRequiredPlan } from "@/features/notifications/plan";
+import Link from "next/link";
 
 type Tab = "catalog" | "mine" | "drafts" | "favourites";
 type Sort = "popular" | "newest" | "name";
 
 const TABS: { id: Tab; label: string; icon: typeof GridViewOutlinedIcon }[] = [
-  { id: "catalog", label: "ShopRoom Templates", icon: GridViewOutlinedIcon },
+  { id: "catalog", label: "CounterCircle Templates", icon: GridViewOutlinedIcon },
   { id: "mine", label: "My Templates", icon: PersonOutlineOutlinedIcon },
   { id: "drafts", label: "Drafts", icon: EditNoteOutlinedIcon },
   { id: "favourites", label: "Favourites", icon: FavoriteBorderOutlinedIcon },
@@ -45,6 +48,8 @@ const SORTS: { id: Sort; label: string }[] = [
 const STUDIO_DESIGN_KEY = "studio_design_id";
 
 const PAGE_SIZE = 12;
+/** The API's page cap, and so the most ids one Favourites request can ask for. */
+const FAVOURITES_BATCH = 24;
 /** Fetch the next page once the card this far through the list comes into view. */
 const PREFETCH_AT = 0.7;
 const GRID =
@@ -53,6 +58,8 @@ const GRID =
 export default function TemplatesBrowser() {
   const router = useRouter();
   const favourites = useFavouriteTemplates();
+  const { plan } = usePlanCapabilities();
+  const isLocked = (t: TemplateSummary) => !!plan && !meetsRequiredPlan(plan.planType, t.requiredPlan);
 
   const [tab, setTab] = useState<Tab>("catalog");
   const [categories, setCategories] = useState<NotificationCategory[]>([]);
@@ -204,19 +211,15 @@ export default function TemplatesBrowser() {
     }
     setLoading(true);
     try {
-      // Favourites are stored as ids only, so the catalog is walked once rather
-      // than adding a bulk-by-id endpoint for a per-device convenience.
-      const wanted = new Set(ids);
-      const found: TemplateSummary[] = [];
-      let p = 1;
-      let pages = 1;
-      do {
-        const res = await listTemplates({ page: p, limit: 24 });
-        pages = res.totalPages;
-        found.push(...res.items.filter((t) => wanted.has(t.id)));
-        p += 1;
-      } while (p <= pages && found.length < wanted.size);
-      setFavouriteItems(found);
+      // Favourites are stored as ids only. The catalog now runs to well over a
+      // thousand templates, so they are fetched by id, one page (24) per request,
+      // rather than by walking every page looking for them.
+      const batches: string[][] = [];
+      for (let i = 0; i < ids.length; i += FAVOURITES_BATCH) batches.push(ids.slice(i, i + FAVOURITES_BATCH));
+      const pages = await Promise.all(batches.map((batch) => listTemplates({ ids: batch, limit: FAVOURITES_BATCH })));
+      const byId = new Map(pages.flatMap((page) => page.items).map((t) => [t.id, t]));
+      // Keep the order they were favourited in; ids of retired templates drop out.
+      setFavouriteItems(ids.flatMap((id) => byId.get(id) ?? []));
       setError(null);
     } catch {
       setError("Could not load your favourites. Please try again.");
@@ -438,6 +441,17 @@ export default function TemplatesBrowser() {
         </>
       )}
 
+      {tab === "catalog" && plan && plan.planType !== "3m" && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-(--color-border-default) bg-(--color-brand-primary-light) px-4 py-2.5 text-[12.5px] text-(--color-text-secondary)">
+          <span>
+            Your {PLAN_NAMES[plan.planType] ?? plan.planType} plan includes the templates listed first. Ones with a lock need a bigger plan.
+          </span>
+          <Link href={UPGRADE_HREF} className="font-semibold text-(--color-brand-primary) hover:underline">
+            See plans
+          </Link>
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 rounded-lg border border-(--color-danger) bg-(--color-danger-bg) px-4 py-2.5 text-[12.5px] text-(--color-danger-text)">
           {error}
@@ -464,7 +478,7 @@ export default function TemplatesBrowser() {
                     categoryName={categoryName(t.categoryId)}
                     favourite={favourites.has(t.id)}
                     busy={usingId === t.id}
-                    locked={false}
+                    locked={isLocked(t)}
                     onToggleFavourite={favourites.toggle}
                     onPreview={setPreviewing}
                     onUse={handleUse}
@@ -503,7 +517,7 @@ export default function TemplatesBrowser() {
           template={previewing}
           categoryName={categoryName(previewing.categoryId)}
           busy={usingId === previewing.id}
-          locked={false}
+          locked={isLocked(previewing)}
           onClose={() => setPreviewing(null)}
           onUse={handleUse}
         />

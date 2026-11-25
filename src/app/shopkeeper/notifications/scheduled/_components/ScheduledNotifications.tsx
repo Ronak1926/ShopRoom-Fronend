@@ -1,30 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import NotificationsShell from "../../_components/NotificationsShell";
-import SampleBadge from "@/components/ui/SampleBadge";
 import DesignPreview from "@/components/notifications/DesignPreview";
 import {
+  cancelSchedule,
   getCapabilities,
   listDesigns,
+  listSchedules,
+  setScheduleStatus,
   type DesignSummary,
   type PlanCapabilities,
+  type SchedulePage,
 } from "@/features/notifications/api";
-import { useShopAudience } from "@/hooks/useShopAudience";
 import DailyLimitStrip from "./DailyLimitStrip";
 import PreferencesRail from "./PreferencesRail";
 import ScheduledRow from "./ScheduledRow";
 import SchedulePreviewModal from "./SchedulePreviewModal";
 import ScheduledSkeleton from "./ScheduledSkeleton";
-import {
-  buildSampleSchedules,
-  groupByDay,
-  type ScheduledItem,
-} from "../_data/sampleSchedules";
+import { groupByDay, toScheduledItem, type ScheduledItem } from "../_utils/scheduleView";
 
 type Tab = "upcoming" | "completed" | "drafts";
 
@@ -38,44 +37,90 @@ const GROUP_DATE = new Intl.DateTimeFormat("en-IN", {
  *  design id it finds here. */
 const STUDIO_DESIGN_KEY = "studio_design_id";
 
+/** The page keeps up to one full page of each list; 50 is the API's ceiling. */
+const PAGE_SIZE = 50;
+
+function errorMessage(err: unknown, fallback: string): string {
+  if (typeof err === "object" && err !== null && "response" in err) {
+    const message = (err as { response?: { data?: { message?: unknown } } }).response?.data
+      ?.message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  return fallback;
+}
+
 export default function ScheduledNotifications() {
   const router = useRouter();
-  const { shop } = useShopAudience();
   const [tab, setTab] = useState<Tab>("upcoming");
   const [drafts, setDrafts] = useState<DesignSummary[]>([]);
-  const [plan, setPlan] = useState<{ planType: string; capabilities: PlanCapabilities } | null>(
-    null,
-  );
+  const [upcoming, setUpcoming] = useState<SchedulePage | null>(null);
+  const [completed, setCompleted] = useState<SchedulePage | null>(null);
+  const [plan, setPlan] = useState<{
+    planType: string;
+    capabilities: PlanCapabilities;
+    usedToday: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState<ScheduledItem | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([listDesigns({ archived: false, status: "DRAFT", limit: 12 }), getCapabilities()])
-      .then(([designs, capabilities]) => {
-        if (cancelled) return;
-        setDrafts(designs.items);
-        setPlan(capabilities);
-      })
-      .catch(() => {
-        // The page still stands without them: the limit strip and the sample
-        // rows simply fall back to what they can show.
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    try {
+      const [up, done, designs, capabilities] = await Promise.all([
+        listSchedules("upcoming", { limit: PAGE_SIZE }),
+        listSchedules("completed", { limit: PAGE_SIZE }),
+        listDesigns({ archived: false, status: "DRAFT", limit: 12 }),
+        getCapabilities(),
+      ]);
+      setUpcoming(up);
+      setCompleted(done);
+      setDrafts(designs.items);
+      setPlan(capabilities);
+      setLoadError(null);
+    } catch (err) {
+      setLoadError(errorMessage(err, "Could not load your schedules."));
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const samples = useMemo(
-    () => buildSampleSchedules(shop?.membersCount ?? 0, drafts),
-    [shop?.membersCount, drafts],
-  );
+  useEffect(() => {
+    void load();
+  }, [load]);
 
-  const listed = tab === "completed" ? samples.completed : samples.upcoming;
-  const groups = useMemo(() => groupByDay(listed), [listed]);
+  async function runAction(id: string, action: () => Promise<unknown>, failure: string) {
+    setBusyId(id);
+    setActionError(null);
+    try {
+      await action();
+      await load();
+    } catch (err) {
+      setActionError(errorMessage(err, failure));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const handleToggle = (item: ScheduledItem) =>
+    runAction(
+      item.id,
+      () => setScheduleStatus(item.id, item.status === "PAUSED" ? "ACTIVE" : "PAUSED"),
+      "Could not update this schedule.",
+    );
+
+  const handleCancel = (item: ScheduledItem) =>
+    runAction(item.id, () => cancelSchedule(item.id), "Could not cancel this schedule.");
+
+  const upcomingItems = useMemo(() => (upcoming?.items ?? []).map(toScheduledItem), [upcoming]);
+  const completedItems = useMemo(() => (completed?.items ?? []).map(toScheduledItem), [completed]);
+
+  const listed = tab === "completed" ? completedItems : upcomingItems;
+  const groups = useMemo(
+    () => groupByDay(listed, tab === "completed" ? "desc" : "asc"),
+    [listed, tab],
+  );
 
   function openDraft(id: string) {
     try {
@@ -87,8 +132,8 @@ export default function ScheduledNotifications() {
   }
 
   const TABS: { id: Tab; label: string; count: number }[] = [
-    { id: "upcoming", label: "Upcoming", count: samples.upcoming.length },
-    { id: "completed", label: "Completed", count: samples.completed.length },
+    { id: "upcoming", label: "Upcoming", count: upcoming?.total ?? 0 },
+    { id: "completed", label: "Completed", count: completed?.total ?? 0 },
     { id: "drafts", label: "Drafts", count: drafts.length },
   ];
 
@@ -110,6 +155,24 @@ export default function ScheduledNotifications() {
     >
       {loading ? (
         <ScheduledSkeleton />
+      ) : loadError && !upcoming ? (
+        <section
+          role="alert"
+          className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-(--color-border-strong) bg-(--color-bg-surface) py-16 px-6 text-center"
+        >
+          <ErrorOutlineOutlinedIcon sx={{ fontSize: 26, color: "var(--color-danger)" }} />
+          <p className="text-[13px] text-(--color-text-secondary)">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              void load();
+            }}
+            className="h-9 px-4 rounded-lg bg-(--color-brand-primary) text-[12.5px] font-semibold text-(--color-text-on-brand) hover:bg-(--color-brand-primary-hover) transition-colors cursor-pointer"
+          >
+            Try again
+          </button>
+        </section>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-5 items-start">
           <div className="flex flex-col gap-5 min-w-0">
@@ -145,11 +208,21 @@ export default function ScheduledNotifications() {
               ))}
             </div>
 
+            {actionError && (
+              <p
+                role="alert"
+                className="flex items-start gap-2 rounded-xl bg-(--color-danger-bg) px-3 py-2.5 text-[12px] text-(--color-danger)"
+              >
+                <ErrorOutlineOutlinedIcon sx={{ fontSize: 15 }} className="mt-0.5 shrink-0" />
+                {actionError}
+              </p>
+            )}
+
             {plan && (
               <DailyLimitStrip
                 planType={plan.planType}
                 dailyLimit={plan.capabilities.dailyNotificationLimit}
-                usedToday={0}
+                usedToday={plan.usedToday}
               />
             )}
 
@@ -216,7 +289,6 @@ export default function ScheduledNotifications() {
                       <span className="text-[11.5px] text-(--color-text-hint)">
                         · {GROUP_DATE.format(group.date)}
                       </span>
-                      <SampleBadge title="Schedules are not stored on the server yet." />
                     </div>
 
                     <div className="rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) overflow-hidden">
@@ -224,10 +296,10 @@ export default function ScheduledNotifications() {
                         <ScheduledRow
                           key={item.id}
                           item={item}
+                          busy={busyId === item.id}
                           onPreview={setPreviewing}
-                          onEdit={() =>
-                            router.push("/shopkeeper/notifications/scheduled/new")
-                          }
+                          onToggle={handleToggle}
+                          onCancel={handleCancel}
                         />
                       ))}
                     </div>

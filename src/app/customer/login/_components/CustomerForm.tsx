@@ -12,8 +12,11 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 
 import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { loginCustomer } from "@/features/auth/authSlice";
+import { loginCustomer, sessionStarted } from "@/features/auth/authSlice";
+import MfaChallenge from "@/components/auth/MfaChallenge";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
+import { nextAfterAuth } from "@/lib/safeRedirect";
+import LinkWithNext from "@/components/ui/LinkWithNext";
 
 export default function CustomerForm() {
   const dispatch = useAppDispatch();
@@ -21,6 +24,7 @@ export default function CustomerForm() {
   const { status } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
   const [showPw, setShowPw] = useState(false);
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
 
   const {
     register,
@@ -37,19 +41,35 @@ export default function CustomerForm() {
       loginCustomer({ email: values.email, password: values.password }),
     );
     if (loginCustomer.fulfilled.match(action)) {
-      router.replace("/customer/home");
+      if ("mfaRequired" in action.payload) setMfaToken(action.payload.mfaToken);
+      else router.replace(nextAfterAuth());
     } else {
       setError("password", { message: "Incorrect email or password" });
     }
   }
 
+  if (mfaToken) {
+    return (
+      <MfaChallenge
+        role="customer"
+        mfaToken={mfaToken}
+        onVerified={(result) => {
+          if (!result.customerId) return;
+          dispatch(sessionStarted(result.customerId));
+          router.replace(nextAfterAuth());
+        }}
+        onCancel={() => setMfaToken(null)}
+      />
+    );
+  }
+
   return (
     <>
-      <ContinueWithGoogle />
+      <ContinueWithGoogle onMfaRequired={setMfaToken} />
 
       <div className="my-6 flex items-center gap-4">
         <div className="h-px flex-1 bg-(--color-border-default)" />
-        <span className="text-[10px] tracking-[1px] text-(--color-auth-ink-muted) uppercase opacity-50">
+        <span className="text-[12px] tracking-[1px] text-(--color-auth-ink-muted) uppercase">
           OR
         </span>
         <div className="h-px flex-1 bg-(--color-border-default)" />
@@ -61,7 +81,7 @@ export default function CustomerForm() {
         noValidate
       >
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+          <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
             Email Address
           </label>
           <div className="relative">
@@ -77,12 +97,12 @@ export default function CustomerForm() {
             />
           </div>
           {errors.email && (
-            <p className="text-[11px] text-(--color-danger)">{errors.email.message}</p>
+            <p className="text-[12px] text-(--color-danger)">{errors.email.message}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+          <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
             Password
           </label>
           <div className="relative">
@@ -96,6 +116,7 @@ export default function CustomerForm() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
+              aria-label={showPw ? "Hide password" : "Show password"}
               className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
             >
               {showPw ? (
@@ -106,10 +127,16 @@ export default function CustomerForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-[11px] text-(--color-danger)">
+            <p className="text-[12px] text-(--color-danger)">
               {errors.password.message}
             </p>
           )}
+        </div>
+
+        <div className="-mt-1 text-right">
+          <Link href="/forgot-password" className="text-[12px] font-bold text-(--color-auth-primary)">
+            Forgot password?
+          </Link>
         </div>
 
         <button
@@ -122,9 +149,9 @@ export default function CustomerForm() {
 
         <p className="text-center text-[13px] text-(--color-auth-ink-muted)">
           Don&apos;t have an account?{" "}
-          <Link href="/customer/signup" className="font-bold text-(--color-auth-primary)">
+          <LinkWithNext path="/customer/signup" className="font-bold text-(--color-auth-primary)">
             Sign up
-          </Link>
+          </LinkWithNext>
         </p>
       </form>
     </>

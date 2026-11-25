@@ -10,14 +10,20 @@ import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import Sidebar from "@/components/customer/Sidebar";
 import Avatar from "@/components/ui/Avatar";
 import ProfileInfoCard from "./_components/ProfileInfoCard";
+import PushNotificationsCard from "@/components/customer/PushNotificationsCard";
 import {
   customerProfileSchema,
   type CustomerProfileFormValues,
 } from "./_schemas/customerProfileSchema";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import DeleteAccountCard from "@/components/account/DeleteAccountCard";
+import ExportDataCard from "@/components/account/ExportDataCard";
+import RecentActivityCard from "@/components/account/RecentActivityCard";
+import TwoStepCard from "@/components/account/TwoStepCard";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
 interface CustomerData {
+  hasPassword: boolean;
   fullName: string;
   email: string;
   allowLocationAccess: boolean;
@@ -54,7 +60,6 @@ export default function CustomerProfilePage() {
       router.replace("/customer/login");
       return;
     }
-    setAuthToken(token);
 
     apiClient
       .get<{ customer: CustomerData }>("/api/customers/me")
@@ -74,11 +79,6 @@ export default function CustomerProfilePage() {
       .finally(() => setInitialLoading(false));
   }, [router, reset]);
 
-  function handleNavChange(id: string) {
-    if (id === "discover") router.push("/customer/home");
-    else if (id === "myrooms") router.push("/customer/myrooms");
-  }
-
   async function onSubmit(values: CustomerProfileFormValues) {
     setSaving(true);
     try {
@@ -97,8 +97,8 @@ export default function CustomerProfilePage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav="profile" onNavChange={handleNavChange} />
+    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+      <Sidebar />
 
       <div className="flex-1 overflow-y-auto p-6">
         {initialLoading ? (
@@ -150,6 +150,35 @@ export default function CustomerProfilePage() {
               errors={errors}
               allowLocationAccess={watch("allowLocationAccess") ?? data.allowLocationAccess}
             />
+
+            <div className="mt-6">
+              <PushNotificationsCard />
+            </div>
+
+            <div className="mt-6">
+              <TwoStepCard role="customer" usesGoogle={!data.hasPassword} />
+            </div>
+
+            <div className="mt-6">
+              <RecentActivityCard endpoint="/api/customers/me/security-events" />
+            </div>
+
+            <div className="mt-6">
+              <ExportDataCard
+                endpoint="/api/customers/me/export"
+                usesGoogle={!data.hasPassword}
+                description="A copy of what CounterCircle holds about you as a file: your details, the rooms you've joined, your messages and reactions, and how notifications reached you. Passwords and sign-in tokens are never included."
+              />
+            </div>
+
+            <div className="mt-6">
+              <DeleteAccountCard
+                cookieName="token"
+                endpoint="/api/customers/me"
+                usesGoogle={!data.hasPassword}
+                consequences="Permanently deletes your profile, location, messages and the rooms you've joined. This can't be undone."
+              />
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">

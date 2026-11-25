@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 import Sidebar from "@/components/customer/Sidebar";
 import DiscoverTopBar from "./_components/DiscoverTopBar";
@@ -19,7 +19,6 @@ import type {
 
 export default function CustomerHome() {
   const router = useRouter();
-  const [activeNav, setActiveNav] = useState("discover");
   const [activeChip, setActiveChip] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -64,7 +63,6 @@ export default function CustomerHome() {
         router.replace("/customer/login");
         return;
       }
-      setAuthToken(token);
       if (append) setLoadingMore(true);
       else setLoading(true);
       try {
@@ -113,7 +111,6 @@ export default function CustomerHome() {
         router.replace("/customer/login");
         return;
       }
-      setAuthToken(token);
       setJoiningRoomId(room.roomId);
       try {
         await apiClient.post(`/api/shop/join/${room.inviteCode}`);
@@ -129,7 +126,6 @@ export default function CustomerHome() {
   useEffect(() => {
     const token = getCookie("token");
     if (!token) return;
-    setAuthToken(token);
     apiClient
       .get<{
         customer: {
@@ -190,14 +186,15 @@ export default function CustomerHome() {
 
   const filterChips = ["All", ...categories, "Trending"];
 
-  function handleNavChange(id: string) {
-    if (id === "myrooms") router.push("/customer/myrooms");
-    else setActiveNav(id);
+  function showPopular() {
+    setActiveChip("All");
+    setSort("popular");
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav={activeNav} onNavChange={handleNavChange} />
+    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+      <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <DiscoverTopBar
           searchQuery={searchQuery}
@@ -239,6 +236,7 @@ export default function CustomerHome() {
         customerLat={customerLat}
         customerLng={customerLng}
         trending={trending}
+        onViewAll={showPopular}
       />
     </div>
   );

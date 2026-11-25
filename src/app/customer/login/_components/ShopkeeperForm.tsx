@@ -11,13 +11,15 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 
 import { apiClient } from "@/utils/apiClient";
-import { setCookie } from "@/utils/cookieUtils";
+import { markSignedIn } from "@/utils/session";
+import MfaChallenge from "@/components/auth/MfaChallenge";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
 
 export default function ShopkeeperForm() {
   const router = useRouter();
   const [showPw, setShowPw] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
 
   const {
     register,
@@ -36,14 +38,32 @@ export default function ShopkeeperForm() {
         email: values.email,
         password: values.password,
       });
-      const { token } = res.data as { token: string };
-      setCookie("shopkeeper_token", token);
+      if ((res.data as { mfaRequired?: boolean }).mfaRequired) {
+        setMfaToken((res.data as { mfaToken: string }).mfaToken);
+        return;
+      }
+      markSignedIn("shopkeeper", (res.data as { shopkeeperId: string }).shopkeeperId);
       router.replace("/shopkeeper/dashboard");
     } catch {
       setError("password", { message: "Incorrect email or password" });
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (mfaToken) {
+    return (
+      <MfaChallenge
+        role="shopkeeper"
+        mfaToken={mfaToken}
+        onVerified={(result) => {
+          if (!result.shopkeeperId) return;
+          markSignedIn("shopkeeper", result.shopkeeperId);
+          router.replace("/shopkeeper/dashboard");
+        }}
+        onCancel={() => setMfaToken(null)}
+      />
+    );
   }
 
   return (
@@ -53,7 +73,7 @@ export default function ShopkeeperForm() {
       noValidate
     >
       <div className="flex flex-col gap-1">
-        <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+        <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
           Email Address
         </label>
         <div className="relative">
@@ -69,12 +89,12 @@ export default function ShopkeeperForm() {
           />
         </div>
         {errors.email && (
-          <p className="text-[11px] text-(--color-danger)">{errors.email.message}</p>
+          <p className="text-[12px] text-(--color-danger)">{errors.email.message}</p>
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-[10px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
+        <label className="text-[12px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)">
           Password
         </label>
         <div className="relative">
@@ -88,6 +108,7 @@ export default function ShopkeeperForm() {
           <button
             type="button"
             onClick={() => setShowPw((v) => !v)}
+            aria-label={showPw ? "Hide password" : "Show password"}
             className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
           >
             {showPw ? (
@@ -98,8 +119,14 @@ export default function ShopkeeperForm() {
           </button>
         </div>
         {errors.password && (
-          <p className="text-[11px] text-(--color-danger)">{errors.password.message}</p>
+          <p className="text-[12px] text-(--color-danger)">{errors.password.message}</p>
         )}
+      </div>
+
+      <div className="-mt-1 text-right">
+        <Link href="/forgot-password?role=shopkeeper" className="text-[12px] font-bold text-(--color-auth-primary)">
+          Forgot password?
+        </Link>
       </div>
 
       <button

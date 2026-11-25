@@ -13,9 +13,8 @@ import {
   YAxis,
 } from "recharts";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
-import SampleBadge from "@/components/ui/SampleBadge";
 import ChartTooltip from "@/components/charts/ChartTooltip";
-import type { MetricPoint } from "../_data/sampleMetrics";
+import type { MetricPoint } from "../_data/metrics";
 
 const DAY = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
@@ -49,7 +48,6 @@ export default function PerformanceChart({
           <h2 className="text-[14px] font-bold text-(--color-text-primary)">
             Notification Performance
           </h2>
-          <SampleBadge />
         </div>
         <span className="h-8 px-3 rounded-lg border border-(--color-border-default) text-[12px] font-medium text-(--color-text-secondary) flex items-center">
           {rangeLabel}

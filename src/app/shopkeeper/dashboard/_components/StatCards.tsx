@@ -9,9 +9,8 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import AdsClickOutlinedIcon from "@mui/icons-material/AdsClickOutlined";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
 import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
-import SampleBadge from "@/components/ui/SampleBadge";
 import { NEARBY_RADIUS_KM, type DashboardSnapshot } from "../_hooks/useDashboardData";
-import type { NotificationMetrics } from "../_data/sampleMetrics";
+import type { NotificationMetrics } from "../_data/metrics";
 
 function Delta({ value, windowLabel }: { value: number; windowLabel: string }) {
   if (!value) {
@@ -39,13 +38,11 @@ function Card({
   icon: Icon,
   label,
   value,
-  sample,
   children,
 }: {
   icon: ElementType;
   label: string;
   value: string;
-  sample?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -57,7 +54,6 @@ function Card({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <p className="text-[11.5px] text-(--color-text-secondary) truncate">{label}</p>
-            {sample && <SampleBadge />}
           </div>
           <p className="mt-0.5 text-[22px] font-bold leading-tight text-(--color-text-primary) tabular-nums">
             {value}
@@ -107,7 +103,6 @@ export default function StatCards({ data, metrics, memberDelta, windowLabel }: P
         icon={SendOutlinedIcon}
         label="Total Notifications Sent"
         value={metrics.totals.sent.toLocaleString()}
-        sample
       >
         <Delta value={metrics.deltas.sent} windowLabel={windowLabel} />
       </Card>
@@ -116,7 +111,6 @@ export default function StatCards({ data, metrics, memberDelta, windowLabel }: P
         icon={MarkEmailReadOutlinedIcon}
         label="Delivered"
         value={metrics.totals.delivered.toLocaleString()}
-        sample
       >
         <p className="mt-1.5 text-[11px] text-(--color-text-hint)">
           {metrics.rates.delivery}% delivery rate
@@ -127,7 +121,6 @@ export default function StatCards({ data, metrics, memberDelta, windowLabel }: P
         icon={VisibilityOutlinedIcon}
         label="Opened"
         value={metrics.totals.opened.toLocaleString()}
-        sample
       >
         <p className="mt-1.5 text-[11px] text-(--color-text-hint)">
           {metrics.rates.open}% open rate
@@ -138,7 +131,6 @@ export default function StatCards({ data, metrics, memberDelta, windowLabel }: P
         icon={AdsClickOutlinedIcon}
         label="Clicked"
         value={metrics.totals.clicked.toLocaleString()}
-        sample
       >
         <p className="mt-1.5 text-[11px] text-(--color-text-hint)">
           {metrics.rates.click}% click rate

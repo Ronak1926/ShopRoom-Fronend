@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +10,7 @@ import { ShopkeeperLeftPanel } from "@/components/ui/ShopkeeperLeftPanel";
 import { useAppDispatch } from "@/hooks/redux";
 import { hydrateToken } from "@/features/auth/authSlice";
 import { getCookie } from "@/utils/cookieUtils";
+import { nextAfterAuth } from "@/lib/safeRedirect";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
 import CustomerForm from "./CustomerForm";
 import ShopkeeperForm from "./ShopkeeperForm";
@@ -21,7 +23,6 @@ export default function LoginClient({ initialTab }: Props) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<"customer" | "shopkeeper">(initialTab);
 
   useEffect(() => {
@@ -29,12 +30,11 @@ export default function LoginClient({ initialTab }: Props) {
     const shopkeeperToken = getCookie("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
-      router.replace("/customer/home");
+      router.replace(nextAfterAuth());
     } else if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
     } else {
       dispatch(hydrateToken());
-      setReady(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -47,8 +47,6 @@ export default function LoginClient({ initialTab }: Props) {
     );
   }
 
-  if (!ready) return null;
-
   const isShopkeeper = tab === "shopkeeper";
 
   return (
@@ -59,13 +57,13 @@ export default function LoginClient({ initialTab }: Props) {
         <div className="w-full max-w-120">
           <div className="flex items-center gap-2 text-(--color-auth-ink) mb-6 justify-center">
             <Image
-              src="/ShopRoomIcon.svg"
-              alt="ShopRoom"
+              src="/CounterCircleIcon.png"
+              alt="CounterCircle"
               width={24}
-              height={21}
+              height={24}
             />
             <span className="text-[24px] leading-8 tracking-[-1.2px] font-bold">
-              ShopRoom
+              CounterCircle
             </span>
           </div>
 
@@ -93,10 +91,10 @@ export default function LoginClient({ initialTab }: Props) {
             {isShopkeeper ? <ShopkeeperForm /> : <CustomerForm />}
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-8 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
-            <span>© 2026 SHOPROOM</span>
-            <span>PRIVACY POLICY</span>
-            <span>HELP CENTER</span>
+          <div className="mt-8 flex items-center justify-center gap-8 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
+            <span>© 2026 COUNTERCIRCLE</span>
+            <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
+            <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
           </div>
         </div>
       </div>

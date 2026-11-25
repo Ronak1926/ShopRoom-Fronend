@@ -2,28 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../dashboard/_components/Sidebar";
+import Sidebar from "@/components/shopkeeper/Sidebar";
 import StudioTopBar from "./_components/StudioTopBar";
 import StudioToolbar from "./_components/StudioToolbar";
-import AddElementsPanel from "./_components/AddElementsPanel";
-import BackgroundScenesPanel from "./_components/BackgroundScenesPanel";
-import AssetLibraryPanel from "./_components/AssetLibraryPanel";
-import TextPanel from "./_components/TextPanel";
-import BadgesLabelsPanel from "./_components/BadgesLabelsPanel";
-import ImagesPanel from "./_components/ImagesPanel";
-import ButtonsPanel from "./_components/ButtonsPanel";
-import IconsPanel from "./_components/IconsPanel";
-import ShapesPanel from "./_components/ShapesPanel";
-import AnimationPanel from "./_components/AnimationPanel";
+import StudioPreviewModal from "./_components/StudioPreviewModal";
 import { animationLengthMs, compactStep, type AnimSlot } from "@/features/notifications/animationPresets";
 import type { ButtonPreset } from "@/features/notifications/buttonPresets";
 import { iconLabel } from "@/features/notifications/iconLibrary";
 import type { ImageTile } from "./_components/images/ImageGrid";
-import {
-  DECORATION_GROUPS,
-  EFFECT_GROUPS,
-  type LibraryItem,
-} from "@/features/notifications/sceneLibrary";
+import type { LibraryItem } from "@/features/notifications/sceneLibrary";
 import {
   createDecoration,
   createImageElement,
@@ -35,7 +22,7 @@ import {
   applyButtonPreset,
   createIconElement,
 } from "@/features/notifications/elementFactory";
-import { findNode, flattenNodes, nodeLabel } from "@/features/notifications/tree";
+import { findNode, flattenNodes } from "@/features/notifications/tree";
 import { pushRecentlyUsedImage } from "@/features/notifications/recentlyUsedImages";
 import { TEXT_CONTENT_PRESETS, TEXT_PRESET_LINKS, type TextStylePreset } from "@/features/notifications/textPresets";
 import type { BadgeLabelKind, BadgeLabelPreset } from "@/features/notifications/badgeLabelPresets";
@@ -44,24 +31,36 @@ import PropertiesPanel from "./_components/PropertiesPanel";
 import BackgroundBuilderPanel from "./_components/BackgroundBuilderPanel";
 import LayersPanel from "./_components/LayersPanel";
 import TimelinePanel from "./_components/TimelinePanel";
-import ResizeHandle from "./_components/ResizeHandle";
-import { useResizable } from "./_hooks/useResizable";
 import { useNotificationDesign } from "./_hooks/useNotificationDesign";
 import { usePlaybackClock } from "./_hooks/usePlaybackClock";
+import QuickEditor from "./_components/QuickEditor";
+import { useCompactLayout } from "./_hooks/useCompactLayout";
+import { StudioPlanProvider } from "./_components/StudioPlanContext";
+import StudioDesktopLayout from "./_components/StudioDesktopLayout";
+import StudioCompactLayout, { type MobileSheet } from "./_components/StudioCompactLayout";
+import StudioSkeleton from "./_components/StudioSkeleton";
+import StudioToolPanel from "./_components/StudioToolPanel";
+import { usePlanCapabilities } from "@/hooks/usePlanCapabilities";
 import { createElement } from "@/features/notifications/elementFactory";
 import { getCookie } from "../../../../utils/cookieUtils";
 
 export default function NotificationStudioPage() {
   const router = useRouter();
 
-  const [leftWidth, resizeLeft] = useResizable(240, 200, 420);
-  const [rightWidth, resizeRight] = useResizable(288, 240, 460);
-  const [bottomHeight, resizeBottom] = useResizable(224, 150, 440);
-  const [layersWidth, resizeLayers] = useResizable(240, 180, 380);
-  const [bgBuilderWidth, resizeBgBuilder] = useResizable(320, 280, 440);
+  // Phones and tablets get one full-width panel at a time under the canvas.
+  const { ready: layoutReady, compact, width: screenWidth } = useCompactLayout();
+  const [sheet, setSheet] = useState<MobileSheet>("tool");
 
   const studio = useNotificationDesign();
+  const { plan, loading: planLoading } = usePlanCapabilities();
+  // Read only once the plan is known (a skeleton shows until then). If the plan could not be loaded
+  // the full editor shows, and the API still refuses any change outside the plan.
+  const quickEditOnly = plan ? !plan.capabilities.ADVANCED_TEMPLATE_EDITING : false;
+  const canAnimate = plan ? plan.capabilities.CUSTOM_ANIMATION : true;
+  const { setCanAnimate } = studio;
+  useEffect(() => setCanAnimate(canAnimate), [canAnimate, setCanAnimate]);
   const [activeTool, setActiveTool] = useState("add");
+  const [previewOpen, setPreviewOpen] = useState(false);
   // The right rail is either the normal element inspector or the Background
   // Builder. There's no separate Scene Builder workspace — the Mobile
   // Preview canvas, the Layers panel and the Animation timeline already
@@ -114,11 +113,6 @@ export default function NotificationStudioPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [studio]);
-
-  function handleNavChange(id: string) {
-    if (id === "profile") router.push("/shopkeeper/profile");
-    else if (id !== "notifications") router.push("/shopkeeper/dashboard");
-  }
 
   // Add a new element of the toolbar tile's type, centred on the canvas.
   // The "Badge" tile opens the dedicated Badges & Labels editor instead of
@@ -365,200 +359,178 @@ export default function NotificationStudioPage() {
     }
   }
 
-  function renderLeftPanel() {
-    switch (activeTool) {
-      case "background":
-        return (
-          <BackgroundScenesPanel
-            width={leftWidth}
-            design={studio.design}
-            appliedSceneId={studio.appliedSceneId}
-            selectedId={studio.selectedId}
-            onSelectElement={(id) => studio.setSelectedId(id)}
-            onApplyScene={studio.applyScene}
-            onDetachScene={studio.detachScene}
-            onSetBackground={studio.setBackground}
-            onInsertIntoScene={handleInsertIntoScene}
-            onSetSceneStyle={studio.setSceneStyle}
-            onNewBlankScene={studio.startBlankScene}
-            onOpenBackgroundBuilder={() => setRightPanel("background")}
-            onToggleLock={studio.toggleLock}
-            copyTone={studio.copyTone}
-            onSetCopyTone={studio.setCopyTone}
-            onClearElements={studio.clearElements}
-            onSetPhotoBackground={studio.setPhotoBackground}
-          />
-        );
-      case "text":
-        return (
-          <TextPanel
-            width={leftWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onAddPreset={handleAddTextPreset}
-            onApplyStyle={handleApplyTextStyle}
-          />
-        );
-      case "images": {
-        const replaceTarget = imageReplaceTargetId && studio.design ? findNode(studio.design.elements, imageReplaceTargetId) : null;
-        return (
-          <ImagesPanel
-            width={leftWidth}
-            replaceTargetName={replaceTarget ? nodeLabel(replaceTarget) : null}
-            onAdd={handleAddImage}
-            onCancelReplace={() => setImageReplaceTargetId(null)}
-          />
-        );
-      }
-      case "buttons":
-        return (
-          <ButtonsPanel
-            width={leftWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onPick={handlePickButton}
-            changeMode={!!buttonChangeTargetId}
-          />
-        );
-      case "icons":
-        return (
-          <IconsPanel
-            width={leftWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onPick={handlePickIcon}
-            changeMode={!!iconChangeTargetId}
-          />
-        );
-      case "shapes":
-        return <ShapesPanel width={leftWidth} onInsert={handleInsertAsset} />;
-      case "elements":
-        return (
-          <AssetLibraryPanel width={leftWidth} title="Decorations" groups={DECORATION_GROUPS} onInsert={handleInsertAsset} />
-        );
-      case "animation":
-        return (
-          <AnimationPanel
-            width={leftWidth}
-            design={studio.design}
-            selectedId={studio.selectedId}
-            onApply={handleApplyAnimation}
-          />
-        );
-      case "effects":
-        return (
-          <AssetLibraryPanel width={leftWidth} title="Effects" groups={EFFECT_GROUPS} onInsert={handleInsertAsset} />
-        );
-      default:
-        if (addView === "badges-labels") {
-          return (
-            <BadgesLabelsPanel
-              width={leftWidth}
-              kind={blKind}
-              onKindChange={setBlKind}
-              onBack={handleBackFromBadgesLabels}
-              onPick={handlePickBadgeLabel}
-              changeMode={!!blChangeTargetId}
-            />
-          );
-        }
-        return <AddElementsPanel width={leftWidth} onAdd={handleAdd} />;
-    }
+  function renderLeftPanel(width: number) {
+    return (
+      <StudioToolPanel
+        width={width}
+        tool={activeTool}
+        studio={studio}
+        canAnimate={canAnimate}
+        addView={addView}
+        badgeLabelKind={blKind}
+        onBadgeLabelKindChange={setBlKind}
+        changing={{ badgeLabel: !!blChangeTargetId, button: !!buttonChangeTargetId, icon: !!iconChangeTargetId, imageTargetId: imageReplaceTargetId }}
+        actions={{
+          add: handleAdd,
+          insertAsset: handleInsertAsset,
+          insertIntoScene: handleInsertIntoScene,
+          addTextPreset: handleAddTextPreset,
+          applyTextStyle: handleApplyTextStyle,
+          addImage: handleAddImage,
+          cancelImageReplace: () => setImageReplaceTargetId(null),
+          pickButton: handlePickButton,
+          pickIcon: handlePickIcon,
+          pickBadgeLabel: handlePickBadgeLabel,
+          backFromBadgesLabels: handleBackFromBadgesLabels,
+          applyAnimation: handleApplyAnimation,
+          openBackgroundBuilder: () => {
+            setRightPanel("background");
+            setSheet("edit");
+          },
+          openImages: () => setActiveTool("images"),
+        }}
+      />
+    );
   }
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav="notifications" onNavChange={handleNavChange} />
+  const topBar = (
+    <StudioTopBar
+      designName={studio.design?.name ?? "Untitled"}
+      saveState={studio.saveState}
+      savedAt={studio.savedAt}
+      onUndo={studio.undo}
+      onRedo={studio.redo}
+      canUndo={studio.canUndo}
+      canRedo={studio.canRedo}
+      onSave={studio.saveVersionNow}
+      onPreview={() => setPreviewOpen(true)}
+    />
+  );
+  const previewModal = previewOpen && studio.design && (
+    <StudioPreviewModal design={studio.design} name={studio.design.name ?? "Untitled"} onClose={() => setPreviewOpen(false)} />
+  );
+  const sidebar = <Sidebar />;
 
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <StudioTopBar
-          designName={studio.design?.name ?? "Untitled"}
-          saveState={studio.saveState}
-          savedAt={studio.savedAt}
-          onUndo={studio.undo}
-          onRedo={studio.redo}
-          canUndo={studio.canUndo}
-          canRedo={studio.canRedo}
-          onSave={studio.saveVersionNow}
-        />
+  // The screen size and the plan decide which editor opens, so wait for both rather than showing
+  // one editor and swapping to another.
+  if (!layoutReady || planLoading) return <StudioSkeleton sidebar={sidebar} />;
 
-        <div className="flex flex-1 min-h-0 overflow-hidden">
-          <StudioToolbar active={activeTool} onChange={setActiveTool} />
-
-          <div className="flex flex-1 flex-col min-w-0">
-            <div className="flex flex-1 min-h-0">
-              {renderLeftPanel()}
-              <ResizeHandle orientation="vertical" onResize={resizeLeft} />
-              <StudioCanvas
-                design={studio.design}
-                loading={studio.loading}
-                error={studio.error}
-                selectedId={studio.selectedId}
-                onSelect={(id) => studio.setSelectedId(id || null)}
-                onBeginInteraction={studio.beginInteraction}
-                onUpdateLive={studio.updateElementLive}
-                onEndInteraction={studio.endInteraction}
-                isPlaying={isPlaying}
-                previewId={previewId}
-              />
-            </div>
-
-            <ResizeHandle orientation="horizontal" onResize={(d) => resizeBottom(-d)} />
-
-            <div className="flex shrink-0" style={{ height: bottomHeight }}>
-              <LayersPanel
-                width={layersWidth}
-                design={studio.design}
-                selectedId={studio.selectedId}
-                onSelect={(id) => studio.setSelectedId(id)}
-                onToggleVisible={(id) =>
-                  studio.updateElement(id, (n) => ({ ...n, visible: n.visible === false }))
-                }
-                onToggleLock={studio.toggleLock}
-              />
-              <ResizeHandle orientation="vertical" onResize={resizeLayers} />
-              <TimelinePanel
-                design={studio.design}
-                playbackTime={playbackTime}
-                isPlaying={isPlaying}
-                onPlay={handlePlay}
-              />
-            </div>
-          </div>
-
-          {rightPanel === "background" && studio.design && (
-            <>
-              <ResizeHandle orientation="vertical" onResize={(d) => resizeBgBuilder(-d)} />
-              <BackgroundBuilderPanel
-                width={bgBuilderWidth}
-                background={studio.design.canvas.background}
-                onSet={studio.setBackground}
-                onClose={() => setRightPanel("properties")}
-              />
-            </>
-          )}
-          {rightPanel === "properties" && (
-            <>
-              <ResizeHandle orientation="vertical" onResize={(d) => resizeRight(-d)} />
-              <PropertiesPanel
-                width={rightWidth}
-                design={studio.design}
-                selectedId={studio.selectedId}
-                updateElement={studio.updateElement}
-                onDelete={studio.deleteElement}
-                onDuplicate={studio.duplicateElement}
-                onMoveLayer={studio.moveLayer}
-                onToggleLock={studio.toggleLock}
-                onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
-                onReplaceImage={openImagesForReplace}
-                onChangeButtonPreset={handleChangeButtonPreset}
-                onChangeIcon={handleChangeIcon}
-                onPreviewAnimation={previewElement}
-              />
-            </>
-          )}
+  if (quickEditOnly) {
+    return (
+      <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+        {sidebar}
+        <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+          {topBar}
+          <QuickEditor studio={studio} />
         </div>
+        {previewModal}
       </div>
-    </div>
+    );
+  }
+
+  const design = studio.design;
+  const propertiesPanel = (width: number) => (
+    <PropertiesPanel
+      width={width}
+      design={design}
+      selectedId={studio.selectedId}
+      updateElement={studio.updateElement}
+      onDelete={studio.deleteElement}
+      onDuplicate={studio.duplicateElement}
+      onMoveLayer={studio.moveLayer}
+      onToggleLock={studio.toggleLock}
+      onChangeBadgeLabelPreset={handleChangeBadgeLabelPreset}
+      onReplaceImage={openImagesForReplace}
+      onChangeButtonPreset={handleChangeButtonPreset}
+      onChangeIcon={handleChangeIcon}
+      onPreviewAnimation={previewElement}
+    />
+  );
+  // Shown in the right rail (desktop) or the Edit tab (phone) instead of the inspector.
+  const backgroundBuilder =
+    rightPanel === "background" && design
+      ? (width: number) => (
+          <BackgroundBuilderPanel
+            width={width}
+            background={design.canvas.background}
+            onSet={studio.setBackground}
+            onClose={() => setRightPanel("properties")}
+          />
+        )
+      : null;
+  const layersPanel = (width: number) => (
+    <LayersPanel
+      width={width}
+      design={design}
+      selectedId={studio.selectedId}
+      onSelect={(id) => studio.setSelectedId(id)}
+      onToggleVisible={(id) => studio.updateElement(id, (n) => ({ ...n, visible: n.visible === false }))}
+      onToggleLock={studio.toggleLock}
+    />
+  );
+  const timelinePanel = (
+    <TimelinePanel design={design} playbackTime={playbackTime} isPlaying={isPlaying} onPlay={handlePlay} />
+  );
+  const canvas = (
+    <StudioCanvas
+      design={design}
+      loading={studio.loading}
+      error={studio.error}
+      selectedId={studio.selectedId}
+      onSelect={(id) => {
+        studio.setSelectedId(id || null);
+        // On a phone, tapping an element opens its settings below the canvas.
+        if (compact && id) setSheet("edit");
+      }}
+      onBeginInteraction={studio.beginInteraction}
+      onUpdateLive={studio.updateElementLive}
+      onEndInteraction={studio.endInteraction}
+      isPlaying={isPlaying}
+      previewId={previewId}
+    />
+  );
+
+  return (
+    <StudioPlanProvider value={{ canAnimate }}>
+      {compact ? (
+        <StudioCompactLayout
+          sidebar={sidebar}
+          topBar={topBar}
+          canvas={canvas}
+          timeline={timelinePanel}
+          overlay={previewModal}
+          screenWidth={screenWidth}
+          toolbar={
+            <StudioToolbar
+              orientation="horizontal"
+              active={sheet === "tool" ? activeTool : ""}
+              onChange={(id) => {
+                setActiveTool(id);
+                setRightPanel("properties");
+                setSheet(id === "layers" ? "layers" : "tool");
+              }}
+            />
+          }
+          sheet={sheet}
+          onSheetChange={setSheet}
+          toolPanel={renderLeftPanel}
+          editPanel={(width) => (backgroundBuilder ? backgroundBuilder(width) : propertiesPanel(width))}
+          layersPanel={layersPanel}
+        />
+      ) : (
+        <StudioDesktopLayout
+          sidebar={sidebar}
+          topBar={topBar}
+          toolbar={<StudioToolbar active={activeTool} onChange={setActiveTool} />}
+          canvas={canvas}
+          timeline={timelinePanel}
+          overlay={previewModal}
+          leftPanel={renderLeftPanel}
+          layersPanel={layersPanel}
+          propertiesPanel={propertiesPanel}
+          backgroundBuilder={backgroundBuilder}
+        />
+      )}
+    </StudioPlanProvider>
   );
 }

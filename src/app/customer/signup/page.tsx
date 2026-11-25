@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import "@/lib/zodJitless";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -19,6 +20,8 @@ import { hydrateToken, registerCustomer } from "@/features/auth/authSlice";
 import { apiClient } from "@/utils/apiClient";
 import { getCookie } from "@/utils/cookieUtils";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
+import { DEFAULT_AFTER_AUTH, nextAfterAuth } from "@/lib/safeRedirect";
+import LinkWithNext from "@/components/ui/LinkWithNext";
 
 const signupSchema = z
   .object({
@@ -44,19 +47,17 @@ export default function SignupPage() {
   const { status, token } = useAppSelector((s) => s.auth);
   const isLoading = status === "loading";
 
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const customerToken = getCookie("token");
     const shopkeeperToken = getCookie("shopkeeper_token");
     if (customerToken) {
       dispatch(hydrateToken());
-      router.replace("/customer/home");
+      router.replace(nextAfterAuth());
     } else if (shopkeeperToken) {
       router.replace("/shopkeeper/dashboard");
     } else {
       dispatch(hydrateToken());
-      setReady(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -141,16 +142,16 @@ export default function SignupPage() {
     } catch {
       // OTP send failed â€” still proceed to verify page, user can resend
     }
-    router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
+    const next = nextAfterAuth();
+    const carry = next === DEFAULT_AFTER_AUTH ? "" : `&next=${encodeURIComponent(next)}`;
+    router.push(`/verify-email?email=${encodeURIComponent(values.email)}${carry}`);
   }
 
   const inputClass =
     "w-full h-[48px] rounded-[8px] bg-(--color-auth-input-bg) px-4 text-sm text-(--color-auth-ink) placeholder:text-(--color-auth-ink-muted) outline-none focus:ring-2 focus:ring-(--color-auth-primary)/30 transition-shadow";
   const labelClass =
-    "text-[10px] leading-[15px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)";
-  const errorClass = "mt-1 text-[11px] text-(--color-danger)";
-
-  if (!ready) return null;
+    "text-[12px] leading-[15px] tracking-[1px] uppercase font-bold text-(--color-auth-ink)";
+  const errorClass = "mt-1 text-[12px] text-(--color-danger)";
 
   return (
     <div className="flex flex-1 bg-(--color-bg-page)">
@@ -170,14 +171,14 @@ export default function SignupPage() {
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 text-(--color-auth-ink)">
                 <Image
-                  src="/ShopRoomIcon.svg"
-                  alt="ShopRoom"
+                  src="/CounterCircleIcon.png"
+                  alt="CounterCircle"
                   width={26}
-                  height={23}
+                  height={26}
                   className="align-middle"
                 />
                 <div className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
-                  ShopRoom
+                  CounterCircle
                 </div>
               </div>
               <h1 className="mt-6 text-[26px] font-extrabold tracking-[-0.65px] text-(--color-auth-ink) text-center">
@@ -195,7 +196,7 @@ export default function SignupPage() {
 
               <div className="my-6 flex items-center gap-4 w-[400px]">
                 <div className="h-px flex-1 bg-(--color-border-default)" />
-                <span className="text-[10px] tracking-[1px] text-(--color-auth-ink-muted) uppercase opacity-50">
+                <span className="text-[12px] tracking-[1px] text-(--color-auth-ink-muted) uppercase">
                   OR
                 </span>
                 <div className="h-px flex-1 bg-(--color-border-default)" />
@@ -255,6 +256,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                         className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-(--color-auth-ink-muted)"
                       >
                         {showPassword ? (
@@ -292,7 +294,7 @@ export default function SignupPage() {
                     <div className="text-[14px] font-bold text-(--color-auth-ink)">
                       Allow location access
                     </div>
-                    <div className="text-[11px] text-(--color-auth-ink-muted)">
+                    <div className="text-[12px] text-(--color-auth-ink-muted)">
                       Show rooms near your current position.
                     </div>
                   </div>
@@ -302,6 +304,7 @@ export default function SignupPage() {
                     disabled={locationLoading}
                     className={`relative w-[44px] h-[24px] rounded-full transition-colors disabled:opacity-60 ${allowLocation ? "bg-(--color-auth-primary)" : "bg-(--color-auth-border)/60"}`}
                     aria-pressed={allowLocation}
+                    aria-label="Share my location"
                   >
                     {locationLoading ? (
                       <span className="absolute inset-0 flex items-center justify-center">
@@ -337,20 +340,20 @@ export default function SignupPage() {
 
                 <div className="text-center text-[14px] text-(--color-auth-ink-muted)">
                   Already have an account?{" "}
-                  <Link
-                    href="/customer/login"
+                  <LinkWithNext
+                    path="/customer/login"
                     className="font-bold text-(--color-auth-primary)"
                   >
                     Log in
-                  </Link>
+                  </LinkWithNext>
                 </div>
               </form>
             </div>
 
-            <div className="mt-12 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-(--color-auth-ink-muted) opacity-50">
-              <span>© 2026 SHOPROOM</span>
-              <span>PRIVACY POLICY</span>
-              <span>HELP CENTER</span>
+            <div className="mt-12 flex items-center justify-center gap-12 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
+              <span>© 2026 COUNTERCIRCLE</span>
+              <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
+              <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
             </div>
           </div>
         </div>

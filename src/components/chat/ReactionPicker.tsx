@@ -7,6 +7,8 @@ interface ReactionPickerProps {
   onSelect: (emoji: string) => void;
   onClose: () => void;
   align?: "left" | "right";
+  /** Which side of its anchor the popover opens on. The composer sits at the bottom, so it opens upward. */
+  placement?: "below" | "above";
 }
 
 /** Thin wrapper around the emoji-picker-react popover — a full WhatsApp-style
@@ -15,6 +17,7 @@ export default function ReactionPicker({
   onSelect,
   onClose,
   align = "left",
+  placement = "below",
 }: ReactionPickerProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,7 +32,7 @@ export default function ReactionPicker({
   return (
     <div
       ref={ref}
-      className={`absolute z-30 top-full mt-1 ${align === "right" ? "right-0" : "left-0"}`}
+      className={`absolute z-30 ${placement === "above" ? "bottom-full mb-1" : "top-full mt-1"} ${align === "right" ? "right-0" : "left-0"}`}
     >
       <EmojiPicker
         onEmojiClick={(data: EmojiClickData) => {

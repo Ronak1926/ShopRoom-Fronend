@@ -51,7 +51,7 @@ function fromTemplate(template: TemplateSummary): SendableNotification {
     name: template.name,
     design: template.designJson,
     badge: "template",
-    meta: "ShopRoom template",
+    meta: "CounterCircle template",
   };
 }
 

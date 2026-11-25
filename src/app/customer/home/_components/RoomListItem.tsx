@@ -1,10 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import Avatar from "@/components/ui/Avatar";
+import { cloudinaryLoader } from "@/lib/cloudinaryLoader";
 import StatusDot from "@/components/ui/StatusDot";
 import { formatCount, type RoomCard as RoomCardData } from "../types";
 
@@ -19,8 +20,7 @@ export default function RoomListItem({ room, joining, onJoin }: RoomListItemProp
     <div className="flex items-center gap-4 bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) p-3 hover:shadow-(--shadow-lg) transition-shadow duration-200">
       <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden">
         {room.coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={room.coverUrl} alt={room.shopName} className="w-full h-full object-cover" />
+          <Image loader={cloudinaryLoader} src={room.coverUrl} alt={room.shopName} fill sizes="80px" className="object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-(--color-brand-primary-light) to-(--color-brand-primary-muted)" />
         )}
@@ -37,9 +37,9 @@ export default function RoomListItem({ room, joining, onJoin }: RoomListItemProp
         </div>
         <div className="flex items-center gap-3 mt-1.5 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <StatusDot status={room.activeNow ? "online" : "offline"} size={7} />
+            <StatusDot status={room.activeToday ? "online" : "offline"} size={7} />
             <span className="text-xs text-(--color-text-secondary)">
-              {room.activeNow ? "Active now" : "Inactive"}
+              {room.activeToday ? "Active today" : "Quiet lately"}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -47,10 +47,6 @@ export default function RoomListItem({ room, joining, onJoin }: RoomListItemProp
             <span className="text-xs text-(--color-text-secondary)">
               {formatCount(room.membersCount)} members
             </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <FavoriteBorderIcon sx={{ fontSize: 13, color: "var(--color-danger)" }} />
-            <span className="text-xs text-(--color-text-secondary)">{formatCount(room.likes)}</span>
           </div>
           {room.distanceKm !== null && (
             <div className="flex items-center gap-1">

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import type { ReactNode } from "react";
 
-const MotionLink = motion.create(Link);
+const MotionLink = m.create(Link);
 
 const BASE =
   "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors duration-150 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-border-focus) focus-visible:ring-offset-2";
@@ -67,7 +67,7 @@ export default function AnimatedButton({
   }
 
   return (
-    <motion.button
+    <m.button
       type={type}
       onClick={onClick}
       aria-label={ariaLabel}
@@ -76,6 +76,6 @@ export default function AnimatedButton({
       whileTap={TAP}
     >
       {children}
-    </motion.button>
+    </m.button>
   );
 }

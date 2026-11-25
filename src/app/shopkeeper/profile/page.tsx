@@ -7,16 +7,19 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import { useRouter } from "next/navigation";
-import Sidebar from "../dashboard/_components/Sidebar";
-import TopBar from "../dashboard/_components/TopBar";
+import ShopkeeperShell from "@/components/shopkeeper/ShopkeeperShell";
 import ProfileSkeleton from "./_components/ProfileSkeleton";
 import ProfileShopCard from "./_components/ProfileShopCard";
 import ProfilePlanCard from "./_components/ProfilePlanCard";
 import ProfileRoomCard from "./_components/ProfileRoomCard";
 import ProfileShopDetailsCard from "./_components/ProfileShopDetailsCard";
 import ProfileAccountCard from "./_components/ProfileAccountCard";
+import DeleteAccountCard from "@/components/account/DeleteAccountCard";
+import ExportDataCard from "@/components/account/ExportDataCard";
+import RecentActivityCard from "@/components/account/RecentActivityCard";
+import TwoStepCard from "@/components/account/TwoStepCard";
 import { shopProfileSchema, type ShopProfileFormValues } from "./_schemas/shopProfileSchema";
-import { apiClient, setAuthToken } from "../../../utils/apiClient";
+import { apiClient } from "../../../utils/apiClient";
 import { getCookie, deleteCookie } from "../../../utils/cookieUtils";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -69,12 +72,9 @@ export default function ShopkeeperProfilePage() {
       router.replace("/customer/login?tab=shopkeeper");
       return;
     }
-    setAuthToken(token);
 
     apiClient
-      .get<ProfileData>("/api/shop/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get<ProfileData>("/api/shop/profile")
       .then((res: { data: ProfileData }) => {
         setData(res.data);
         setLogoUrl(res.data.shop.logoUrl);
@@ -98,17 +98,6 @@ export default function ShopkeeperProfilePage() {
       })
       .finally(() => setInitialLoading(false));
   }, [router, reset]);
-
-  function handleNavChange(id: string) {
-    if (id === "profile") return;
-    if (id === "myroom") {
-      router.push("/shopkeeper/room/_");
-    } else if (id === "settings") {
-      router.push("/shopkeeper/settings");
-    } else {
-      router.push("/shopkeeper/dashboard");
-    }
-  }
 
   async function onSubmit(values: ShopProfileFormValues) {
     setSaving(true);
@@ -156,17 +145,12 @@ export default function ShopkeeperProfilePage() {
   }
 
   return (
-    <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
-      <Sidebar activeNav="profile" onNavChange={handleNavChange} />
-
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <TopBar />
-
+    <ShopkeeperShell>
         {initialLoading ? (
           <ProfileSkeleton />
         ) : data ? (
-          <main className="flex-1 p-7 overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <h1 className="text-[28px] font-bold text-(--color-text-primary)">
                 Shop Profile
               </h1>
@@ -200,9 +184,9 @@ export default function ShopkeeperProfilePage() {
               )}
             </div>
 
-            <div className="flex gap-6 items-start">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
               {/* Left column */}
-              <div className="w-[340px] shrink-0 flex flex-col gap-4">
+              <div className="w-full shrink-0 flex flex-col gap-4 lg:w-85">
                 <ProfileShopCard
                   shopName={data.shop.shopName}
                   category={data.shop.category}
@@ -249,17 +233,27 @@ export default function ShopkeeperProfilePage() {
                   register={register}
                   errors={errors}
                 />
+                <TwoStepCard role="shopkeeper" />
+                <RecentActivityCard endpoint="/api/shopkeeper/me/security-events" />
+                <ExportDataCard
+                  endpoint="/api/shopkeeper/me/export"
+                  description="A copy of your shop's data as a file: your details, plan and payments, notification designs, schedules and send history, and your own chat messages. Your members' names and emails, and your password, are not included."
+                />
+                <DeleteAccountCard
+                  cookieName="shopkeeper_token"
+                  endpoint="/api/shopkeeper/me"
+                  consequences="Permanently deletes your shop, its room and chat history, your notification designs and send history. Your members keep their own accounts. This can't be undone and your subscription isn't refunded."
+                />
               </div>
             </div>
-          </main>
+          </>
         ) : (
-          <main className="flex-1 p-7 flex items-center justify-center">
+          <div className="flex items-center justify-center py-20">
             <p className="text-(--color-text-secondary)">
               Failed to load profile. Please try again.
             </p>
-          </main>
+          </div>
         )}
-      </div>
-    </div>
+    </ShopkeeperShell>
   );
 }

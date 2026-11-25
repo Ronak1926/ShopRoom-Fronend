@@ -7,7 +7,7 @@ import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import Sidebar from "@/components/customer/Sidebar";
 import Avatar from "@/components/ui/Avatar";
-import { apiClient, setAuthToken } from "@/utils/apiClient";
+import { apiClient } from "@/utils/apiClient";
 import { getCookie, deleteCookie } from "@/utils/cookieUtils";
 
 interface JoinedRoom {
@@ -21,7 +21,6 @@ interface JoinedRoom {
 
 export default function MyRoomsPage() {
   const router = useRouter();
-  const [activeNav, setActiveNav] = useState("myrooms");
   const [rooms, setRooms] = useState<JoinedRoom[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -31,7 +30,6 @@ export default function MyRoomsPage() {
       router.replace("/customer/login");
       return;
     }
-    setAuthToken(token);
     apiClient
       .get<{ rooms: JoinedRoom[] }>("/api/customers/me/rooms")
       .then((res) => setRooms(res.data.rooms))
@@ -49,15 +47,10 @@ export default function MyRoomsPage() {
       .finally(() => setInitialLoading(false));
   }, [router]);
 
-  function handleNavChange(id: string) {
-    if (id === "discover") router.push("/customer/home");
-    else setActiveNav(id);
-  }
-
   if (initialLoading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-(--color-bg-page)">
-        <Sidebar activeNav={activeNav} onNavChange={handleNavChange} />
+      <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) lg:flex-row">
+        <Sidebar />
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-3xl mx-auto space-y-3">
             <div className="h-8 w-40 bg-(--color-gray-100) rounded animate-pulse mb-6" />
@@ -74,8 +67,8 @@ export default function MyRoomsPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-(--color-bg-page) text-(--color-text-primary)">
-      <Sidebar activeNav={activeNav} onNavChange={handleNavChange} />
+    <div className="flex h-dvh flex-col overflow-hidden bg-(--color-bg-page) text-(--color-text-primary) lg:flex-row">
+      <Sidebar />
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold text-(--color-text-primary) mb-1">

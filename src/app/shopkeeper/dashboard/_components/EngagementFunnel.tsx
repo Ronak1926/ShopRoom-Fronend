@@ -1,9 +1,8 @@
 "use client";
 
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import SampleBadge from "@/components/ui/SampleBadge";
 import ChartTooltip from "@/components/charts/ChartTooltip";
-import type { NotificationMetrics } from "../_data/sampleMetrics";
+import type { NotificationMetrics } from "../_data/metrics";
 
 const STAGE_COLORS = [
   "var(--color-brand-primary)",
@@ -39,7 +38,6 @@ export default function EngagementFunnel({ metrics }: { metrics: NotificationMet
     <section className="h-full rounded-2xl border border-(--color-border-default) bg-(--color-bg-surface) p-5">
       <header className="flex items-center gap-2">
         <h2 className="text-[14px] font-bold text-(--color-text-primary)">Engagement Funnel</h2>
-        <SampleBadge />
       </header>
       <p className="text-[11px] text-(--color-text-hint) mt-0.5">
         How far a notification travels, from send to tap.

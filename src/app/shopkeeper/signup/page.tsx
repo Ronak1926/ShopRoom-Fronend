@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { ShopkeeperLeftPanel } from "../../../components/ui/ShopkeeperLeftPanel";
 import { AuthTabButton } from "../../../components/ui/AuthTabButton";
 import { apiClient } from "../../../utils/apiClient";
-import { getCookie, setCookie } from "../../../utils/cookieUtils";
+import { getCookie } from "../../../utils/cookieUtils";
+import { markSignedIn } from "../../../utils/session";
 import { type Step1Values, type Step2Values } from "./_lib/schemas";
 import { StepIndicator } from "./_components/StepIndicator";
 import { Step1Account } from "./_components/Step1Account";
@@ -19,7 +20,6 @@ import { Step4Payment } from "./_components/Step4Payment";
 export default function ShopkeeperSignupPage() {
   const router = useRouter();
 
-  const [ready, setReady] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +42,6 @@ export default function ShopkeeperSignupPage() {
     }
     const saved = localStorage.getItem("shopkeeper_draft_id");
     if (saved) setDraftId(saved);
-    setReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -172,8 +171,6 @@ export default function ShopkeeperSignupPage() {
     }
   }
 
-  if (!ready) return null;
-
   return (
     <div className="flex flex-1 bg-[var(--color-bg-page)]">
       <ShopkeeperLeftPanel />
@@ -183,13 +180,13 @@ export default function ShopkeeperSignupPage() {
           {/* Logo */}
           <div className="flex items-center gap-2 text-[var(--color-auth-ink)] mb-8 justify-center">
             <Image
-              src="/ShopRoomIcon.svg"
-              alt="ShopRoom"
+              src="/CounterCircleIcon.png"
+              alt="CounterCircle"
               width={24}
-              height={21}
+              height={24}
             />
             <span className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
-              ShopRoom
+              CounterCircle
             </span>
           </div>
 
@@ -249,9 +246,9 @@ export default function ShopkeeperSignupPage() {
               <Step4Payment
                 draftId={draftId}
                 userEmail={step1Email}
-                onSuccess={(token, inviteCode) => {
+                onSuccess={(shopkeeperId, inviteCode) => {
                   localStorage.removeItem("shopkeeper_draft_id");
-                  setCookie("shopkeeper_token", token);
+                  markSignedIn("shopkeeper", shopkeeperId);
                   localStorage.setItem("shopkeeper_invite_code", inviteCode);
                   router.push("/shopkeeper/dashboard");
                 }}

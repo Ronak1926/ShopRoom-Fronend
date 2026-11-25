@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { ElementType, ReactNode } from "react";
-import Sidebar from "../../dashboard/_components/Sidebar";
-import TopBar from "../../dashboard/_components/TopBar";
-import { getCookie } from "../../../../utils/cookieUtils";
+import ShopkeeperShell from "@/components/shopkeeper/ShopkeeperShell";
 
 interface Props {
   title: string;
@@ -31,25 +28,8 @@ export default function NotificationsShell({
 }: Props) {
   const router = useRouter();
 
-  useEffect(() => {
-    if (!getCookie("shopkeeper_token")) {
-      router.replace("/customer/login?tab=shopkeeper");
-    }
-  }, [router]);
-
-  function handleNavChange(id: string) {
-    if (id === "profile") router.push("/shopkeeper/profile");
-    else if (id !== "notifications") router.push("/shopkeeper/dashboard");
-  }
-
   return (
-    <div className="flex h-screen bg-(--color-bg-page) text-(--color-text-primary) overflow-hidden">
-      <Sidebar activeNav="notifications" onNavChange={handleNavChange} />
-
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <TopBar />
-
-        <main className="flex-1 p-7 overflow-y-auto">
+    <ShopkeeperShell>
           <div className="flex flex-wrap items-start justify-between gap-6 mb-8">
             <div>
               <h1 className="text-[28px] font-bold text-(--color-text-primary) mb-1">
@@ -84,8 +64,6 @@ export default function NotificationsShell({
             </button>
           </div>
           )}
-        </main>
-      </div>
-    </div>
+    </ShopkeeperShell>
   );
 }

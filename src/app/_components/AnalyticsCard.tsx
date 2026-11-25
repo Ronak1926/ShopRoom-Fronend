@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import { VIEWPORT, floatAnimate, floatTransition } from "./motion";
@@ -71,7 +71,7 @@ export default function AnalyticsCard() {
         </p>
 
         {/* Floating growth badge */}
-        <motion.div
+        <m.div
           animate={floatAnimate(8)}
           transition={floatTransition(4)}
           className="absolute top-4 right-4 flex items-center gap-1.5 h-7 px-3 rounded-full bg-(--color-brand-primary) shadow-(--shadow-sm)"
@@ -82,7 +82,7 @@ export default function AnalyticsCard() {
           <span className="text-[12px] font-bold text-(--color-text-on-brand)">
             +300%
           </span>
-        </motion.div>
+        </m.div>
 
         <svg
           viewBox="0 0 320 140"
@@ -97,7 +97,7 @@ export default function AnalyticsCard() {
               <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <motion.path
+          <m.path
             d={AREA}
             fill="url(#areaFill)"
             initial={{ opacity: 0 }}
@@ -105,7 +105,7 @@ export default function AnalyticsCard() {
             viewport={VIEWPORT}
             transition={{ duration: 0.8, delay: 0.9 }}
           />
-          <motion.path
+          <m.path
             d={LINE}
             fill="none"
             stroke="currentColor"
@@ -117,7 +117,7 @@ export default function AnalyticsCard() {
             viewport={VIEWPORT}
             transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
           />
-          <motion.circle
+          <m.circle
             cx={320}
             cy={18}
             r={5}
@@ -141,7 +141,7 @@ export default function AnalyticsCard() {
       </div>
 
       {/* Floating widget */}
-      <motion.div
+      <m.div
         animate={floatAnimate(10)}
         transition={floatTransition(5)}
         className="absolute -bottom-5 -left-4 hidden sm:flex items-center gap-3 bg-(--color-bg-surface) rounded-2xl shadow-(--shadow-md) border border-(--color-border-default) px-4 py-3"
@@ -161,7 +161,7 @@ export default function AnalyticsCard() {
             new members today
           </span>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }

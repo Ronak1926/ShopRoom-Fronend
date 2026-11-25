@@ -27,7 +27,15 @@ export type GoogleAuthRequest = {
   idToken: string;
 };
 
+/** The session itself arrives in an HttpOnly cookie; the body carries only what the page shows. */
 export type LoginResponse = {
-  token: string;
+  /** Who signed in. Not a secret: the page keeps it to know which messages are the viewer's own. */
+  customerId: string;
   customer?: Customer;
+};
+
+/** The password was right but the account has two-step verification: a code is still needed. */
+export type MfaRequiredResponse = {
+  mfaRequired: true;
+  mfaToken: string;
 };

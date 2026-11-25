@@ -4,47 +4,39 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import { getCookie, deleteCookie } from "../../utils/cookieUtils";
-import { setAuthToken } from "../../utils/apiClient";
+import { isSignedIn, signOut, type SessionRole } from "../../utils/session";
+
+/** Longest sign-out waits on cleanup; a slow network must not trap anyone signed in. */
+const CLEANUP_TIMEOUT_MS = 3000;
 
 interface Props {
-  cookieName: string;
-  namePayloadKey: string;
+  role: SessionRole;
   redirectTo: string;
   description: string;
+  /**
+   * Cleanup that needs the session while it still exists (e.g. unregistering a
+   * push device). Best effort: failures and slow responses never block sign-out.
+   */
+  onBeforeSignOut?: () => Promise<void>;
 }
 
-export default function SignOutConfirmation({
-  cookieName,
-  namePayloadKey,
-  redirectTo,
-  description,
-}: Props) {
+export default function SignOutConfirmation({ role, redirectTo, description, onBeforeSignOut }: Props) {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
-    const token = getCookie(cookieName);
-    if (!token) {
-      router.replace(redirectTo);
-      return;
-    }
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      if (payload.email) setEmail(payload.email);
-      if (payload[namePayloadKey]) setDisplayName(payload[namePayloadKey]);
-    } catch {
-      // display fields stay null
-    }
-  }, [cookieName, namePayloadKey, redirectTo, router]);
+    if (!isSignedIn(role)) router.replace(redirectTo);
+  }, [role, redirectTo, router]);
 
-  function handleSignOut() {
+  async function handleSignOut() {
     setSigningOut(true);
-    deleteCookie(cookieName);
-    setAuthToken(null);
+    if (onBeforeSignOut) {
+      await Promise.race([
+        onBeforeSignOut().catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, CLEANUP_TIMEOUT_MS)),
+      ]);
+    }
+    await signOut(role).catch(() => {});
     setTimeout(() => router.replace(redirectTo), 600);
   }
 
@@ -57,9 +49,9 @@ export default function SignOutConfirmation({
           <div className="px-8 py-9">
             {/* Brand */}
             <div className="flex items-center justify-center gap-2 mb-8">
-              <Image src="/ShopRoomIcon.svg" alt="ShopRoom" width={22} height={20} />
+              <Image src="/CounterCircleIcon.png" alt="CounterCircle" width={22} height={22} />
               <span className="text-[20px] font-bold text-(--color-auth-ink) tracking-[-0.5px]">
-                ShopRoom
+                CounterCircle
               </span>
             </div>
 
@@ -75,23 +67,6 @@ export default function SignOutConfirmation({
                 {description}
               </p>
             </div>
-
-            {/* Account info pill */}
-            {email && (
-              <div className="flex items-center gap-3 bg-(--color-bg-page) border border-(--color-border-default) rounded-xl px-4 py-3 mb-7">
-                <div className="w-8 h-8 rounded-full bg-(--color-brand-primary-light) flex items-center justify-center shrink-0">
-                  <PersonOutlinedIcon sx={{ fontSize: 16, color: "var(--color-brand-primary)" }} />
-                </div>
-                <div className="min-w-0">
-                  {displayName && (
-                    <div className="text-[13px] font-semibold text-(--color-text-primary) truncate">
-                      {displayName}
-                    </div>
-                  )}
-                  <div className="text-[12px] text-(--color-text-secondary) truncate">{email}</div>
-                </div>
-              </div>
-            )}
 
             {/* Actions */}
             <div className="flex flex-col gap-3">

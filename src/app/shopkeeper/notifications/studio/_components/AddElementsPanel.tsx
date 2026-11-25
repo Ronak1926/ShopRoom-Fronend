@@ -43,9 +43,10 @@ function GroupLabel({ children }: { children: string }) {
 interface Props {
   width: number;
   onAdd: (id: string) => void;
+  onUploadImage: () => void;
 }
 
-export default function AddElementsPanel({ width, onAdd }: Props) {
+export default function AddElementsPanel({ width, onAdd, onUploadImage }: Props) {
   return (
     <aside
       // width is drag-controlled, so it must be an inline style
@@ -78,6 +79,7 @@ export default function AddElementsPanel({ width, onAdd }: Props) {
           <GroupLabel>Uploads</GroupLabel>
           <button
             type="button"
+            onClick={onUploadImage}
             className="w-full flex flex-col items-center justify-center gap-2 py-7 rounded-xl border-2 border-dashed border-(--color-border-strong) text-(--color-text-secondary) hover:border-(--color-brand-primary) hover:text-(--color-brand-primary) hover:bg-(--color-brand-primary-light) transition-colors cursor-pointer"
           >
             <FileUploadOutlinedIcon sx={{ fontSize: 24 }} />

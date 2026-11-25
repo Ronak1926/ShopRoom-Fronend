@@ -1,5 +1,5 @@
 /**
- * features/notifications/assets.ts — ShopRoom decorative SVG asset registry.
+ * features/notifications/assets.ts — CounterCircle decorative SVG asset registry.
  *
  * Premium, illustration-grade art: veined foliage, layered clouds, a true 3D
  * podium and glinting sparkles. Every asset tints via `currentColor` and layers

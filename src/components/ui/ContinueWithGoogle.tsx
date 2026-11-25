@@ -9,11 +9,37 @@ import {
   getRedirectResult,
 } from "firebase/auth";
 
-import { firebaseAuth, googleProvider } from "../../lib/firebase";
+import { firebaseAuth, googleProvider, popupResolver } from "../../lib/firebase";
 import { googleAuthCustomer } from "../../features/auth/authSlice";
 import { useAppDispatch } from "../../hooks/redux";
+import { nextAfterAuth } from "../../lib/safeRedirect";
 
-export function ContinueWithGoogle() {
+/** Set just before leaving for Google's page, so only the return trip asks Firebase for a redirect result. */
+const REDIRECT_PENDING_KEY = "shoproom_google_redirect";
+
+function redirectPending(): boolean {
+  try {
+    return sessionStorage.getItem(REDIRECT_PENDING_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setRedirectPending(pending: boolean): void {
+  try {
+    if (pending) sessionStorage.setItem(REDIRECT_PENDING_KEY, "1");
+    else sessionStorage.removeItem(REDIRECT_PENDING_KEY);
+  } catch {
+    // Storage blocked: the sign-in just won't resume after a redirect.
+  }
+}
+
+interface Props {
+  /** Google accepted the person but their account needs a code from its authenticator app. */
+  onMfaRequired?: (mfaToken: string) => void;
+}
+
+export function ContinueWithGoogle({ onMfaRequired }: Props) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -21,8 +47,11 @@ export function ContinueWithGoogle() {
 
   // Pick up result after a signInWithRedirect (popup-blocked fallback)
   useEffect(() => {
+    // Looking for a redirect result loads Google's scripts, so it is only done when we sent the person away.
+    if (!redirectPending()) return;
+    setRedirectPending(false);
     let cancelled = false;
-    getRedirectResult(firebaseAuth)
+    getRedirectResult(firebaseAuth, popupResolver)
       .then(async (result) => {
         if (cancelled || !result) return;
         setLoading(true);
@@ -30,7 +59,12 @@ export function ContinueWithGoogle() {
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (cancelled) return;
         if (googleAuthCustomer.fulfilled.match(action)) {
-          router.push("/customer/home");
+          if ("mfaRequired" in action.payload) {
+            setLoading(false);
+            onMfaRequired?.(action.payload.mfaToken);
+            return;
+          }
+          router.push(nextAfterAuth());
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
           setLoading(false);
@@ -45,19 +79,24 @@ export function ContinueWithGoogle() {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, router]);
+  }, [dispatch, router, onMfaRequired]);
 
   // NOT async — signInWithPopup must be called synchronously so the browser
   // recognises it as a direct user gesture (prevents popup-blocked errors)
   function handleClick() {
     setError(null);
-    signInWithPopup(firebaseAuth, googleProvider)
+    signInWithPopup(firebaseAuth, googleProvider, popupResolver)
       .then(async (result) => {
         setLoading(true);
         const idToken = await result.user.getIdToken();
         const action = await dispatch(googleAuthCustomer({ idToken }));
         if (googleAuthCustomer.fulfilled.match(action)) {
-          router.push("/customer/home");
+          if ("mfaRequired" in action.payload) {
+            setLoading(false);
+            onMfaRequired?.(action.payload.mfaToken);
+            return;
+          }
+          router.push(nextAfterAuth());
         } else {
           setError((action.payload as string) ?? "Google sign-in failed");
           setLoading(false);
@@ -66,7 +105,9 @@ export function ContinueWithGoogle() {
       .catch((err: any) => {
         if (err?.code === "auth/popup-blocked") {
           // Popup was blocked — fall back to full-page redirect
-          signInWithRedirect(firebaseAuth, googleProvider).catch((e) => {
+          setRedirectPending(true);
+          signInWithRedirect(firebaseAuth, googleProvider, popupResolver).catch((e) => {
+            setRedirectPending(false);
             setError(e?.message ?? "Google sign-in failed");
           });
         } else if (err?.code !== "auth/popup-closed-by-user") {

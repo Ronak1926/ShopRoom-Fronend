@@ -66,7 +66,8 @@ export function Step1Account({ isLoading, onSubmit }: Step1AccountProps) {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)] hover:text-[var(--color-auth-ink)]"
+              aria-label={showPw ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-(--color-auth-ink-muted) hover:text-(--color-auth-ink)"
             >
               <EyeIcon open={showPw} />
             </button>
@@ -87,7 +88,8 @@ export function Step1Account({ isLoading, onSubmit }: Step1AccountProps) {
             <button
               type="button"
               onClick={() => setShowCpw((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-auth-ink-muted)] hover:text-[var(--color-auth-ink)]"
+              aria-label={showCpw ? "Hide confirmation password" : "Show confirmation password"}
+              className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-(--color-auth-ink-muted) hover:text-(--color-auth-ink)"
             >
               <EyeIcon open={showCpw} />
             </button>

@@ -8,6 +8,7 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { apiClient } from "../../utils/apiClient";
+import { DEFAULT_AFTER_AUTH, nextAfterAuth, withNext } from "../../lib/safeRedirect";
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -68,7 +69,8 @@ function VerifyEmailContent() {
     setLoading(true);
     try {
       await apiClient.post("/api/otp/verify", { email, code });
-      router.push("/");
+      // An invite link that started this sign-up goes back through login to the invite.
+      router.push(nextAfterAuth() === DEFAULT_AFTER_AUTH ? "/" : withNext("/customer/login"));
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -104,14 +106,14 @@ function VerifyEmailContent() {
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
               <Image
-                src="/ShopRoomIcon.svg"
-                alt="ShopRoom"
+                src="/CounterCircleIcon.png"
+                alt="CounterCircle"
                 width={26}
-                height={23}
+                height={26}
                 className="align-middle"
               />
               <div className="text-[24px] leading-[32px] tracking-[-1.2px] font-bold">
-                ShopRoom
+                CounterCircle
               </div>
             </div>
 
@@ -231,9 +233,9 @@ function VerifyEmailContent() {
           </div>
 
           <div className="mt-10 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-[var(--color-auth-ink-muted)] opacity-50">
-            <span>© 2026 SHOPROOM</span>
-            <span>PRIVACY POLICY</span>
-            <span>HELP CENTER</span>
+            <span>© 2026 COUNTERCIRCLE</span>
+            <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
+            <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>
           </div>
         </div>
       </div>

@@ -8,19 +8,16 @@ import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
-import SampleBadge from "@/components/ui/SampleBadge";
 
 function Insight({
   icon: Icon,
   label,
   value,
-  sample,
   children,
 }: {
   icon: ElementType;
   label: string;
   value: string;
-  sample?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -32,7 +29,6 @@ function Insight({
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <p className="text-[11px] text-(--color-text-secondary) truncate">{label}</p>
-            {sample && <SampleBadge />}
           </div>
           <p className="mt-0.5 text-[19px] font-bold leading-tight text-(--color-text-primary) tabular-nums">
             {value}
@@ -79,7 +75,6 @@ export default function RoomInsightsCard({
           icon={PeopleOutlinedIcon}
           label="Active Members"
           value={activeMembers.toLocaleString()}
-          sample
         >
           <p className="mt-1 text-[10.5px] text-(--color-text-hint)">{share(activeMembers)}</p>
         </Insight>
@@ -111,7 +106,6 @@ export default function RoomInsightsCard({
           icon={AutorenewOutlinedIcon}
           label="Returning Members"
           value={returningMembers.toLocaleString()}
-          sample
         >
           <p className="mt-1 text-[10.5px] text-(--color-text-hint)">
             {activeMembers
@@ -124,7 +118,6 @@ export default function RoomInsightsCard({
           icon={TrendingUpOutlinedIcon}
           label="Engagement Score"
           value={String(engagementScore)}
-          sample
         >
           <span className="mt-1 inline-flex h-5 px-2 rounded-full bg-(--color-success-light) text-[10px] font-semibold text-(--color-success-text) items-center">
             {grade}

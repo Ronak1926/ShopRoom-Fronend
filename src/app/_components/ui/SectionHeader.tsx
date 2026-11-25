@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { fadeUp, staggerContainer, VIEWPORT } from "../motion";
 
 interface SectionHeaderProps {
@@ -37,7 +37,7 @@ export default function SectionHeader({
     align === "center" ? "items-center text-center mx-auto" : "items-start text-left";
 
   return (
-    <motion.div
+    <m.div
       variants={staggerContainer(0.12)}
       initial="hidden"
       whileInView="visible"
@@ -45,27 +45,27 @@ export default function SectionHeader({
       className={`flex flex-col gap-4 max-w-2xl ${alignment} ${className}`}
     >
       {eyebrow && (
-        <motion.span
+        <m.span
           variants={fadeUp}
           className="text-[12px] font-bold tracking-[0.16em] uppercase text-(--color-brand-primary)"
         >
           {eyebrow}
-        </motion.span>
+        </m.span>
       )}
-      <motion.h2
+      <m.h2
         variants={fadeUp}
         className="text-[clamp(28px,4vw,44px)] font-extrabold text-(--color-text-primary) leading-[1.12] tracking-tight text-balance"
       >
         {renderTitle(title, highlight)}
-      </motion.h2>
+      </m.h2>
       {subtitle && (
-        <motion.p
+        <m.p
           variants={fadeUp}
           className="text-[16px] text-(--color-text-secondary) leading-relaxed text-pretty"
         >
           {subtitle}
-        </motion.p>
+        </m.p>
       )}
-    </motion.div>
+    </m.div>
   );
 }

@@ -366,7 +366,7 @@ function ScenesTab({
       </div>
 
       <p className="text-[11px] font-semibold tracking-widest uppercase text-(--color-text-hint) mb-2">
-        ShopRoom scenes
+        CounterCircle scenes
       </p>
       <div className="grid grid-cols-2 gap-2.5 mb-4">
         {scenes.map((scene) => {
