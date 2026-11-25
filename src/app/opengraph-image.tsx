@@ -10,8 +10,8 @@ export const contentType = "image/png";
 // next/og renders this markup with its own engine, which only understands inline styles
 // and flexbox; Tailwind classes and CSS variables are not available here.
 export default async function OpenGraphImage() {
-  const logo = await readFile(path.join(process.cwd(), "public", "CounterCircleIcon.svg"));
-  const logoSrc = `data:image/svg+xml;base64,${logo.toString("base64")}`;
+  const logo = await readFile(path.join(process.cwd(), "public", "CounterCircleIcon.png"));
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
 
   return new ImageResponse(
     (

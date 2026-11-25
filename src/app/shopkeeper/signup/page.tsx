@@ -180,7 +180,7 @@ export default function ShopkeeperSignupPage() {
           {/* Logo */}
           <div className="flex items-center gap-2 text-[var(--color-auth-ink)] mb-8 justify-center">
             <Image
-              src="/CounterCircleIcon.svg"
+              src="/CounterCircleIcon.png"
               alt="CounterCircle"
               width={24}
               height={24}

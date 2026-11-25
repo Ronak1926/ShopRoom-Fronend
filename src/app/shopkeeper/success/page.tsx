@@ -10,7 +10,7 @@ export default function ShopkeeperSuccessPage() {
       <div className="w-full max-w-[440px] rounded-[14px] bg-[var(--color-bg-surface)] px-8 py-10 shadow-(--shadow-md) border border-[var(--color-border-default)] text-center">
         <div className="flex items-center gap-2 justify-center mb-8 text-[var(--color-auth-ink)]">
           <Image
-            src="/CounterCircleIcon.svg"
+            src="/CounterCircleIcon.png"
             alt="CounterCircle"
             width={24}
             height={24}

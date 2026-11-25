@@ -106,7 +106,7 @@ function VerifyEmailContent() {
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
               <Image
-                src="/CounterCircleIcon.svg"
+                src="/CounterCircleIcon.png"
                 alt="CounterCircle"
                 width={26}
                 height={26}

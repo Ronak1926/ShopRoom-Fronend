@@ -70,7 +70,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 flex flex-col gap-4 max-w-[280px]">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/CounterCircleIcon.svg" alt="" width={36} height={36} priority />
+              <Image src="/CounterCircleIcon.png" alt="" width={36} height={36} priority />
               <span className="text-[19px] font-extrabold text-(--color-text-primary)">
                 CounterCircle
               </span>

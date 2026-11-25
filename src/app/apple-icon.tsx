@@ -7,8 +7,8 @@ export const contentType = "image/png";
 
 // Inline styles are required by next/og, which does not support CSS classes.
 export default async function AppleIcon() {
-  const logo = await readFile(path.join(process.cwd(), "public", "CounterCircleIcon.svg"));
-  const logoSrc = `data:image/svg+xml;base64,${logo.toString("base64")}`;
+  const logo = await readFile(path.join(process.cwd(), "public", "CounterCircleIcon.png"));
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
 
   return new ImageResponse(
     (

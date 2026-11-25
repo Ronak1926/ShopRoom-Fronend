@@ -66,8 +66,8 @@ messaging.onBackgroundMessage((payload) => {
   return Promise.all([
     self.registration.showNotification(title, {
       body: data.body || "",
-      icon: "/CounterCircleIcon.svg",
-      badge: "/CounterCircleIcon.svg",
+      icon: "/CounterCircleIcon.png",
+      badge: "/CounterCircleIcon.png",
       image: data.imageUrl || undefined,
       data,
     }),

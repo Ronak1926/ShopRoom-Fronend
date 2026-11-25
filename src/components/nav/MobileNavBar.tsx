@@ -37,7 +37,7 @@ export default function MobileNavBar({ children, actions }: { children: ReactNod
         >
           <MenuOutlinedIcon />
         </button>
-        <Image src="/CounterCircleIcon.svg" alt="" width={20} height={20} />
+        <Image src="/CounterCircleIcon.png" alt="" width={20} height={20} />
         <span className="text-[17px] font-bold text-(--color-text-primary)">CounterCircle</span>
         {actions && <div className="ml-auto flex items-center">{actions}</div>}
       </header>

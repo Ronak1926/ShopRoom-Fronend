@@ -54,7 +54,7 @@ export default function Navbar() {
     >
       <nav className="max-w-[1200px] mx-auto h-16 px-6 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <Image src="/CounterCircleIcon.svg" alt="" width={36} height={36} priority />
+          <Image src="/CounterCircleIcon.png" alt="" width={36} height={36} priority />
           <span className="text-[19px] font-extrabold text-(--color-text-primary) tracking-tight">
             CounterCircle
           </span>

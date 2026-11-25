@@ -28,7 +28,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="flex flex-1 items-center justify-center bg-(--color-bg-page) px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2 text-(--color-auth-ink)">
-          <Image src="/CounterCircleIcon.svg" alt="CounterCircle" width={24} height={24} />
+          <Image src="/CounterCircleIcon.png" alt="CounterCircle" width={24} height={24} />
           <span className="text-[24px] leading-8 tracking-[-1.2px] font-bold">CounterCircle</span>
         </div>
         <div className="rounded-[14px] border border-(--color-border-default) bg-(--color-bg-surface) p-6 shadow-(--shadow-md) sm:p-8">{children}</div>

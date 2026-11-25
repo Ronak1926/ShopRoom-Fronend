@@ -57,7 +57,7 @@ export default function LoginClient({ initialTab }: Props) {
         <div className="w-full max-w-120">
           <div className="flex items-center gap-2 text-(--color-auth-ink) mb-6 justify-center">
             <Image
-              src="/CounterCircleIcon.svg"
+              src="/CounterCircleIcon.png"
               alt="CounterCircle"
               width={24}
               height={24}
