@@ -120,6 +120,8 @@ export interface TemplatePage {
 
 export interface ListTemplatesParams {
   categoryId?: string;
+  /** Only these templates — at most 24 (one page), as the API enforces. */
+  ids?: string[];
   q?: string;
   sort?: "popular" | "newest" | "name";
   page?: number;
@@ -127,8 +129,9 @@ export interface ListTemplatesParams {
 }
 
 export async function listTemplates(params: ListTemplatesParams = {}): Promise<TemplatePage> {
+  const { ids, ...rest } = params;
   const { data } = await apiClient.get<Envelope<TemplatePage>>("/api/notifications/templates", {
-    params,
+    params: { ...rest, ...(ids ? { ids: ids.join(",") } : {}) },
   });
   return data.data;
 }

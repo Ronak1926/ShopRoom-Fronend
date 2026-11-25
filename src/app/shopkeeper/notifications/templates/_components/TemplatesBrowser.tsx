@@ -45,6 +45,8 @@ const SORTS: { id: Sort; label: string }[] = [
 const STUDIO_DESIGN_KEY = "studio_design_id";
 
 const PAGE_SIZE = 12;
+/** The API's page cap, and so the most ids one Favourites request can ask for. */
+const FAVOURITES_BATCH = 24;
 /** Fetch the next page once the card this far through the list comes into view. */
 const PREFETCH_AT = 0.7;
 const GRID =
@@ -204,19 +206,15 @@ export default function TemplatesBrowser() {
     }
     setLoading(true);
     try {
-      // Favourites are stored as ids only, so the catalog is walked once rather
-      // than adding a bulk-by-id endpoint for a per-device convenience.
-      const wanted = new Set(ids);
-      const found: TemplateSummary[] = [];
-      let p = 1;
-      let pages = 1;
-      do {
-        const res = await listTemplates({ page: p, limit: 24 });
-        pages = res.totalPages;
-        found.push(...res.items.filter((t) => wanted.has(t.id)));
-        p += 1;
-      } while (p <= pages && found.length < wanted.size);
-      setFavouriteItems(found);
+      // Favourites are stored as ids only. The catalog now runs to well over a
+      // thousand templates, so they are fetched by id, one page (24) per request,
+      // rather than by walking every page looking for them.
+      const batches: string[][] = [];
+      for (let i = 0; i < ids.length; i += FAVOURITES_BATCH) batches.push(ids.slice(i, i + FAVOURITES_BATCH));
+      const pages = await Promise.all(batches.map((batch) => listTemplates({ ids: batch, limit: FAVOURITES_BATCH })));
+      const byId = new Map(pages.flatMap((page) => page.items).map((t) => [t.id, t]));
+      // Keep the order they were favourited in; ids of retired templates drop out.
+      setFavouriteItems(ids.flatMap((id) => byId.get(id) ?? []));
       setError(null);
     } catch {
       setError("Could not load your favourites. Please try again.");
