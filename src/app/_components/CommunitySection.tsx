@@ -55,7 +55,7 @@ export default function CommunitySection() {
           <m.div
             animate={floatAnimate(12)}
             transition={floatTransition(4.5)}
-            className="absolute -left-3 sm:-left-10 top-10 z-20 flex items-center gap-2.5 bg-(--color-bg-surface) rounded-2xl shadow-(--shadow-md) border border-(--color-border-default) px-3.5 py-2.5"
+            className="absolute -left-3 -top-10 sm:-left-10 sm:top-10 z-20 flex items-center gap-2.5 bg-(--color-bg-surface) rounded-2xl shadow-(--shadow-md) border border-(--color-border-default) px-3.5 py-2.5"
           >
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-(--color-badge-success-bg)">
               <PersonAddAlt1RoundedIcon

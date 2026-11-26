@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import PlayCircleOutlineRoundedIcon from "@mui/icons-material/PlayCircleOutlineRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import AnimatedButton from "./ui/AnimatedButton";
 
@@ -58,15 +58,15 @@ export default function Hero() {
           </p>
 
           <div
-            className="hero-rise hero-rise-3 mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5"
+            className="hero-rise hero-rise-3 mt-8 flex w-full flex-col items-stretch gap-3.5 sm:w-auto sm:flex-row sm:items-center"
           >
             <AnimatedButton href="/shopkeeper/signup" variant="primary" size="lg">
               Create Your Shop
               <ArrowForwardRoundedIcon sx={{ fontSize: 20 }} />
             </AnimatedButton>
-            <AnimatedButton variant="ghost" size="lg">
-              <PlayCircleOutlineRoundedIcon sx={{ fontSize: 26 }} />
-              Watch Demo
+            <AnimatedButton href="/#how-it-works" variant="outline" size="lg">
+              <KeyboardArrowDownRoundedIcon sx={{ fontSize: 24 }} />
+              See how it works
             </AnimatedButton>
           </div>
 

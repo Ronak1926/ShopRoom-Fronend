@@ -2,7 +2,7 @@
 
 import "@/lib/zodJitless";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
@@ -18,6 +18,8 @@ const contactSchema = z.object({
 });
 type ContactValues = z.infer<typeof contactSchema>;
 
+const TOPICS = ["Payment or billing", "Notifications", "My account", "Feedback"] as const;
+
 export default function ContactForm() {
   const [sent, setSent] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -25,8 +27,13 @@ export default function ContactForm() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ContactValues>({ resolver: zodResolver(contactSchema), mode: "onTouched" });
+
+  const subject = useWatch({ control, name: "subject" });
+  const messageLength = useWatch({ control, name: "message" })?.length ?? 0;
 
   async function onSubmit(values: ContactValues) {
     setServerError(null);
@@ -70,6 +77,24 @@ export default function ContactForm() {
         </div>
       ))}
 
+      <div className="-mt-2 flex flex-wrap items-center gap-2" role="group" aria-label="Pick a topic">
+        {TOPICS.map((topic) => (
+          <button
+            key={topic}
+            type="button"
+            aria-pressed={subject === topic}
+            onClick={() => setValue("subject", topic, { shouldValidate: true, shouldDirty: true })}
+            className={`rounded-full border px-3 py-1 text-[12px] font-semibold transition-colors ${
+              subject === topic
+                ? "border-(--color-brand-primary) bg-(--color-brand-primary-light) text-(--color-brand-primary)"
+                : "border-(--color-border-default) text-(--color-text-secondary) hover:border-(--color-brand-primary)"
+            }`}
+          >
+            {topic}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-1">
         <label htmlFor="contact-message" className={authLabelCls}>
           Message
@@ -82,7 +107,10 @@ export default function ContactForm() {
             errors.message ? "ring-2 ring-(--color-danger)" : ""
           }`}
         />
-        {errors.message && <p className="text-[11px] text-(--color-danger)">{errors.message.message}</p>}
+        <div className="flex items-start justify-between gap-3">
+          {errors.message ? <p className="text-[11px] text-(--color-danger)">{errors.message.message}</p> : <span />}
+          <span className="text-[11px] text-(--color-text-secondary)">{messageLength}/4000</span>
+        </div>
       </div>
 
       {serverError && (

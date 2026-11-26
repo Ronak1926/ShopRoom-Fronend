@@ -53,7 +53,7 @@ export default function LoginClient({ initialTab }: Props) {
     <div className="flex flex-1 bg-(--color-bg-page)">
       {isShopkeeper ? <ShopkeeperLeftPanel /> : <AuthLeftPanel />}
 
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
+      <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
         <div className="w-full max-w-120">
           <div className="flex items-center gap-2 text-(--color-auth-ink) mb-6 justify-center">
             <Image

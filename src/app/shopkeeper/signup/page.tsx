@@ -175,7 +175,7 @@ export default function ShopkeeperSignupPage() {
     <div className="flex flex-1 bg-[var(--color-bg-page)]">
       <ShopkeeperLeftPanel />
 
-      <div className="flex flex-1 items-start justify-center px-6 py-10 overflow-y-auto min-h-screen">
+      <div className="flex flex-1 min-w-0 items-start justify-center px-4 py-8 sm:px-6 sm:py-10 overflow-y-auto min-h-screen">
         <div className="w-full max-w-[500px]">
           {/* Logo */}
           <div className="flex items-center gap-2 text-[var(--color-auth-ink)] mb-8 justify-center">

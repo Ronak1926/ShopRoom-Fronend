@@ -157,7 +157,7 @@ export default function SignupPage() {
     <div className="flex flex-1 bg-(--color-bg-page)">
       <AuthLeftPanel />
 
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
+      <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
         <div className="w-full max-w-[480px]">
           {/* Role toggle */}
           <div className="flex rounded-[10px] bg-(--color-auth-input-bg) p-1 mb-6">
@@ -167,7 +167,7 @@ export default function SignupPage() {
             </AuthTabButton>
           </div>
 
-          <div className="rounded-[12px] bg-(--color-bg-surface) px-10 py-10 shadow-(--shadow-md) border border-(--color-border-default)">
+          <div className="rounded-[12px] bg-(--color-bg-surface) px-5 py-8 shadow-(--shadow-md) sm:px-10 sm:py-10 border border-(--color-border-default)">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 text-(--color-auth-ink)">
                 <Image
@@ -190,11 +190,11 @@ export default function SignupPage() {
             </div>
 
             <div className="mt-8 flex flex-col items-center">
-              <div className="w-[400px]">
+              <div className="w-full">
                 <ContinueWithGoogle />
               </div>
 
-              <div className="my-6 flex items-center gap-4 w-[400px]">
+              <div className="my-6 flex w-full items-center gap-4">
                 <div className="h-px flex-1 bg-(--color-border-default)" />
                 <span className="text-[12px] tracking-[1px] text-(--color-auth-ink-muted) uppercase">
                   OR
@@ -203,7 +203,7 @@ export default function SignupPage() {
               </div>
 
               <form
-                className="w-[400px] flex flex-col gap-4"
+                className="flex w-full flex-col gap-4"
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
               >
@@ -350,7 +350,7 @@ export default function SignupPage() {
               </form>
             </div>
 
-            <div className="mt-12 flex items-center justify-center gap-12 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-12 gap-y-3 text-[12px] tracking-[2px] uppercase text-(--color-auth-ink-muted)">
               <span>© 2026 COUNTERCIRCLE</span>
               <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
               <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>

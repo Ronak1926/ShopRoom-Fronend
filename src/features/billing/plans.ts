@@ -23,9 +23,9 @@ export interface PlanOffer {
 
 /** Included in every plan. */
 export const COMMON_PERKS = [
-  "Your own room with a shareable invite link",
-  "Unlimited members and real-time chat",
-  "Animated notification banners, sent now or scheduled",
+  "Your own room with invite link",
+  "Unlimited members and live chat",
+  "Animated banners, now or scheduled",
   "Delivery, open and tap analytics",
 ];
 
@@ -36,7 +36,7 @@ export const PLAN_OFFERS: PlanOffer[] = [
     price: 499,
     days: 30,
     description: "Try CounterCircle for a month",
-    perks: ["1 notification a day, to your room members", "50+ ready-made templates", "Quick edit: your words and photos"],
+    perks: ["1 notification a day", "50+ ready-made templates", "Quick edit: your words, photos"],
   },
   {
     id: "2m",
@@ -44,7 +44,7 @@ export const PLAN_OFFERS: PlanOffer[] = [
     price: 899,
     days: 60,
     description: "Most popular choice",
-    perks: ["2 notifications a day", "Reach customers within 5 km", "150+ templates", "Custom templates and the full editor"],
+    perks: ["2 notifications a day", "Reach customers within 5 km", "150+ templates", "Custom templates, full editor"],
     recommended: true,
   },
   {
@@ -53,7 +53,7 @@ export const PLAN_OFFERS: PlanOffer[] = [
     price: 1199,
     days: 90,
     description: "Best value for money",
-    perks: ["4 notifications a day", "Reach customers within 10 km", "All 1,400+ templates", "Custom templates and the full editor", "Custom animations"],
+    perks: ["4 notifications a day", "Reach customers within 10 km", "All 1,400+ templates", "Custom templates, full editor", "Custom animations"],
   },
 ];
 

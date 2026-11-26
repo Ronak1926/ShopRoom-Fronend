@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { m } from "framer-motion";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import PlayCircleOutlineRoundedIcon from "@mui/icons-material/PlayCircleOutlineRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { fadeUp, staggerContainer, VIEWPORT } from "./motion";
 import AnimatedButton from "./ui/AnimatedButton";
 
@@ -63,12 +63,13 @@ export default function FinalCTA() {
               <ArrowForwardRoundedIcon sx={{ fontSize: 20 }} />
             </AnimatedButton>
             <AnimatedButton
+              href="/#how-it-works"
               variant="white_ghost"
               size="lg"
               className="text-(--color-text-on-brand) border border-white/30 hover:bg-white/10 hover:text-(--color-text-on-brand)"
             >
-              <PlayCircleOutlineRoundedIcon sx={{ fontSize: 24 }} />
-              Learn More
+              <KeyboardArrowDownRoundedIcon sx={{ fontSize: 24 }} />
+              See how it works
             </AnimatedButton>
           </m.div>
         </m.div>

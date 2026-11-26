@@ -274,7 +274,9 @@ export default function FullMapPage() {
     if (mapRef.current) return;
     if (!mapDivRef.current) return;
 
+    let cancelled = false;
     import("leaflet").then(async (L) => {
+      if (cancelled) return;
       if (!document.getElementById("shoproom-map-style")) {
         const style = document.createElement("style");
         style.id = "shoproom-map-style";
@@ -311,7 +313,8 @@ export default function FullMapPage() {
         // fallback to Ahmedabad
       }
 
-      const map = L.map(mapDivRef.current!, {
+      if (cancelled || mapRef.current || !mapDivRef.current) return;
+      const map = L.map(mapDivRef.current, {
         center: defaultCenter,
         zoom: 12,
         zoomControl: true,
@@ -362,6 +365,7 @@ export default function FullMapPage() {
     });
 
     return () => {
+      cancelled = true;
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (hideCardRef.current) clearTimeout(hideCardRef.current);
       mapRef.current?.remove();

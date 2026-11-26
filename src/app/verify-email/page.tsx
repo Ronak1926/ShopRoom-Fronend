@@ -100,8 +100,8 @@ function VerifyEmailContent() {
     <div className="flex flex-1 bg-[var(--color-bg-page)]">
       <AuthLeftPanel />
 
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className="w-full max-w-[480px] rounded-[12px] bg-[var(--color-bg-surface)] px-10 py-10 shadow-(--shadow-md) border border-[var(--color-border-default)]">
+      <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
+        <div className="w-full max-w-[480px] rounded-[12px] bg-[var(--color-bg-surface)] px-5 py-8 sm:px-10 sm:py-10 shadow-(--shadow-md) border border-[var(--color-border-default)]">
           {/* Header */}
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-[var(--color-auth-ink)]">
@@ -154,7 +154,7 @@ function VerifyEmailContent() {
 
           {/* OTP inputs */}
           <div className="mt-8 flex flex-col items-center gap-6">
-            <div className="flex gap-3">
+            <div className="flex w-full justify-center gap-2 sm:gap-3">
               {digits.map((d, idx) => (
                 <input
                   key={idx}
@@ -169,7 +169,7 @@ function VerifyEmailContent() {
                   onKeyDown={(e) => handleKeyDown(idx, e)}
                   onFocus={(e) => e.target.select()}
                   className={[
-                    "w-[52px] h-[60px] rounded-[10px] text-center text-[22px] font-bold",
+                    "h-[52px] min-w-0 max-w-[52px] flex-1 sm:h-[60px] rounded-[10px] text-center text-[22px] font-bold",
                     "bg-[var(--color-auth-input-bg)] text-[var(--color-auth-ink)]",
                     "outline-none transition-shadow",
                     d
@@ -232,7 +232,7 @@ function VerifyEmailContent() {
             </div>
           </div>
 
-          <div className="mt-10 flex items-center justify-center gap-12 text-[10px] tracking-[2px] uppercase text-[var(--color-auth-ink-muted)] opacity-50">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-12 gap-y-3 text-[10px] tracking-[2px] uppercase text-[var(--color-auth-ink-muted)] opacity-50">
             <span>© 2026 COUNTERCIRCLE</span>
             <Link href="/privacy" className="hover:text-(--color-auth-primary)">PRIVACY POLICY</Link>
             <Link href="/help" className="hover:text-(--color-auth-primary)">HELP CENTER</Link>

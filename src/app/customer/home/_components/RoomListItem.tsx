@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
@@ -16,11 +17,12 @@ type RoomListItemProps = {
 };
 
 export default function RoomListItem({ room, joining, onJoin }: RoomListItemProps) {
+  const [coverFailed, setCoverFailed] = useState(false);
   return (
     <div className="flex items-center gap-4 bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) p-3 hover:shadow-(--shadow-lg) transition-shadow duration-200">
       <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden">
-        {room.coverUrl ? (
-          <Image loader={cloudinaryLoader} src={room.coverUrl} alt={room.shopName} fill sizes="80px" className="object-cover" />
+        {room.coverUrl && !coverFailed ? (
+          <Image loader={cloudinaryLoader} src={room.coverUrl} alt={room.shopName} fill onError={() => setCoverFailed(true)} sizes="80px" className="object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-(--color-brand-primary-light) to-(--color-brand-primary-muted)" />
         )}

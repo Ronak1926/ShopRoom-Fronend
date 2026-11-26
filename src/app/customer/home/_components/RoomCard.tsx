@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
@@ -16,16 +17,18 @@ type RoomCardProps = {
 };
 
 export default function RoomCard({ room, joining, onJoin }: RoomCardProps) {
+  const [coverFailed, setCoverFailed] = useState(false);
   return (
     <div className="bg-(--color-bg-surface) rounded-2xl border border-(--color-border-default) overflow-hidden cursor-pointer hover:shadow-(--shadow-lg) hover:-translate-y-0.5 transition-all duration-200 group">
       {/* Image zone */}
       <div className="relative h-44">
-        {room.coverUrl ? (
+        {room.coverUrl && !coverFailed ? (
           <Image
             loader={cloudinaryLoader}
             src={room.coverUrl}
             alt={room.shopName}
             fill
+            onError={() => setCoverFailed(true)}
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
           />

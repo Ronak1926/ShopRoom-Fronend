@@ -9,7 +9,7 @@ export default function PublicPage({ children }: { children: ReactNode }) {
     <MotionProvider>
       <div className="flex min-h-screen flex-col bg-(--color-bg-page)">
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pt-16">{children}</main>
         <Footer />
       </div>
     </MotionProvider>

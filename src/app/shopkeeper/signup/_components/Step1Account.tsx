@@ -102,7 +102,7 @@ export function Step1Account({ isLoading, onSubmit }: Step1AccountProps) {
           <input
             {...register("isShopkeeper")}
             type="checkbox"
-            className="mt-0.5 accent-[var(--color-auth-primary)] w-4 h-4 shrink-0"
+            className="mt-0.5 accent-[var(--color-auth-primary)] w-5 h-5 shrink-0"
           />
           <span className="text-[13px] text-[var(--color-auth-ink-muted)] leading-snug">
             I confirm that I am a shopkeeper registering on behalf of my

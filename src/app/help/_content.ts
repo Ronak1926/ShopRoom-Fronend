@@ -4,13 +4,17 @@ export interface Faq {
 }
 
 export interface FaqGroup {
+  id: string;
   title: string;
+  description: string;
   items: Faq[];
 }
 
 export const HELP_GROUPS: FaqGroup[] = [
   {
+    id: "customers",
     title: "For customers",
+    description: "Joining rooms, notifications, and your account.",
     items: [
       {
         question: "How do I join a shop's room?",
@@ -45,7 +49,9 @@ export const HELP_GROUPS: FaqGroup[] = [
     ],
   },
   {
+    id: "shopkeepers",
     title: "For shopkeepers",
+    description: "Your room, notifications, members, and plan.",
     items: [
       {
         question: "How do customers find my room?",
@@ -81,6 +87,33 @@ export const HELP_GROUPS: FaqGroup[] = [
         question: "What can I see about my members?",
         answer:
           "Your Members page lists each member's name, email, join date and whether their notifications are on. You can search it and export a list of names, join dates and notification settings as a CSV. The export leaves out email addresses.",
+      },
+    ],
+  },
+  {
+    id: "billing",
+    title: "Payments and billing",
+    description: "Paying for a plan, receipts, and changing plans.",
+    items: [
+      {
+        question: "How do I pay for a plan?",
+        answer:
+          "Open Billing, choose a plan and pay through Razorpay using any of the options shown at checkout. Your plan starts as soon as the payment is confirmed.",
+      },
+      {
+        question: "Where can I find my receipt?",
+        answer:
+          "We email a receipt after each payment, and Billing lists every payment you have made so you can look one up later.",
+      },
+      {
+        question: "Can I move to a cheaper plan while mine is still running?",
+        answer:
+          "Not until it ends. Until then you can extend your current plan or upgrade to a bigger one. Once your plan has ended you can pick any plan.",
+      },
+      {
+        question: "I paid but my plan isn't active.",
+        answer:
+          "Confirmation normally arrives within a minute. Refresh Billing first. If it still isn't active, contact us with the Razorpay payment ID from your receipt and we will sort it out.",
       },
     ],
   },

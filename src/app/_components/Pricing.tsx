@@ -7,12 +7,14 @@ import SectionHeader from "./ui/SectionHeader";
 import AnimatedButton from "./ui/AnimatedButton";
 import { COMMON_PERKS, PLAN_OFFERS } from "@/features/billing/plans";
 
+type Feature = { text: string; distinct: boolean };
+
 type Plan = {
   name: string;
   price: string;
   period: string;
   tagline: string;
-  features: string[];
+  features: Feature[];
   cta: string;
   href: string;
   popular?: boolean;
@@ -23,7 +25,7 @@ const CUSTOMER_PLAN: Plan = {
   price: "₹0",
   period: "/forever",
   tagline: "Free for everyone who shops",
-  features: ["Discover local shops", "Join as many rooms as you like", "Chat with shopkeepers", "Get notifications from the shops you join"],
+  features: ["Discover local shops", "Join as many rooms as you like", "Chat with shopkeepers", "Get notifications from the shops you join"].map((text) => ({ text, distinct: false })),
   cta: "Get Started",
   href: "/customer/signup",
 };
@@ -36,7 +38,10 @@ const PLANS: Plan[] = [
     price: `₹${offer.price}`,
     period: "one-time",
     tagline: offer.description,
-    features: [...offer.perks, ...(offer.id === "1m" ? COMMON_PERKS : ["Everything in the shorter plans"])],
+    features: [
+      ...offer.perks.map((text) => ({ text, distinct: true })),
+      ...COMMON_PERKS.map((text) => ({ text, distinct: false })),
+    ],
     cta: `Choose ${offer.label}`,
     href: "/shopkeeper/signup",
     popular: offer.recommended,
@@ -92,14 +97,20 @@ export default function Pricing() {
 
               <ul className="flex flex-col gap-3.5 mb-8">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2.5">
+                  <li key={feature.text} className="flex items-center gap-2.5">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-(--color-brand-primary-light) shrink-0">
                       <CheckRoundedIcon
                         sx={{ fontSize: 13, color: "var(--color-brand-primary)" }}
                       />
                     </span>
-                    <span className="text-[14px] text-(--color-text-secondary)">
-                      {feature}
+                    <span
+                      className={`text-[14px] ${
+                        feature.distinct
+                          ? "font-semibold text-(--color-text-primary)"
+                          : "text-(--color-text-secondary)"
+                      }`}
+                    >
+                      {feature.text}
                     </span>
                   </li>
                 ))}
