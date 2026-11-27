@@ -137,14 +137,16 @@ export default function SignupPage() {
       return;
     }
 
+    let codeSent = true;
     try {
       await apiClient.post("/api/otp/send", { email: values.email });
     } catch {
-      // OTP send failed â€” still proceed to verify page, user can resend
+      codeSent = false;
     }
     const next = nextAfterAuth();
     const carry = next === DEFAULT_AFTER_AUTH ? "" : `&next=${encodeURIComponent(next)}`;
-    router.push(`/verify-email?email=${encodeURIComponent(values.email)}${carry}`);
+    const notice = codeSent ? "" : "&sendFailed=1";
+    router.push(`/verify-email?email=${encodeURIComponent(values.email)}${carry}${notice}`);
   }
 
   const inputClass =

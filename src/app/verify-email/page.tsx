@@ -16,7 +16,9 @@ function VerifyEmailContent() {
   const email = searchParams.get("email") ?? "";
 
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("sendFailed") ? "We couldn't email you a code just now. Tap Resend code to try again." : null,
+  );
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);

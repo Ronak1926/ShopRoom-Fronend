@@ -10,6 +10,7 @@
 
 import { apiClient } from "./apiClient";
 import { deleteCookie, getCookie, setCookie } from "./cookieUtils";
+import { clearSessionToken } from "./sessionMode";
 
 export type SessionRole = "customer" | "shopkeeper";
 
@@ -34,6 +35,7 @@ export function isSignedIn(role: SessionRole): boolean {
 /** Forgets the flag only: for when the API has already said the session is over. */
 export function markSignedOut(role: SessionRole): void {
   deleteCookie(FLAG[role]);
+  clearSessionToken(role);
 }
 
 /** Ends the session: asks the API to clear its HttpOnly cookie, then forgets the flag (even if the request fails). */
