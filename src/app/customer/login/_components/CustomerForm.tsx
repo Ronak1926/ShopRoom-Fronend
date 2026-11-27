@@ -12,10 +12,12 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 
 import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { loginCustomer, sessionStarted } from "@/features/auth/authSlice";
+import { EMAIL_NOT_VERIFIED, loginCustomer, sessionStarted } from "@/features/auth/authSlice";
 import MfaChallenge from "@/components/auth/MfaChallenge";
 import { loginSchema, type LoginFormValues, inputCls } from "../_schemas/loginSchema";
-import { nextAfterAuth } from "@/lib/safeRedirect";
+import { DEFAULT_AFTER_AUTH, nextAfterAuth } from "@/lib/safeRedirect";
+import { apiClient } from "@/utils/apiClient";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import LinkWithNext from "@/components/ui/LinkWithNext";
 
 export default function CustomerForm() {
@@ -30,7 +32,7 @@ export default function CustomerForm() {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onTouched",
@@ -43,8 +45,14 @@ export default function CustomerForm() {
     if (loginCustomer.fulfilled.match(action)) {
       if ("mfaRequired" in action.payload) setMfaToken(action.payload.mfaToken);
       else router.replace(nextAfterAuth());
+    } else if (action.payload === EMAIL_NOT_VERIFIED) {
+      // The password was right but the email is not confirmed: send a fresh code and go and enter it.
+      const sent = await apiClient.post("/api/otp/send", { email: values.email }).then(() => true, () => false);
+      const next = nextAfterAuth();
+      const carry = next === DEFAULT_AFTER_AUTH ? "" : `&next=${encodeURIComponent(next)}`;
+      router.push(`/verify-email?email=${encodeURIComponent(values.email)}&unconfirmed=1${sent ? "" : "&sendFailed=1"}${carry}`);
     } else {
-      setError("password", { message: "Incorrect email or password" });
+      setError("password", { message: typeof action.payload === "string" ? action.payload : "We couldn't sign you in. Please try again." });
     }
   }
 
@@ -139,13 +147,9 @@ export default function CustomerForm() {
           </Link>
         </div>
 
-        <button
-          type="submit"
-          disabled={!isValid || isLoading}
-          className="w-full h-13 rounded-lg bg-(--color-auth-primary) text-white text-[15px] font-bold disabled:opacity-50 mt-1 hover:bg-(--color-brand-primary-active) transition-colors"
-        >
-          {isLoading ? "Signing in…" : "Log in"}
-        </button>
+        <SubmitButton disabled={!isValid} loading={isLoading || isSubmitting} loadingText="Signing in…" className="mt-1">
+          Log in
+        </SubmitButton>
 
         <p className="text-center text-[13px] text-(--color-auth-ink-muted)">
           Don&apos;t have an account?{" "}

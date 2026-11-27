@@ -44,6 +44,9 @@ export const registerCustomer = createAsyncThunk<
   }
 });
 
+/** The rejection value when the password was right but the email address is not confirmed yet. */
+export const EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
+
 export const loginCustomer = createAsyncThunk<LoginResponse | MfaRequiredResponse, LoginRequest>(
   "auth/loginCustomer",
   async (payload, thunkApi) => {
@@ -54,6 +57,9 @@ export const loginCustomer = createAsyncThunk<LoginResponse | MfaRequiredRespons
       );
       return res.data;
     } catch (err: any) {
+      if (err?.response?.data?.code === "EMAIL_NOT_VERIFIED") {
+        return thunkApi.rejectWithValue(EMAIL_NOT_VERIFIED);
+      }
       const message =
         err?.response?.data?.message ?? err?.message ?? "Login failed";
       return thunkApi.rejectWithValue(message);

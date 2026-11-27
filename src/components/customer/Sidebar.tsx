@@ -65,16 +65,18 @@ export default function Sidebar() {
           {!collapsed && <span className="text-[17px] leading-none font-bold text-(--color-text-primary)">CounterCircle</span>}
         </div>
 
-        <button
-          type="button"
-          onClick={toggle}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="mx-3 mb-2 flex h-8 items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) transition-colors hover:bg-(--color-bg-page) hover:text-(--color-text-primary)"
-        >
-          {collapsed ? <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} /> : <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />}
-        </button>
-
         <NavList collapsed={collapsed} />
+
+        <div className="px-3 pb-5">
+          <button
+            type="button"
+            onClick={toggle}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="flex h-8 w-full items-center justify-center rounded-lg border border-(--color-border-default) bg-transparent text-(--color-text-secondary) transition-colors hover:bg-(--color-bg-page) hover:text-(--color-text-primary)"
+          >
+            {collapsed ? <ChevronRightOutlinedIcon sx={{ fontSize: 16 }} /> : <ChevronLeftOutlinedIcon sx={{ fontSize: 16 }} />}
+          </button>
+        </div>
       </aside>
     </>
   );

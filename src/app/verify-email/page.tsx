@@ -10,7 +10,7 @@ import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { apiClient } from "../../utils/apiClient";
 import { apiMessage } from "../../features/account/passwordApi";
 import { SubmitButton } from "../../components/ui/SubmitButton";
-import { DEFAULT_AFTER_AUTH, nextAfterAuth, withNext } from "../../lib/safeRedirect";
+import { withNext } from "../../lib/safeRedirect";
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -25,6 +25,7 @@ function VerifyEmailContent() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resending, setResending] = useState(false);
+  const unconfirmed = Boolean(searchParams.get("unconfirmed"));
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -74,8 +75,8 @@ function VerifyEmailContent() {
     setLoading(true);
     try {
       await apiClient.post("/api/otp/verify", { email, code });
-      // An invite link that started this sign-up goes back through login to the invite.
-      router.push(nextAfterAuth() === DEFAULT_AFTER_AUTH ? "/" : withNext("/customer/login"));
+      // The email is confirmed, so now they sign in (an invite link that started this sign-up carries on after login).
+      router.push(withNext("/customer/login"));
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -193,6 +194,11 @@ function VerifyEmailContent() {
             {error && (
               <div className="w-full rounded-[8px] border border-(--color-danger-bg) bg-(--color-danger-light) px-3 py-2 text-sm text-(--color-danger-text) text-center">
                 {error}
+              </div>
+            )}
+            {unconfirmed && !error && !resendSuccess && (
+              <div className="w-full rounded-[8px] border border-(--color-success)/30 bg-(--color-success-light) px-3 py-2 text-sm text-(--color-success-text) text-center">
+                Your email isn&apos;t confirmed yet. Enter the code we sent to finish signing in.
               </div>
             )}
             {resendSuccess && !error && (
