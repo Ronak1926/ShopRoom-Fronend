@@ -10,10 +10,14 @@ import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { apiClient } from "../../utils/apiClient";
 import { apiMessage } from "../../features/account/passwordApi";
 import { SubmitButton } from "../../components/ui/SubmitButton";
-import { withNext } from "../../lib/safeRedirect";
+import { nextAfterAuth, withNext } from "../../lib/safeRedirect";
+import { useAppDispatch } from "../../hooks/redux";
+import { sessionStarted } from "../../features/auth/authSlice";
+import { clearVerification, readVerification } from "../../features/auth/emailVerification";
 
 function VerifyEmailContent() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
 
@@ -74,14 +78,31 @@ function VerifyEmailContent() {
     setError(null);
     setLoading(true);
     try {
-      await apiClient.post("/api/otp/verify", { email, code });
-      // The email is confirmed, so now they sign in (an invite link that started this sign-up carries on after login).
-      router.push(withNext("/customer/login"));
+      const verificationToken = readVerification(email);
+      if (!verificationToken) {
+        // This tab never saw the password step (a reload in another tab, say): confirm the address, then sign in.
+        await apiClient.post("/api/otp/verify", { email, code });
+        router.push(withNext("/customer/login"));
+        return;
+      }
+      const { data } = await apiClient.post<{ customerId?: string; mfaRequired?: boolean }>("/api/customers/verify-email", {
+        email,
+        code,
+        verificationToken,
+      });
+      clearVerification();
+      if (data.customerId && !data.mfaRequired) {
+        // The API has started the session (cookie, or token in token mode): straight into the app.
+        dispatch(sessionStarted(data.customerId));
+        router.replace(nextAfterAuth());
+      } else {
+        // The address is confirmed but two-step verification still needs its code, which the login page asks for.
+        router.push(withNext("/customer/login"));
+      }
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? "Invalid or expired code. Please try again.";
-      setError(msg);
+      const body = (err as { response?: { data?: { message?: string; code?: string } } })?.response?.data;
+      if (body?.code === "VERIFICATION_EXPIRED") clearVerification();
+      setError(body?.message ?? "Invalid or expired code. Please try again.");
     } finally {
       setLoading(false);
     }

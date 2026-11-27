@@ -32,6 +32,8 @@ export type LoginResponse = {
   /** Who signed in. Not a secret: the page keeps it to know which messages are the viewer's own. */
   customerId: string;
   customer?: Customer;
+  /** Only in the answer to sign-up: presented with the emailed code, it starts the session (features/auth/emailVerification.ts). */
+  verificationToken?: string;
 };
 
 /** The password was right but the account has two-step verification: a code is still needed. */

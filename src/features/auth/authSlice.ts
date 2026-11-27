@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/tool
 import { apiClient } from "../../utils/apiClient";
 import { getCookie } from "../../utils/cookieUtils";
 import { markSignedIn, markSignedOut } from "../../utils/session";
+import { saveVerification } from "./emailVerification";
 
 import type {
   Customer,
@@ -58,6 +59,9 @@ export const loginCustomer = createAsyncThunk<LoginResponse | MfaRequiredRespons
       return res.data;
     } catch (err: any) {
       if (err?.response?.data?.code === "EMAIL_NOT_VERIFIED") {
+        // The password was right, so the API hands over the token that lets the emailed code finish the sign-in.
+        const verificationToken = err.response.data.verificationToken;
+        if (typeof verificationToken === "string") saveVerification(payload.email, verificationToken);
         return thunkApi.rejectWithValue(EMAIL_NOT_VERIFIED);
       }
       const message =

@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { hydrateToken, registerCustomer } from "@/features/auth/authSlice";
 import { apiClient } from "@/utils/apiClient";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { saveVerification } from "@/features/auth/emailVerification";
 import { getCookie } from "@/utils/cookieUtils";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
 import { DEFAULT_AFTER_AUTH, nextAfterAuth } from "@/lib/safeRedirect";
@@ -137,6 +138,8 @@ export default function SignupPage() {
       setServerError((action.payload as string) ?? "Registration failed");
       return;
     }
+
+    if (action.payload.verificationToken) saveVerification(values.email, action.payload.verificationToken);
 
     let codeSent = true;
     try {
