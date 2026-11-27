@@ -39,6 +39,10 @@ describe("sessionFromResponse", () => {
     assert.deepEqual(sessionFromResponse("/api/shopkeeper/login", { token: "t2", shopkeeperId: "s1", shopName: "X" }), { role: "shopkeeper", token: "t2" });
   });
 
+  it("does not sign a new customer in at registration", () => {
+    assert.equal(sessionFromResponse("/api/customers/register", { token: "t0", customerId: "c9" }), null);
+  });
+
   it("takes the fresh token after a password change", () => {
     assert.deepEqual(sessionFromResponse("/api/customers/me/password", { token: "t3", message: "ok" }), { role: "customer", token: "t3" });
     assert.deepEqual(sessionFromResponse("/api/shopkeeper/me/password?x=1", { token: "t4" }), { role: "shopkeeper", token: "t4" });

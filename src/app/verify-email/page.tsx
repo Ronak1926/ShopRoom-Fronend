@@ -8,6 +8,8 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { AuthLeftPanel } from "../../components/ui/AuthLeftPanel";
 import { apiClient } from "../../utils/apiClient";
+import { apiMessage } from "../../features/account/passwordApi";
+import { SubmitButton } from "../../components/ui/SubmitButton";
 import { DEFAULT_AFTER_AUTH, nextAfterAuth, withNext } from "../../lib/safeRedirect";
 
 function VerifyEmailContent() {
@@ -22,6 +24,7 @@ function VerifyEmailContent() {
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -84,17 +87,20 @@ function VerifyEmailContent() {
   }
 
   async function handleResend() {
-    if (resendCooldown > 0) return;
+    if (resendCooldown > 0 || resending) return;
     setResendSuccess(false);
     setError(null);
+    setResending(true);
     try {
       await apiClient.post("/api/otp/send", { email });
       setResendCooldown(60);
       setResendSuccess(true);
       setDigits(Array(6).fill(""));
       inputRefs.current[0]?.focus();
-    } catch {
-      setError("Failed to resend code. Please try again.");
+    } catch (err: unknown) {
+      setError(apiMessage(err, "We couldn't send the code. Please try again in a moment."));
+    } finally {
+      setResending(false);
     }
   }
 
@@ -196,14 +202,9 @@ function VerifyEmailContent() {
             )}
 
             {/* Verify button */}
-            <button
-              type="button"
-              onClick={handleVerify}
-              disabled={loading || digits.join("").length < 6}
-              className="w-full h-[56px] rounded-[8px] bg-[var(--color-auth-primary)] text-white text-[16px] font-bold disabled:opacity-50 transition-opacity"
-            >
-              {loading ? "Verifying…" : "Verify Email"}
-            </button>
+            <SubmitButton type="button" onClick={handleVerify} disabled={digits.join("").length < 6} loading={loading} loadingText="Verifying…">
+              Verify Email
+            </SubmitButton>
 
             {/* Resend */}
             <div className="text-[14px] text-[var(--color-auth-ink-muted)] text-center">
@@ -216,9 +217,10 @@ function VerifyEmailContent() {
                 <button
                   type="button"
                   onClick={handleResend}
-                  className="font-bold text-[var(--color-auth-primary)] hover:underline"
+                  disabled={resending}
+                  className="font-bold text-[var(--color-auth-primary)] hover:underline disabled:opacity-60"
                 >
-                  Resend code
+                  {resending ? "Sending…" : "Resend code"}
                 </button>
               )}
             </div>

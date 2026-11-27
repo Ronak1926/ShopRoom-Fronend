@@ -18,6 +18,7 @@ import { ContinueWithGoogle } from "@/components/ui/ContinueWithGoogle";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { hydrateToken, registerCustomer } from "@/features/auth/authSlice";
 import { apiClient } from "@/utils/apiClient";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { getCookie } from "@/utils/cookieUtils";
 import { AuthTabButton } from "@/components/ui/AuthTabButton";
 import { DEFAULT_AFTER_AUTH, nextAfterAuth } from "@/lib/safeRedirect";
@@ -76,7 +77,7 @@ export default function SignupPage() {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     mode: "onTouched",
@@ -332,13 +333,9 @@ export default function SignupPage() {
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={!isValid || isLoading}
-                  className="w-full h-[56px] rounded-[8px] bg-(--color-auth-primary) text-white text-[16px] font-bold disabled:opacity-50 transition-opacity"
-                >
-                  {isLoading ? "Creating Account" : "Create Account"}
-                </button>
+                <SubmitButton disabled={!isValid} loading={isSubmitting || isLoading} loadingText="Creating your account…">
+                  Create Account
+                </SubmitButton>
 
                 <div className="text-center text-[14px] text-(--color-auth-ink-muted)">
                   Already have an account?{" "}

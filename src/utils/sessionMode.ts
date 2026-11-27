@@ -72,6 +72,8 @@ export function sessionFromResponse(url: string | undefined, data: unknown): { r
   if (!data || typeof data !== "object") return null;
   const body = data as Record<string, unknown>;
   if (typeof body.token !== "string" || body.token.length === 0) return null;
+  // A new customer is not signed in until they confirm their email and log in.
+  if ((url ?? "").split("?")[0] === "/api/customers/register") return null;
   if (typeof body.customerId === "string") return { role: "customer", token: body.token };
   if (typeof body.shopkeeperId === "string") return { role: "shopkeeper", token: body.token };
   const path = (url ?? "").split("?")[0];

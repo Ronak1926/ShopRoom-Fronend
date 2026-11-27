@@ -147,9 +147,8 @@ export const authSlice = createSlice({
         state.error = null;
       })
       .addCase(registerCustomer.fulfilled, (state, action) => {
+        // Not signed in yet: the person confirms their email with a code first, then signs in.
         state.status = "succeeded";
-        markSignedIn("customer", action.payload.customerId);
-        state.token = getCookie("token");
         state.customer = action.payload.customer ?? null;
         state.error = null;
       })
