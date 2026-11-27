@@ -12,7 +12,8 @@ import { apiMessage } from "../../features/account/passwordApi";
 import { SubmitButton } from "../../components/ui/SubmitButton";
 import { nextAfterAuth, withNext } from "../../lib/safeRedirect";
 import { useAppDispatch } from "../../hooks/redux";
-import { sessionStarted } from "../../features/auth/authSlice";
+import { loginCustomer, sessionStarted } from "../../features/auth/authSlice";
+import { authInputCls, authLabelCls } from "../../components/ui/authInput";
 import { clearVerification, readVerification } from "../../features/auth/emailVerification";
 
 function VerifyEmailContent() {
@@ -30,6 +31,9 @@ function VerifyEmailContent() {
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resending, setResending] = useState(false);
   const unconfirmed = Boolean(searchParams.get("unconfirmed"));
+  // Without the token from the password step (another tab, an older sign-up), the password is asked for here instead.
+  const [needsPassword, setNeedsPassword] = useState(() => readVerification(email) === null);
+  const [password, setPassword] = useState("");
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -75,14 +79,27 @@ function VerifyEmailContent() {
       setError("Please enter all 6 digits.");
       return;
     }
+    const verificationToken = readVerification(email);
+    if (!verificationToken && !password) {
+      setNeedsPassword(true);
+      setError("Enter your password so we can sign you in once the code is confirmed.");
+      return;
+    }
     setError(null);
     setLoading(true);
     try {
-      const verificationToken = readVerification(email);
       if (!verificationToken) {
-        // This tab never saw the password step (a reload in another tab, say): confirm the address, then sign in.
+        // No token from the password step: the password itself is the second proof. Confirm the address, then sign in.
         await apiClient.post("/api/otp/verify", { email, code });
-        router.push(withNext("/customer/login"));
+        const login = await dispatch(loginCustomer({ email, password }));
+        if (loginCustomer.fulfilled.match(login) && !("mfaRequired" in login.payload)) {
+          router.replace(nextAfterAuth());
+        } else if (loginCustomer.fulfilled.match(login)) {
+          router.push(withNext("/customer/login"));
+        } else {
+          setError("Your email is confirmed, but that password didn't match. Sign in from the login page.");
+          setTimeout(() => router.push(withNext("/customer/login")), 2500);
+        }
         return;
       }
       const { data } = await apiClient.post<{ customerId?: string; mfaRequired?: boolean }>("/api/customers/verify-email", {
@@ -101,7 +118,12 @@ function VerifyEmailContent() {
       }
     } catch (err: unknown) {
       const body = (err as { response?: { data?: { message?: string; code?: string } } })?.response?.data;
-      if (body?.code === "VERIFICATION_EXPIRED") clearVerification();
+      if (body?.code === "VERIFICATION_EXPIRED") {
+        clearVerification();
+        setNeedsPassword(true);
+        setError("Enter your password below to finish. The code you entered may need to be requested again.");
+        return;
+      }
       setError(body?.message ?? "Invalid or expired code. Please try again.");
     } finally {
       setLoading(false);
@@ -228,8 +250,32 @@ function VerifyEmailContent() {
               </div>
             )}
 
+            {needsPassword && (
+              <div className="flex w-full flex-col gap-1">
+                <label htmlFor="verify-password" className={authLabelCls}>
+                  Your password
+                </label>
+                <input
+                  id="verify-password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="The password you chose"
+                  className={`${authInputCls(false)} px-4`}
+                />
+                <p className="text-[12px] text-(--color-auth-ink-muted)">We need it to sign you in once the code is confirmed.</p>
+              </div>
+            )}
+
             {/* Verify button */}
-            <SubmitButton type="button" onClick={handleVerify} disabled={digits.join("").length < 6} loading={loading} loadingText="Verifying…">
+            <SubmitButton
+              type="button"
+              onClick={handleVerify}
+              disabled={digits.join("").length < 6 || (needsPassword && password.length === 0)}
+              loading={loading}
+              loadingText="Verifying…"
+            >
               Verify Email
             </SubmitButton>
 
